@@ -439,7 +439,7 @@ void PNMLParser::collectColorsInTuple(rapidxml::xml_node<>* element, std::vector
         return;	
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {	
         collectColorsInTuple(element->first_node(), collectedColors);	
-    } else if (strcmp(element->name(), "userOperator") == 0 || strcmp(element->name(), "dotconstant") == 0 || strcmp(element->name(), "variable") == 0 	
+    } else if (strcmp(element->name(), "useroperator") == 0 || strcmp(element->name(), "dotconstant") == 0 || strcmp(element->name(), "variable") == 0 	
                     || strcmp(element->name(), "successor") == 0 || strcmp(element->name(), "predecessor") == 0) {	
         std::vector<PetriEngine::Colored::ColorExpression_ptr> expressionsToAdd;	
         auto color = parseColorExpression(element);	
