@@ -147,7 +147,6 @@ namespace PetriEngine {
         arc.expr = std::move(expr);
         arc.input = input;
         if(inhibitor){
-            std::cout << "Adding inhib arc " << std::endl;
             inhibitorArcs.push_back(std::move(arc));
         } else {
             _transitions[t].arcs.push_back(std::move(arc));

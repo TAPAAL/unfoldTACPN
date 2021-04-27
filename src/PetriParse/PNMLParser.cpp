@@ -688,7 +688,6 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
     }
     else if((type && strcmp(type->value(), "inhibitor") == 0) || (element && strcmp(element->name(), "inhibitorArc") == 0) || (type && strcmp(type->value(), "tapnInhibitor") == 0))
     {
-        std::cout << "Found inhib arc" << std::endl;
         inhibitor = true;
     }
     else if((type && strcmp(type->value(), "transport") == 0) || (element && strcmp(element->name(), "transportArc") == 0))
