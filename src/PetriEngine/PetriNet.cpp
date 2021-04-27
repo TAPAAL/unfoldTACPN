@@ -286,7 +286,8 @@ namespace PetriEngine {
                                 }
                             }
                         } else {
-                            out << "<" << arcName << R"( id=")" << (id++) << R"(" inscription=")" << pre.first->interval << R"(" source=")" <<   _placenames[pre.first->place] << "\" weight=\"" << pre.first->tokens << "\" target=\"" << _transitionnames[t] << "\" />\n";
+                            std::string interval = pre.first->interval.empty() ? "[0,inf)" : pre.first->interval;
+                            out << "<" << arcName << R"( id=")" << (id++) << R"(" inscription=")" << interval << R"(" source=")" <<   _placenames[pre.first->place] << "\" weight=\"" << pre.first->tokens << "\" target=\"" << _transitionnames[t] << "\" />\n";
                         }
                     }
                     else {
@@ -302,7 +303,8 @@ namespace PetriEngine {
                             }
                         }
                         else {
-                            out << R"(<arc id=")" << (id++) << R"(" inscription=")" << pre.first->interval << R"(" nameOffsetX="0.0" source=")" <<   _placenames[pre.first->place] << "\" weight=\"" << pre.first->tokens << "\" target=\"" << _transitionnames[t] << "\" type=\"" << type << "\" />\n";
+                            std::string interval = pre.first->interval.empty() ? "[0,inf)" : pre.first->interval;
+                            out << R"(<arc id=")" << (id++) << R"(" inscription=")" << interval << R"(" nameOffsetX="0.0" source=")" <<   _placenames[pre.first->place] << "\" weight=\"" << pre.first->tokens << "\" target=\"" << _transitionnames[t] << "\" type=\"" << type << "\" />\n";
                         }
 
                     }
