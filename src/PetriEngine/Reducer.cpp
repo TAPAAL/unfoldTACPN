@@ -221,7 +221,7 @@ namespace PetriEngine {
             assert(std::is_sorted(p.producers.begin(), p.producers.end()));
             assert(!p.skip || (p.consumers.size() == 0 && p.producers.size() == 0));
             
-            for(uint c : p.consumers)
+            for(uint32_t c : p.consumers)
             {
                 Transition& t = parent->_transitions[c];
                 assert(!t.skip);
@@ -230,7 +230,7 @@ namespace PetriEngine {
                 assert(a->place == i);
             }
             
-            for(uint prod : p.producers)
+            for(uint32_t prod : p.producers)
             {
                 Transition& t = parent->_transitions[prod];
                 assert(!t.skip);
@@ -474,7 +474,7 @@ namespace PetriEngine {
                     continue;
 
                 // UB2. we need to remember initial marking
-                uint initm = parent->initMarking()[p];
+                uint32_t initm = parent->initMarking()[p];
                 initm /= inArc->weight; // integer-devision is floor by default
 
                 if(reconstructTrace)
@@ -606,8 +606,8 @@ namespace PetriEngine {
                     if( parent->_places[pinner].skip ||
                         parent->_places[pouter].skip) break;
                     
-                    uint p1 = pouter;
-                    uint p2 = pinner;
+                    uint32_t p1 = pouter;
+                    uint32_t p2 = pinner;
                     
                     if(swp == 1) std::swap(p1, p2);
                     
@@ -758,8 +758,8 @@ namespace PetriEngine {
 
                     if (tin.skip || tout.skip) break;
                     
-                    uint t1 = touter;
-                    uint t2 = tinner;
+                    uint32_t t1 = touter;
+                    uint32_t t2 = tinner;
                     if (swp == 1) std::swap(t1, t2);
 
                     // D1. not same transition
@@ -773,7 +773,7 @@ namespace PetriEngine {
                     if (trans1.pre.size() != trans2.pre.size()) break;
 
                     int ok = 0;
-                    uint mult = std::numeric_limits<uint>::max();
+                    uint32_t mult = std::numeric_limits<uint32_t>::max();
                     // D4. postsets must match
                     for (int i = trans1.post.size() - 1; i >= 0; --i) {
                         Arc& arc = trans1.post[i];
@@ -783,7 +783,7 @@ namespace PetriEngine {
                             break;
                         }
 
-                        if (mult == std::numeric_limits<uint>::max()) {
+                        if (mult == std::numeric_limits<uint32_t>::max()) {
                             if (arc2.weight < arc.weight || (arc2.weight % arc.weight) != 0) {
                                 ok = 1;
                                 break;
@@ -808,7 +808,7 @@ namespace PetriEngine {
                             break;
                         }
 
-                        if (mult == std::numeric_limits<uint>::max()) {
+                        if (mult == std::numeric_limits<uint32_t>::max()) {
                             if (arc2.weight < arc.weight || (arc2.weight % arc.weight) != 0) {
                                 ok = 1;
                                 break;
@@ -850,7 +850,7 @@ namespace PetriEngine {
             
             std::set<uint32_t> notenabled;
             bool ok = true;
-            for(uint cons : place.consumers)
+            for(uint32_t cons : place.consumers)
             {
                 Transition& t = getTransition(cons);
                 auto in = getInArc(p, t);
@@ -871,7 +871,7 @@ namespace PetriEngine {
             
             if(!ok || notenabled.size() == 0) continue;
 
-            for(uint prod : place.producers)
+            for(uint32_t prod : place.producers)
             {
                 if(notenabled.count(prod) == 0)
                 {
@@ -898,7 +898,7 @@ namespace PetriEngine {
                 parent->initialMarking[p] = 0;
             
             bool skipplace = (notenabled.size() == place.consumers.size()) && (placeInQuery[p] == 0);
-            for(uint cons : notenabled)
+            for(uint32_t cons : notenabled)
                 skipTransition(cons);
 
             if(skipplace)
@@ -1089,7 +1089,7 @@ namespace PetriEngine {
             if(placeInQuery[p] != 0) continue; 
             
             bool ok = true;
-            for(uint cons : place.consumers)
+            for(uint32_t cons : place.consumers)
             {
                 Transition& t = getTransition(cons);
                 auto w = getInArc(p, t)->weight;
