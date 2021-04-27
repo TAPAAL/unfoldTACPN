@@ -378,7 +378,7 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
             out << "    </formula>\n  </property>\n";
 
     }
-        
+    out << "</property-set>\n";    
     out.close();
 }
 
@@ -488,6 +488,13 @@ int main(int argc, char* argv[]) {
         // } else {
             writeQueries(queries, querynames, reorder, options.query_out_file, builder.getPlaceNames());
         // }
+    }
+    auto net = std::unique_ptr<PetriNet>(builder.makePetriNet());
+    if(options.model_out_file.size() > 0)
+    {
+        fstream file;
+        file.open(options.model_out_file, std::ios::out);
+        net->toXML(file, cpnBuilder.isTimed(), cpnBuilder.getInvariants(), options.outputVerifydtapnFormat);
     }
     
        
