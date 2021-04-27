@@ -102,7 +102,7 @@ std::vector<std::string> explode(std::string const & s)
 ReturnValue parseOptions(int argc, char* argv[], options_t& options)
 {
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--query-reduction") == 0) {
+        /*if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--query-reduction") == 0) {
             if (i == argc - 1) {
                 fprintf(stderr, "Missing number after \"%s\"\n\n", argv[i]);
                 return ErrorCode;
@@ -111,7 +111,7 @@ ReturnValue parseOptions(int argc, char* argv[], options_t& options)
                 fprintf(stderr, "Argument Error: Invalid query reduction timeout argument \"%s\"\n", argv[i]);
                 return ErrorCode;
             }
-        } else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-statistics") == 0) {
+        } else */if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-statistics") == 0) {
             options.printstatistics = false;
         } else if (strcmp(argv[i], "-x") == 0 || strcmp(argv[i], "--xml-queries") == 0) {
             if (i == argc - 1) {
@@ -131,12 +131,7 @@ ReturnValue parseOptions(int argc, char* argv[], options_t& options)
                     options.querynumbers.insert(--n);
                 }
             }
-        }  else if(strcmp(argv[i], "--seed-offset") == 0) {
-            if (sscanf(argv[++i], "%u", &options.seed_offset) != 1) {
-                fprintf(stderr, "Argument Error: Invalid seed offset argument \"%s\"\n", argv[i]);
-                return ErrorCode;
-            }
-        }    
+        }  
         else if (strcmp(argv[i], "--write-simplified") == 0)
         {
             options.query_out_file = std::string(argv[++i]);
@@ -235,19 +230,11 @@ ReturnValue parseOptions(int argc, char* argv[], options_t& options)
 }
 
 auto
-readQueries(options_t& options, std::vector<std::string>& qstrings)
+readQueries(options_t& options, std::vector<std::string>& qstrings, ifstream& qfile)
 {
 
     std::vector<Condition_ptr > conditions;
-        //Open query file
-        ifstream qfile(options.queryfile, ifstream::in);
-        if (!qfile) {
-            fprintf(stderr, "Error: Query file \"%s\" couldn't be opened\n", options.queryfile);
-            fprintf(stdout, "CANNOT_COMPUTE\n");
-            conditions.clear();
-            return conditions;
-        }
-
+        
         if(options.querynumbers.size() == 0)
         {
             string querystring; // excluding EF and AG
@@ -316,26 +303,16 @@ readQueries(options_t& options, std::vector<std::string>& qstrings)
                 qstrings.push_back(q.id);
             }
         }
-        qfile.close();
         return conditions;
     
  }
 
-ReturnValue parseModel(AbstractPetriNetBuilder& builder, options_t& options)
+ReturnValue parseModel(AbstractPetriNetBuilder& builder, ifstream& mfile)
 {
-    //Load the model
-    ifstream mfile(options.modelfile, ifstream::in);
-    if (!mfile) {
-        fprintf(stderr, "Error: Model file \"%s\" couldn't be opened\n", options.modelfile);
-        fprintf(stdout, "CANNOT_COMPUTE\n");
-        return ErrorCode;
-    }
-
-
     //Parse and build the petri net
     PNMLParser parser;
     parser.parse(mfile, &builder);
-    options.isCPN = builder.isColored();
+    //options.isCPN = builder.isColored();
 
     // Close the file
     mfile.close();
@@ -359,11 +336,8 @@ void printUnfoldingStats(ColoredPetriNetBuilder& builder, options_t& options) {
     }
 }
  
-void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::string>& querynames, std::vector<uint32_t>& order, std::string& filename, const std::unordered_map<std::string, uint32_t>& place_names) 
+void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::string>& querynames, std::vector<uint32_t>& order, fstream& out, const std::unordered_map<std::string, uint32_t>& place_names) 
 {
-    fstream out;
-    
-    out.open(filename, std::ios::out);
     out << "<?xml version=\"1.0\"?>\n<property-set xmlns=\"http://mcc.lip6.fr/\">\n";
     
     
@@ -373,33 +347,23 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
             queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(true));
         else if(queries[i]->isTriviallyFalse())
             queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(false));
-            out << "  <property>\n    <id>" << querynames[i] << "</id>\n    <description>Simplified</description>\n    <formula>\n";
-            queries[i]->toXML(out, 3);
-            out << "    </formula>\n  </property>\n";
+        
+        out << "  <property>\n    <id>" << querynames[i] << "</id>\n    <description>Simplified</description>\n    <formula>\n";
+        queries[i]->toXML(out, 3);
+        out << "    </formula>\n  </property>\n";
+        
 
     }
     out << "</property-set>\n";    
     out.close();
 }
 
-int main(int argc, char* argv[]) {
-
-    options_t options;
-    
-    ReturnValue v = parseOptions(argc, argv, options);
-    if(v != ContinueCode) return v;
-    options.print();
-    srand (time(NULL) xor options.seed_offset);  
+void unfoldNet(ifstream& inputModelFile, ifstream& inputQueryFile, ostream& outputModelFile, fstream& outputQueryFile,options_t options) {
     ColoredPetriNetBuilder cpnBuilder;
-    if(parseModel(cpnBuilder, options) != ContinueCode) 
+    if(parseModel(cpnBuilder, inputModelFile) != ContinueCode) 
     {
         std::cerr << "Error parsing the model" << std::endl;
-        return ErrorCode;
-    }
-    if(options.cpnOverApprox && !cpnBuilder.isColored())
-    {
-        std::cerr << "CPN OverApproximation is only usable on colored models" << std::endl;
-        return UnknownCode;
+        //return ErrorCode;
     }
     if (options.printstatistics) {
         std::cout << "Finished parsing model" << std::endl;
@@ -408,17 +372,17 @@ int main(int argc, char* argv[]) {
 
     //----------------------- Parse Query -----------------------//
     std::vector<std::string> querynames;
-    auto queries = readQueries(options, querynames);
+    auto queries = readQueries(options, querynames, inputQueryFile);
     
-    if(options.printstatistics && options.queryReductionTimeout > 0)
+    /*if(options.printstatistics && options.queryReductionTimeout > 0)
     {
         negstat_t stats;            
         std::cout << "RWSTATS LEGEND:";
         stats.printRules(std::cout);            
         std::cout << std::endl;
-    }
+    }*/
 
-    if(cpnBuilder.isColored())
+    /*if(cpnBuilder.isColored())
     {
         negstat_t stats;            
         EvaluationContext context(nullptr, nullptr);
@@ -435,7 +399,7 @@ int main(int argc, char* argv[]) {
                 std::cout << std::endl;
             }
         }
-    }
+    }*/
 
     
     auto builder = cpnBuilder.unfold();
@@ -443,61 +407,80 @@ int main(int argc, char* argv[]) {
     builder.sort();
     
     //----------------------- Query Simplification -----------------------//
-    bool alldone = options.queryReductionTimeout > 0;
+    //bool alldone = options.queryReductionTimeout > 0;
     PetriNetBuilder b2(builder);
     std::unique_ptr<PetriNet> qnet(b2.makePetriNet(false));
-    MarkVal* qm0 = qnet->makeInitialMarking();
+    //MarkVal* qm0 = qnet->makeInitialMarking();
 
     if(queries.size() == 0 || contextAnalysis(cpnBuilder, b2, qnet.get(), queries) != ContinueCode)
     {
         std::cerr << "Could not analyze the queries" << std::endl;
+        //return ErrorCode;
+    }
+    
+    std::vector<uint32_t> reorder(queries.size());
+    for(uint32_t i = 0; i < queries.size(); ++i) reorder[i] = i;
+    std::sort(reorder.begin(), reorder.end(), [&queries](auto a, auto b){
+
+        if(queries[a]->isReachability() != queries[b]->isReachability())
+            return queries[a]->isReachability() > queries[b]->isReachability();
+        if(queries[a]->isLoopSensitive() != queries[b]->isLoopSensitive())
+            return queries[a]->isLoopSensitive() < queries[b]->isLoopSensitive();
+        if(queries[a]->containsNext() != queries[b]->containsNext())
+            return queries[a]->containsNext() < queries[b]->containsNext();
+        return queries[a]->formulaSize() < queries[b]->formulaSize();
+    });
+
+    //Write queries to output file
+    writeQueries(queries, querynames, reorder, outputQueryFile, builder.getPlaceNames());
+
+    //Write net to output file
+    auto net = std::unique_ptr<PetriNet>(builder.makePetriNet());
+    net->toXML(outputModelFile, cpnBuilder.isTimed(), cpnBuilder.getInvariants(), options.outputVerifydtapnFormat);
+    
+    
+       
+    //return SuccessCode;
+}
+
+int main(int argc, char* argv[]) {
+
+    options_t options;
+    
+    ReturnValue v = parseOptions(argc, argv, options);
+    if(v != ContinueCode) return v;
+    options.print();
+
+    //Load the model
+    ifstream mfile(options.modelfile, ifstream::in);
+    if (!mfile) {
+        std::cerr << "Error: Query file \""<< options.model_out_file << "\" couldn't be opened\n" << std::endl;
+        std::cout << "CANNOT_COMPUTE\n" << std::endl;
+        return ErrorCode;
+    }
+    //Open query file
+    ifstream qfile(options.queryfile, ifstream::in);
+    if (!qfile) {
+        std::cerr << "Error: Query file \""<< options.queryfile << "\" couldn't be opened\n" << std::endl;
+        std::cout << "CANNOT_COMPUTE\n" << std::endl;
+        return ErrorCode;
+    }
+    fstream outputQueryFile;
+    outputQueryFile.open(options.query_out_file, std::ios::out);
+    if (!outputQueryFile) {
+        std::cerr << "Error: Query file \""<< options.query_out_file << "\" couldn't be opened\n" << std::endl;
+        std::cout << "CANNOT_COMPUTE\n" << std::endl;
+        return ErrorCode;
+    }
+    fstream outputModelfile(options.model_out_file, ifstream::out);
+    if (!outputModelfile) {
+        std::cerr << "Error: Query file \""<< options.model_out_file << "\" couldn't be opened\n" << std::endl;
+        std::cout << "CANNOT_COMPUTE\n" << std::endl;
         return ErrorCode;
     }
     
-    if(options.query_out_file.size() > 0)
-    {
-        std::vector<uint32_t> reorder(queries.size());
-        for(uint32_t i = 0; i < queries.size(); ++i) reorder[i] = i;
-        std::sort(reorder.begin(), reorder.end(), [&queries](auto a, auto b){
+    unfoldNet(mfile, qfile, outputModelfile, outputQueryFile,options);
 
-            if(queries[a]->isReachability() != queries[b]->isReachability())
-                return queries[a]->isReachability() > queries[b]->isReachability();
-            if(queries[a]->isLoopSensitive() != queries[b]->isLoopSensitive())
-                return queries[a]->isLoopSensitive() < queries[b]->isLoopSensitive();
-            if(queries[a]->containsNext() != queries[b]->containsNext())
-                return queries[a]->containsNext() < queries[b]->containsNext();
-            return queries[a]->formulaSize() < queries[b]->formulaSize();
-        });
-        // if (options.outputVerifydtapnFormat) {
-        //     std::ofstream queryFile(options.query_out_file);
-        //     for (uint32_t i = 0; i < queries.size(); ++i) {
-        //         std::cout << "Writing query ";
-        //         queries[i].get()->toString(std::cout);
-        //         std::cout << std::endl;
-
-        //         if(queries[i]->isTriviallyTrue()){
-        //             std::cout << "trivially true" << std::endl;
-        //             queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(true));
-        //         } else if(queries[i]->isTriviallyFalse()){
-        //             queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(false));
-        //             std::cout << "trivially false" << std::endl;
-        //         }
-        //         queries[i].get()->toString(queryFile);
-        //     }
-
-        // } else {
-            writeQueries(queries, querynames, reorder, options.query_out_file, builder.getPlaceNames());
-        // }
-    }
-    auto net = std::unique_ptr<PetriNet>(builder.makePetriNet());
-    if(options.model_out_file.size() > 0)
-    {
-        fstream file;
-        file.open(options.model_out_file, std::ios::out);
-        net->toXML(file, cpnBuilder.isTimed(), cpnBuilder.getInvariants(), options.outputVerifydtapnFormat);
-    }
-    
-       
     return SuccessCode;
 }
 

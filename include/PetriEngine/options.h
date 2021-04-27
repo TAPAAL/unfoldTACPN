@@ -15,7 +15,7 @@ struct options_t {
     char* queryfile = NULL;
     bool printstatistics = true;
     std::set<size_t> querynumbers;
-    int queryReductionTimeout = 30;
+    //int queryReductionTimeout = 30;
     uint32_t cores = 1;
 
     //CTL Specific options
@@ -25,9 +25,8 @@ struct options_t {
 
     
     //CPN Specific options
-    bool cpnOverApprox = false;
+    //bool cpnOverApprox = false;
     bool isCPN = false;
-    uint32_t seed_offset = 0;
 
     //TACPN options
     bool outputVerifydtapnFormat = false;
@@ -39,11 +38,11 @@ struct options_t {
         
         std::string optionsOut;        
         
-        if (queryReductionTimeout > 0) {
+        /*if (queryReductionTimeout > 0) {
             optionsOut += ",Query_Simplication=ENABLED,QSTimeout=" + std::to_string(queryReductionTimeout);
         } else {
             optionsOut += ",Query_Simplication=DISABLED";
-        }
+        }*/
         
         optionsOut += "\n";
         
