@@ -1,5 +1,6 @@
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#include <iostream>
+#ifndef LIBUNFOLDTACPN_H
+#define LIBUNFOLDTACPN_H
 
 #include <ctype.h>
 #include <stddef.h>
@@ -8,8 +9,12 @@
 #include <string.h>
 #include <cctype>
 #include <iostream>
+struct unfoldtacpn_options_t;
+void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std::ostream& outputModelFile, std::fstream& outputQueryFile,unfoldtacpn_options_t options);
 
-struct options_t {
+
+
+struct unfoldtacpn_options_t {
 //    bool outputtrace = false;
     char* modelfile = NULL;
     char* queryfile = NULL;
@@ -51,4 +56,5 @@ struct options_t {
 };
 
 #endif
+
 
