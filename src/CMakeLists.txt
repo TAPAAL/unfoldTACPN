@@ -9,7 +9,7 @@ add_library(unfoldtacpn ${HEADER_FILES}
     PetriEngine/PetriNetBuilder.cpp PetriEngine/Reducer.cpp PetriParse/PNMLParser.cpp PetriParse/QueryBinaryParser.cpp
     PetriParse/QueryXMLParser.cpp)
 add_executable(verifypn-${ARCH_TYPE} VerifyPN.cpp)
-add_dependencies(verifypn-${ARCH_TYPE} glpk-ext)
+add_dependencies(unfoldtacpn glpk-ext)
 
 target_link_libraries(verifypn-${ARCH_TYPE} PRIVATE PetriEngine PetriParse unfoldtacpn)
 
