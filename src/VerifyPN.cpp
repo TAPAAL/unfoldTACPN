@@ -373,44 +373,14 @@ void unfoldNet(ifstream& inputModelFile, ifstream& inputQueryFile, ostream& outp
     //----------------------- Parse Query -----------------------//
     std::vector<std::string> querynames;
     auto queries = readQueries(options, querynames, inputQueryFile);
-    
-    /*if(options.printstatistics && options.queryReductionTimeout > 0)
-    {
-        negstat_t stats;            
-        std::cout << "RWSTATS LEGEND:";
-        stats.printRules(std::cout);            
-        std::cout << std::endl;
-    }*/
 
-    /*if(cpnBuilder.isColored())
-    {
-        negstat_t stats;            
-        EvaluationContext context(nullptr, nullptr);
-        for (ssize_t qid = queries.size() - 1; qid >= 0; --qid) {
-            queries[qid] = queries[qid]->pushNegation(stats, context, false, false, false);
-            if(options.printstatistics)
-            {
-                std::cout << "\nQuery before expansion and reduction: ";
-                queries[qid]->toString(std::cout);
-                std::cout << std::endl;
-
-                std::cout << "RWSTATS COLORED PRE:";
-                stats.print(std::cout);
-                std::cout << std::endl;
-            }
-        }
-    }*/
-
-    
     auto builder = cpnBuilder.unfold();
     printUnfoldingStats(cpnBuilder, options);
     builder.sort();
     
     //----------------------- Query Simplification -----------------------//
-    //bool alldone = options.queryReductionTimeout > 0;
     PetriNetBuilder b2(builder);
     std::unique_ptr<PetriNet> qnet(b2.makePetriNet(false));
-    //MarkVal* qm0 = qnet->makeInitialMarking();
 
     if(queries.size() == 0 || contextAnalysis(cpnBuilder, b2, qnet.get(), queries) != ContinueCode)
     {
@@ -454,27 +424,27 @@ int main(int argc, char* argv[]) {
     //Load the model
     ifstream mfile(options.modelfile, ifstream::in);
     if (!mfile) {
-        std::cerr << "Error: Query file \""<< options.model_out_file << "\" couldn't be opened\n" << std::endl;
+        std::cerr << "Error: Input Model file \""<< options.model_out_file << "\" couldn't be opened\n" << std::endl;
         std::cout << "CANNOT_COMPUTE\n" << std::endl;
         return ErrorCode;
     }
     //Open query file
     ifstream qfile(options.queryfile, ifstream::in);
     if (!qfile) {
-        std::cerr << "Error: Query file \""<< options.queryfile << "\" couldn't be opened\n" << std::endl;
+        std::cerr << "Error: Input Query file \""<< options.queryfile << "\" couldn't be opened\n" << std::endl;
         std::cout << "CANNOT_COMPUTE\n" << std::endl;
         return ErrorCode;
     }
     fstream outputQueryFile;
     outputQueryFile.open(options.query_out_file, std::ios::out);
     if (!outputQueryFile) {
-        std::cerr << "Error: Query file \""<< options.query_out_file << "\" couldn't be opened\n" << std::endl;
+        std::cerr << "Error: Output Query file \""<< options.query_out_file << "\" couldn't be opened\n" << std::endl;
         std::cout << "CANNOT_COMPUTE\n" << std::endl;
         return ErrorCode;
     }
     fstream outputModelfile(options.model_out_file, ifstream::out);
     if (!outputModelfile) {
-        std::cerr << "Error: Query file \""<< options.model_out_file << "\" couldn't be opened\n" << std::endl;
+        std::cerr << "Error: Output Model file \""<< options.model_out_file << "\" couldn't be opened\n" << std::endl;
         std::cout << "CANNOT_COMPUTE\n" << std::endl;
         return ErrorCode;
     }
