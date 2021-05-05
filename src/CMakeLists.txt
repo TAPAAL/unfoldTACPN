@@ -21,4 +21,4 @@ install(TARGETS unfoldtacpn verifypn-${ARCH_TYPE}
     LIBRARY DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     ARCHIVE DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-install(FILES ../unfoldtacpn.h DESTINATION include/)
+install(FILES ../include/unfoldtacpn.h DESTINATION include/)
