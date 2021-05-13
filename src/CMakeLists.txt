@@ -1,3 +1,4 @@
+project(unfoldtacpn C CXX)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_subdirectory(PetriParse)
 add_subdirectory(PetriEngine)
