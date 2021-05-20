@@ -192,12 +192,13 @@ void printUnfoldingStats(ColoredPetriNetBuilder& builder, unfoldtacpn_options_t&
  
 void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::string>& querynames, std::vector<uint32_t>& order, fstream& out, const std::unordered_map<std::string, uint32_t>& place_names) 
 {
-    out << "<?xml version=\"1.0\"?>\n<property-set xmlns=\"http://mcc.lip6.fr/\">\n";
+    //out << "<?xml version=\"1.0\"?>\n<property-set xmlns=\"http://mcc.lip6.fr/\">\n";
     
     
     for(uint32_t j = 0; j < queries.size(); j++) {
         auto i = order[j];
-        if(queries[i]->isTriviallyTrue())
+        queries[i]->toString(out);
+        /*if(queries[i]->isTriviallyTrue())
             queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(true));
         else if(queries[i]->isTriviallyFalse())
             queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(false));
@@ -206,9 +207,10 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
         queries[i]->toXML(out, 3);
         out << "    </formula>\n  </property>\n";
         
-
+    
     }
-    out << "</property-set>\n";    
+    out << "</property-set>\n";*/ 
+    }   
     out.close();
 }
 
