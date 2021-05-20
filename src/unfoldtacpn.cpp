@@ -212,6 +212,7 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
     out.close();
 }
 
+
 void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std::ostream& outputModelFile, std::fstream& outputQueryFile,unfoldtacpn_options_t options) {
     ColoredPetriNetBuilder cpnBuilder;
     if(parseModel(cpnBuilder, inputModelFile) != ContinueCode) 

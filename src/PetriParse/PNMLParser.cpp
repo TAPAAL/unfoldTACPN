@@ -692,7 +692,7 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
     }
     else if((type && strcmp(type->value(), "transport") == 0) || (element && strcmp(element->name(), "transportArc") == 0))
     {
-        transportID = element->first_attribute("transportID")->value();
+        transportID = element->first_attribute("id")->value();
         transport = true;
     }
     else if ((type && strcmp(type->value(), "normal") == 0) || (element && (strcmp(element->name(), "inputArc") == 0 || strcmp(element->name(), "outputArc") == 0))) {
