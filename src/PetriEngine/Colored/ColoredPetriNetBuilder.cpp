@@ -146,6 +146,7 @@ namespace PetriEngine {
             assert(expr != nullptr);
         arc.expr = std::move(expr);
         arc.input = input;
+        _places[p].inhibitor |= inhibitor;
         if(inhibitor){
             inhibitorArcs.push_back(std::move(arc));
         } else {
@@ -188,7 +189,7 @@ namespace PetriEngine {
         arc.transport = transport;
         arc.transportID = transportID;
         // _transitions[t].inhibitor |= inhibitor;
-        // _places[p].inhibitor |= inhibitor;
+         _places[p].inhibitor |= inhibitor;
         if(inhibitor){
             std::cout << "Adding inhib arc " << std::endl;
             inhibitorArcs.push_back(std::move(arc));
@@ -286,17 +287,6 @@ namespace PetriEngine {
             yBuffer += 0;
             
         }
-        if (isTimed()) { // we add the shadow place p.sum
-            double x = xBuffer + get<0>(placePos);
-            double y = yBuffer + get<1>(placePos);
-            Colored::Color color;
-            std::string placeName = place.name + "Sum";
-            _ptBuilder.addPlace(placeName, place.marking.size(), Colored::TimeInvariant(color), x, y);
-            _invariantStrings[placeName] = Colored::TimeInvariant(color).toString();
-            //_ptplacenames[place.name][color.getId()] = std::move(placeName);
-            _shadowPlacesNames[place.name] = std::move(placeName);
-            ++_nptplaces;
-        }
     }
 
     Colored::TimeInvariant ColoredPetriNetBuilder::getTimeInvariantForPlace(std::vector< Colored::TimeInvariant> TimeInvariants, const Colored::Color* color) {
@@ -354,14 +344,26 @@ namespace PetriEngine {
         for (uint32_t i = 0; i < inhibitorArcs.size(); ++i) {
             if (_transitions[inhibitorArcs[i].transition].name.compare(oldname) == 0) {
                 Colored::Arc inhibArc = inhibitorArcs[i];
-                std::string place = _shadowPlacesNames[_places[inhibArc.place].name];
-                _ptBuilder.addInputArc(place, newname, inhibArc.inhibitor, inhibArc.weight);
+                std::string placeName = _sumPlacesNames[inhibArc.place];
+
+                if(placeName.empty()){
+                    const PetriEngine::Colored::Place& place = _places[inhibArc.place]; 
+                    std::string sumPlaceName = place.name + "Sum";
+                    _ptBuilder.addPlace(sumPlaceName, place.marking.size(),0.0,0.0);
+                    //_ptplacenames[place.name][color.getId()] = std::move(placeName);
+                    if(_ptplacenames.count(place.name) <= 0){
+                        _ptplacenames[place.name][0] = sumPlaceName;
+                    }
+                    _sumPlacesNames[inhibArc.place] = std::move(sumPlaceName);
+                }
+                _ptBuilder.addInputArc(placeName, newname, true, inhibArc.weight);
             }
         }
     }
 
     void ColoredPetriNetBuilder::unfoldArc(Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {
         Colored::ExpressionContext context {binding, _colors};
+        const PetriEngine::Colored::Place& place = _places[arc.place];
         auto ms = arc.expr->eval(context);
         int shadowWeight = 0;
         std::vector<Colored::TimeInterval>& timeIntervals = arc.interval;
@@ -370,7 +372,7 @@ namespace PetriEngine {
                 continue;
             }
             shadowWeight += color.second;
-            const std::string& pName = _ptplacenames[_places[arc.place].name][color.first->getId()];
+            const std::string& pName = _ptplacenames[place.name][color.first->getId()];
             if(isTimed()){
                 if (!arc.input) {
                     _ptBuilder.addOutputArc(tName, pName, color.second, arc.transport, arc.transportID);
@@ -388,23 +390,27 @@ namespace PetriEngine {
              
             ++_nptarcs;
         }
-        if(isTimed() && shadowWeight > 0) {
-            std::string pName = _shadowPlacesNames[_places[arc.place].name];
-            if (!arc.input) {
-                _ptBuilder.addOutputArc(tName, pName, shadowWeight, false, arc.transportID);
-            } else {
-                Colored::Color color;
-                Colored::TimeInterval timeInterval(color);
-                _ptBuilder.addInputArc(pName, tName, arc.inhibitor, false, shadowWeight, timeInterval, arc.transportID);
+
+        if(place.inhibitor){
+            const std::string &sumPlaceName = _sumPlacesNames[arc.place];
+            if(sumPlaceName.empty()){
+                const std::string &newSumPlaceName = place.name + "Sum";
+                _ptBuilder.addPlace(newSumPlaceName, place.marking.size(),0.0,0.0);
+                //_ptplacenames[place.name][color.getId()] = std::move(placeName);
+                _sumPlacesNames[arc.place] = std::move(newSumPlaceName);
             }
-            ++_nptarcs;
-            /*
-            if(inhibitorArcs.find(_places[arc.place].name) != inhibitorArcs.end()) {
-                Colored::Arc inhibArc = inhibitorArcs[_places[arc.place].name];
-                _ptBuilder.addInputArc(pName, tName, inhibArc.inhibitor, inhibArc.weight);
+            
+
+            if(shadowWeight > 0) {
+                if (!arc.input) {
+                    _ptBuilder.addOutputArc(tName, sumPlaceName, shadowWeight);
+                } else {
+                    Colored::Color color;
+                    Colored::TimeInterval timeInterval(color);
+                    _ptBuilder.addInputArc(sumPlaceName, tName, false, false, shadowWeight, timeInterval, arc.transportID);
+                }
                 ++_nptarcs;
             }
-             */
         }
     }
 

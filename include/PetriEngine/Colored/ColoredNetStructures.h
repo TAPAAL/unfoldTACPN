@@ -58,7 +58,7 @@ namespace PetriEngine {
             ColorType* type;
             Multiset marking;
             std::vector<Colored::TimeInvariant> invariants;
-            //bool inhibitor = false;
+            bool inhibitor = false;
         };
     }
 }

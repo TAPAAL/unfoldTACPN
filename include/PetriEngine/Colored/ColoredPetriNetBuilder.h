@@ -149,7 +149,7 @@ namespace PetriEngine {
         std::unordered_map<std::string,uint32_t> _placenames;
         std::unordered_map<std::string,uint32_t> _transitionnames;
         PTPlaceMap _ptplacenames;
-        std::unordered_map<std::string, std::string> _shadowPlacesNames;
+        std::unordered_map<uint32_t, std::string> _sumPlacesNames;
         PTTransitionMap _pttransitionnames;
         std::vector< std::tuple<double, double> > _placelocations;
         std::vector< std::tuple<double, double> > _transitionlocations;
