@@ -282,6 +282,7 @@ namespace PetriEngine {
                             auto post = postset(t);
                             for (; post.first != post.second; ++post.first) {
                                 if (post.first->transportID.compare(pre.first->transportID) == 0 && (getType(post, false).compare("transport")) == 0) {
+                                    
                                     out << "<" << arcName << R"( id=")" << (id++) << R"(" inscription=")" << pre.first->interval << R"(" source=")" <<   _placenames[pre.first->place] << R"(" transition=")" << _transitionnames[t] <<  "\" weight=\"" << pre.first->tokens << "\" target=\"" << _placenames[post.first->place] << "\" />\n";
                                     continue;
                                 }

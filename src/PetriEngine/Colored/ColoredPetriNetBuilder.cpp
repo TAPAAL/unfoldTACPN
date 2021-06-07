@@ -370,19 +370,12 @@ namespace PetriEngine {
             }
             shadowWeight += color.second;
             const std::string& pName = _ptplacenames[place.name][color.first->getId()];
-            if(isTimed()){
-                if (!arc.input) {
-                    _ptBuilder.addOutputArc(tName, pName, color.second, arc.transport, arc.transportID);
-                } else {
-                    Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
-                    _ptBuilder.addInputArc(pName, tName, arc.inhibitor, arc.transport, color.second, timeInterval, arc.transportID);
-                }
+            
+            if (!arc.input) {
+                _ptBuilder.addOutputArc(tName, pName, color.second, arc.transport, arc.transportID);
             } else {
-                if (!arc.input) {
-                    _ptBuilder.addOutputArc(tName, pName, color.second);
-                } else {
-                    _ptBuilder.addInputArc(pName, tName, arc.inhibitor, color.second);
-                }
+                Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
+                _ptBuilder.addInputArc(pName, tName, arc.inhibitor, arc.transport, color.second, timeInterval, arc.transportID);
             }
              
             ++_nptarcs;
