@@ -351,7 +351,7 @@ namespace PetriEngine {
                     if(_ptplacenames.count(place.name) <= 0){
                         _ptplacenames[place.name][0] = placeName;
                     }
-                    _sumPlacesNames[inhibArc.place] = std::move(placeName);
+                    _sumPlacesNames[inhibArc.place] = placeName;
                 }
                 _ptBuilder.addInputArc(placeName, newname, true, inhibArc.weight);
             }
@@ -390,13 +390,13 @@ namespace PetriEngine {
 
         if(place.inhibitor){
             Colored::Color color;
-            const std::string &sumPlaceName = _sumPlacesNames[arc.place];
+            std::string sumPlaceName = _sumPlacesNames[arc.place];
             if(sumPlaceName.empty()){
-                const std::string &newSumPlaceName = place.name + "Sum";
-                _ptBuilder.addPlace(newSumPlaceName, place.marking.size(), Colored::TimeInvariant(color), 0, 0);
-                _invariantStrings[newSumPlaceName] = Colored::TimeInvariant(color).toString();
+                sumPlaceName = place.name + "Sum";
+                _ptBuilder.addPlace(sumPlaceName, place.marking.size(), Colored::TimeInvariant(color), 0, 0);
+                _invariantStrings[sumPlaceName] = Colored::TimeInvariant(color).toString();
                 //_ptplacenames[place.name][color.getId()] = std::move(placeName);
-                _sumPlacesNames[arc.place] = std::move(newSumPlaceName);
+                _sumPlacesNames[arc.place] =sumPlaceName;
             }
             
 

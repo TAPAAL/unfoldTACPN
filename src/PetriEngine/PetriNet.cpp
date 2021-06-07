@@ -201,6 +201,7 @@ namespace PetriEngine {
 
         }
 
+
         for(size_t i = 0; i < _nplaces; ++i)
         {
             auto& p = _placenames[i];

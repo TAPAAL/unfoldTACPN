@@ -212,7 +212,6 @@ namespace PetriEngine {
     }
     
     PetriNet* PetriNetBuilder::makePetriNet(bool reorder) {
-        
         /*
          * The basic idea is to construct three arrays, the first array, 
          * _invariants points to "arcs" - they are triplets (weight, place, inhibitor)
