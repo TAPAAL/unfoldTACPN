@@ -191,7 +191,6 @@ namespace PetriEngine {
         // _transitions[t].inhibitor |= inhibitor;
          _places[p].inhibitor |= inhibitor;
         if(inhibitor){
-            std::cout << "Adding inhib arc " << std::endl;
             inhibitorArcs.push_back(std::move(arc));
         } else {
             _transitions[t].arcs.push_back(std::move(arc));
@@ -347,9 +346,11 @@ namespace PetriEngine {
                 std::string placeName = _sumPlacesNames[inhibArc.place];
 
                 if(placeName.empty()){
+                    Colored::Color color;
                     const PetriEngine::Colored::Place& place = _places[inhibArc.place]; 
                     std::string sumPlaceName = place.name + "Sum";
-                    _ptBuilder.addPlace(sumPlaceName, place.marking.size(),0.0,0.0);
+                    _ptBuilder.addPlace(placeName, place.marking.size(), Colored::TimeInvariant(color), 0, 0);
+                    _invariantStrings[placeName] = Colored::TimeInvariant(color).toString();
                     //_ptplacenames[place.name][color.getId()] = std::move(placeName);
                     if(_ptplacenames.count(place.name) <= 0){
                         _ptplacenames[place.name][0] = sumPlaceName;
@@ -392,10 +393,12 @@ namespace PetriEngine {
         }
 
         if(place.inhibitor){
+            Colored::Color color;
             const std::string &sumPlaceName = _sumPlacesNames[arc.place];
             if(sumPlaceName.empty()){
                 const std::string &newSumPlaceName = place.name + "Sum";
-                _ptBuilder.addPlace(newSumPlaceName, place.marking.size(),0.0,0.0);
+                _ptBuilder.addPlace(newSumPlaceName, place.marking.size(), Colored::TimeInvariant(color), 0, 0);
+                _invariantStrings[newSumPlaceName] = Colored::TimeInvariant(color).toString();
                 //_ptplacenames[place.name][color.getId()] = std::move(placeName);
                 _sumPlacesNames[arc.place] = std::move(newSumPlaceName);
             }
@@ -405,7 +408,6 @@ namespace PetriEngine {
                 if (!arc.input) {
                     _ptBuilder.addOutputArc(tName, sumPlaceName, shadowWeight);
                 } else {
-                    Colored::Color color;
                     Colored::TimeInterval timeInterval(color);
                     _ptBuilder.addInputArc(sumPlaceName, tName, false, false, shadowWeight, timeInterval, arc.transportID);
                 }
