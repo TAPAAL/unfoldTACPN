@@ -272,13 +272,9 @@ namespace PetriEngine {
             double y = yBuffer + get<1>(placePos);
             std::string name = place.name + "Sub" + std::to_string(i);
             const Colored::Color* color = &place.type->operator[](i);
-            if (isTimed()) {
-                Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
-                _ptBuilder.addPlace(name, place.marking[color], invariant, x, y);
-                _invariantStrings[name] = invariant.toString();
-            } else {
-                _ptBuilder.addPlace(name, place.marking[color], x, y);
-            }
+            Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
+            _ptBuilder.addPlace(name, place.marking[color], invariant, x, y);
+            _invariantStrings[name] = invariant.toString();
 
             _ptplacenames[place.name][color->getId()] = std::move(name);
             ++_nptplaces;
@@ -348,14 +344,14 @@ namespace PetriEngine {
                 if(placeName.empty()){
                     Colored::Color color;
                     const PetriEngine::Colored::Place& place = _places[inhibArc.place]; 
-                    std::string sumPlaceName = place.name + "Sum";
+                    placeName = place.name + "Sum";
                     _ptBuilder.addPlace(placeName, place.marking.size(), Colored::TimeInvariant(color), 0, 0);
                     _invariantStrings[placeName] = Colored::TimeInvariant(color).toString();
                     //_ptplacenames[place.name][color.getId()] = std::move(placeName);
                     if(_ptplacenames.count(place.name) <= 0){
-                        _ptplacenames[place.name][0] = sumPlaceName;
+                        _ptplacenames[place.name][0] = placeName;
                     }
-                    _sumPlacesNames[inhibArc.place] = std::move(sumPlaceName);
+                    _sumPlacesNames[inhibArc.place] = std::move(placeName);
                 }
                 _ptBuilder.addInputArc(placeName, newname, true, inhibArc.weight);
             }
