@@ -22,6 +22,7 @@ struct unfoldtacpn_options_t {
     std::set<size_t> querynumbers;
     //int queryReductionTimeout = 30;
     uint32_t cores = 1;
+    std::string query_out_xml_file;
 
     //CTL Specific options
     
@@ -32,6 +33,7 @@ struct unfoldtacpn_options_t {
     //CPN Specific options
     //bool cpnOverApprox = false;
     bool isCPN = false;
+    
 
     //TACPN options
     bool outputVerifydtapnFormat = false;

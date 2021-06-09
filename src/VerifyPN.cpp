@@ -86,9 +86,13 @@ ReturnValue parseOptions(int argc, char* argv[], unfoldtacpn_options_t& options)
                 }
             }
         }  
-        else if (strcmp(argv[i], "--write-simplified") == 0)
+        else if (strcmp(argv[i], "--write-queries") == 0)
         {
             options.query_out_file = std::string(argv[++i]);
+        }
+        else if (strcmp(argv[i], "--write-simplified") == 0)
+        {
+            options.query_out_xml_file = std::string(argv[++i]);
         }
         else if (strcmp(argv[i], "--write-reduced") == 0)
         {
@@ -133,6 +137,7 @@ ReturnValue parseOptions(int argc, char* argv[], unfoldtacpn_options_t& options)
                     "  -verifydtapn <tt>                  Specifies the format of the output model (tt is currently the only valid value)\n"
                     "                                     - tt output as dtapn format\n"
                     "  --write-simplified <filename>      Outputs the queries to the given file after simplification\n"
+                    "  --write-queries <filename>         Outputs the queries to the given file in .q format after simplification\n"
                     "  --write-reduced <filename>         Outputs the model to the given file after structural reduction\n"
                     "Return Values:\n"
                     "  A unfolded net \n"
@@ -211,6 +216,14 @@ int main(int argc, char* argv[]) {
         std::cout << "CANNOT_COMPUTE\n" << std::endl;
         return ErrorCode;
     }
+
+    std::fstream outputQueryXMLFile;
+    outputQueryXMLFile.open(options.query_out_xml_file, std::ios::out);
+    if (!outputQueryXMLFile) {
+        std::cerr << "Error: Output Query file \""<< options.query_out_xml_file << "\" couldn't be opened\n" << std::endl;
+        std::cout << "CANNOT_COMPUTE\n" << std::endl;
+        return ErrorCode;
+    }
     std::fstream outputModelfile(options.model_out_file, std::ifstream::out);
     if (!outputModelfile) {
         std::cerr << "Error: Output Model file \""<< options.model_out_file << "\" couldn't be opened\n" << std::endl;
@@ -218,7 +231,7 @@ int main(int argc, char* argv[]) {
         return ErrorCode;
     }
     
-    unfoldNet(mfile, qfile, outputModelfile, outputQueryFile,options);
+    unfoldNet(mfile, qfile, outputModelfile, outputQueryFile, outputQueryXMLFile,options);
 
     return SuccessCode;
 }
