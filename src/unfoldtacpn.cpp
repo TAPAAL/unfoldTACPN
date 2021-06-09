@@ -214,8 +214,28 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
     out.close();
 }
 
+void writeXMLQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::string>& querynames, std::vector<uint32_t>& order, fstream& out, const std::unordered_map<std::string, uint32_t>& place_names) 
+{
+    out << "<?xml version=\"1.0\"?>\n<property-set xmlns=\"http://mcc.lip6.fr/\">\n";
+    for(uint32_t j = 0; j < queries.size(); j++) {
+        auto i = order[j];
+        if(queries[i]->isTriviallyTrue())
+            queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(true));
+        else if(queries[i]->isTriviallyFalse())
+            queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(false));
+        
+        out << "  <property>\n    <id>" << querynames[i] << "</id>\n    <description>Simplified</description>\n    <formula>\n";
+        queries[i]->toXML(out, 3);
+        out << "    </formula>\n  </property>\n";
+        
+    
+    }
+    out << "</property-set>\n"; 
+    out.close();
+}
 
-void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std::ostream& outputModelFile, std::fstream& outputQueryFile,unfoldtacpn_options_t options) {
+
+void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std::ostream& outputModelFile, std::fstream& outputQueryFile, std::fstream& outputXMLQueryFile,unfoldtacpn_options_t options) {
     ColoredPetriNetBuilder cpnBuilder;
     if(parseModel(cpnBuilder, inputModelFile) != ContinueCode) 
     {
@@ -260,6 +280,9 @@ void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std
 
     //Write queries to output file
     writeQueries(queries, querynames, reorder, outputQueryFile, builder.getPlaceNames());
+
+    //Write queries in XML format to output file
+    writeXMLQueries(queries, querynames, reorder, outputXMLQueryFile, builder.getPlaceNames());
 
     //Write net to output file
     auto net = std::unique_ptr<PetriNet>(builder.makePetriNet());

@@ -12,7 +12,7 @@
 
 
 struct unfoldtacpn_options_t;
-void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std::ostream& outputModelFile, std::fstream& outputQueryFile,unfoldtacpn_options_t options);
+void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std::ostream& outputModelFile, std::fstream& outputQueryFile, std::fstream& outputXMLQueryFile, unfoldtacpn_options_t options);
 
 struct unfoldtacpn_options_t {
 //    bool outputtrace = false;
