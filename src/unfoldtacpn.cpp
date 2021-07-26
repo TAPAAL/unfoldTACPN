@@ -195,8 +195,9 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
     //out << "<?xml version=\"1.0\"?>\n<property-set xmlns=\"http://mcc.lip6.fr/\">\n";
     
     
-    for(uint32_t j = 0; j < queries.size(); j++) {
-        auto i = order[j];
+    //for(uint32_t j = 0; j < queries.size(); j++) {
+        //As .q files can only have one query, we only write the first query for verification
+        auto i = order[0];
         queries[i]->toString(out);
         /*if(queries[i]->isTriviallyTrue())
             queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(true));
@@ -210,7 +211,7 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
     
     }
     out << "</property-set>\n";*/ 
-    }   
+    //}   
     out.close();
 }
 
