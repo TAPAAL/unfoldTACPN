@@ -252,13 +252,6 @@ void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std
     std::vector<std::string> querynames;
     auto queries = readQueries(options, querynames, inputQueryFile);
 
-    std::cout << "found " <<  queries.size() << " queries" << std::endl;
-    std::cout << "query numbers:" << std::endl;
-    for(auto num : options.querynumbers){
-        std::cout << num << std::endl;
-    }
-    std::cout << std::endl;
-
     auto builder = cpnBuilder.unfold();
     printUnfoldingStats(cpnBuilder, options);
     builder.sort();
