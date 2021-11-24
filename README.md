@@ -1,38 +1,25 @@
-# VerifyPN
-VerifyPN is based on [PeTe](https://github.com/jopsen/PeTe) and aims to provide
-a fast untimed engine for TAPAAL.
+# unfoldTACPN
 
-## License
-VerifyPN is available under the terms of the GNU GPL version 3 or
-(at your option) any later version.
-If this license doesn't suit you're welcome to contact us, and purpose an
-alternative license.
+This is the extract of the unfolding part of VerifyPN specialized for timed systems.
+This is intended as a temporary hot-fix for enabling support for Colored Timed-Arc Petri Nets
+in the VerfifyDTAPN engine.
 
-## Compilation
-Requirements for compilation
-```
-cmake >= 3.9
-flex >= 2.6.4
-bison >= 3.0.5
-gmp-static (required only for model checking competition)
+Over time this should be refactored into a general unfolding library, merged with
+the functionality of the (faster and better) unfolder of VerifyPN.
 
-sudo apt update
-sudo apt install build-essential cmake flex bison brz
 
-```
-
-The four distributions of VerifyPN can be compiled as follows
+The four distributions of unfoldTACPN can be compiled as follows
 ### Linux64 and OSX64
 ```
 bzr branch lp:verifypn
 mkdir build && cd  build
-cmake .. -DVERIFYPN_Static=ON -DVERIFYPN_MC_Simplification=OFF 
+cmake .. -DVERIFYPN_Static=ON -DVERIFYPN_MC_Simplification=OFF
 
 #For mac, one need to enforce that we use the GCC compiler using:
 export CC=gcc-9
 export CXX=g++-9
 #and point to the correct version of flex and bison by adding
-#-DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex 
+#-DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex
 #to cmake call
 
 ```
@@ -57,7 +44,7 @@ make
 ```
 mkdir build
 cd  build
-cmake .. -DVERIFYPN_Static=OFF -DVERIFYPN_MC_Simplification=ON 
+cmake .. -DVERIFYPN_Static=OFF -DVERIFYPN_MC_Simplification=ON
 make
 ```
 
