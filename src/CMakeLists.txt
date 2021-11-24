@@ -15,4 +15,9 @@ install(TARGETS unfoldtacpn PQL Colored PetriParse
 
 install(FILES ../include/unfoldtacpn.h DESTINATION include/)
 install(FILES ../include/PQL/PQL.h ../include/PQL/Visitor.h ../include/PQL/Expressions.h  DESTINATION include/PQL/)
-install(FILES ../Colored/{ColoredNetStructures.h,ColoredPetriNetBuilder.h,Colors.h,Expressions.h,TimeInterval.h,TimeInvariant.h}  DESTINATION include/Colored/)
+install(FILES ../Colored/ColoredNetStructures.h
+              ../Colored/ColoredPetriNetBuilder.h
+              ../Colored/Colors.h
+              ../Colored/Expressions.h
+              ../Colored/TimeInterval.h
+              ../Colored/TimeInvariant.h  DESTINATION include/Colored/)
