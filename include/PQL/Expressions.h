@@ -25,7 +25,6 @@
 #include <fstream>
 #include <algorithm>
 #include "PQL.h"
-#include "Contexts.h"
 
 namespace unfoldtacpn {
     namespace PQL {
