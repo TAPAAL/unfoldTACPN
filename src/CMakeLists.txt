@@ -14,5 +14,5 @@ install(TARGETS unfoldtacpn PQL Colored PetriParse
     ARCHIVE DESTINATION lib/unfoldtacpn)
 
 install(FILES ../include/unfoldtacpn.h DESTINATION include/)
-install(FILES ../include/PQL/PQL.h ../include/PQL/visitor.h ../include/PQL/Expressions.h  DESTINATION include/PQL/)
+install(FILES ../include/PQL/PQL.h ../include/PQL/Visitor.h ../include/PQL/Expressions.h  DESTINATION include/PQL/)
 install(FILES ../Colored/*  DESTINATION include/Colored/)
