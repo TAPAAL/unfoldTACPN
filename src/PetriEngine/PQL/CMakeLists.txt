@@ -12,6 +12,4 @@ bison_target(pql_parser "${CMAKE_CURRENT_SOURCE_DIR}/PQLQueryParser.y"
 add_flex_bison_dependency(pql_lexer pql_parser)
 
 add_library(PQL ${BISON_pql_parser_OUTPUTS} ${FLEX_pql_lexer_OUTPUTS} Expressions.cpp PQL.cpp Contexts.cpp)
-add_dependencies(PQL glpk-ext)
-target_link_libraries(PQL glpk)
 

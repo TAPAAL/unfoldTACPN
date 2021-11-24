@@ -3,17 +3,17 @@
  *                     Thomas Søndersø Nielsen <primogens@gmail.com>,
  *                     Lars Kærlund Østergaard <larsko@gmail.com>,
  *                     Peter Gjøl Jensen <root@petergjoel.dk>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -29,10 +29,9 @@
 #include <list>
 #include <map>
 #include <chrono>
-#include <glpk.h>
 
 namespace PetriEngine {
-    
+
     namespace PQL {
 
         /** Context provided for context analysis */
@@ -56,14 +55,14 @@ namespace PetriEngine {
             : _placeNames(places), _transitionNames(tnames), _net(net) {
 
             }
-            
+
             virtual void setHasDeadlock(){};
-            
+
             const PetriNet* net() const
             {
                 return _net;
             }
-            
+
             /** Resolve an identifier */
             virtual ResolutionResult resolve(const std::string& identifier, bool place = true);
 
@@ -122,13 +121,13 @@ namespace PetriEngine {
                 _marking = marking;
                 _net = net;
             }
-            
+
             EvaluationContext() {};
 
             const MarkVal* marking() const {
                 return _marking;
             }
-            
+
             void setMarking(MarkVal* marking) {
                 _marking = marking;
             }
@@ -170,71 +169,6 @@ namespace PetriEngine {
             bool failed;
             std::string netName;
         };
-
-        class SimplificationContext {
-        public:
-
-            SimplificationContext(const MarkVal* marking,
-                    const PetriNet* net, uint32_t queryTimeout, uint32_t lpTimeout)
-                    : _queryTimeout(queryTimeout), _lpTimeout(lpTimeout) {
-                _negated = false;
-                _marking = marking;
-                _net = net;
-                _base_lp = buildBase();
-                _start = std::chrono::high_resolution_clock::now();
-            }
-                    
-            virtual ~SimplificationContext() {
-                if(_base_lp != nullptr)
-                    glp_delete_prob(_base_lp);
-                _base_lp = nullptr;
-            }
-
-
-            const MarkVal* marking() const {
-                return _marking;
-            }
-
-            const PetriNet* net() const {
-                return _net;
-            }
-
-            void negate() {
-                _negated = !_negated;
-            }
-
-            bool negated() const {
-                return _negated;
-            }
-            
-            void setNegate(bool b){
-                _negated = b;
-            }
-            
-            double getReductionTime();
-            
-            bool timeout() const {
-                auto end = std::chrono::high_resolution_clock::now();
-                auto diff = std::chrono::duration_cast<std::chrono::seconds>(end - _start);
-                return (diff.count() >= _queryTimeout);
-            }
-            
-            uint32_t getLpTimeout() const;
-            
-            glp_prob* makeBaseLP() const;
-
-        private:
-            bool _negated;
-            const MarkVal* _marking;
-            const PetriNet* _net;
-            uint32_t _queryTimeout, _lpTimeout;
-            std::chrono::high_resolution_clock::time_point _start;
-            mutable glp_prob* _base_lp = nullptr;
-
-            glp_prob* buildBase() const;
-
-        };
-
     } // PQL
 } // PetriEngine
 

@@ -69,31 +69,12 @@ if (VERIFYPN_GetDependencies)
     include(ExternalProject)
     set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 
-    ExternalProject_add(ptrie-ext
-        GIT_REPOSITORY https://github.com/petergjoel/ptrie
-        GIT_TAG 230b3640bfbe2ed5befdafbaf17bd3804231b50f
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION} -DPTRIE_BuildTest=OFF -DCMAKE_BUILD_TYPE=Release
-    )
     ExternalProject_add(rapidxml-ext
         URL https://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%201.13/rapidxml-1.13.zip
         URL_HASH SHA512=6c10583e6631ccdb0217d0a5381172cb4c1046226de6ef1acf398d85e81d145228e14c3016aefcd7b70a1db8631505b048d8b4f5d4b0dbf1811d2482eefdd265
         BUILD_COMMAND ""
         CONFIGURE_COMMAND mkdir -p ${CMAKE_BINARY_DIR}/external/include
-        INSTALL_COMMAND cd ../rapidxml-ext && ${CMAKE_COMMAND} -E copy rapidxml.hpp rapidxml_iterators.hpp rapidxml_print.hpp rapidxml_utils.hpp ${EXTERNAL_INSTALL_LOCATION}/include    
-    )
-
-    if (WIN32) #If windows 32 or 64 
-      set(GLPK_CFLAGS "-D __WOE__ -O3" )
-    else(WIN32)
-      set(GLPK_CFLAGS "-O3" )
-    endif(WIN32)
-    ExternalProject_add(glpk-ext
-        URL https://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz
-        URL_HASH SHA512=997e8e599ff1718a08c66b86eadd0e01f4644899f1e95920f8ae91d66b4d8361021766b346845f4dcbcfe667b41ab72ea3d377017a0ebf85d7ece091cfd81375
-	CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} <SOURCE_DIR>/configure --enable-shared=no --prefix=${EXTERNAL_INSTALL_LOCATION} CFLAGS=${GLPK_CFLAGS}
-	BUILD_COMMAND make
-        INSTALL_COMMAND make install
-        PATCH_COMMAND patch -p1 < ${PROJECT_SOURCE_DIR}/glpk-warning.patch
+        INSTALL_COMMAND cd ../rapidxml-ext && ${CMAKE_COMMAND} -E copy rapidxml.hpp rapidxml_iterators.hpp rapidxml_print.hpp rapidxml_utils.hpp ${EXTERNAL_INSTALL_LOCATION}/include
     )
 
     link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)

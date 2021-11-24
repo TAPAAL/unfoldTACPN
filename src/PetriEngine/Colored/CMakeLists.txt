@@ -5,4 +5,4 @@ Colors.cpp
 Multiset.cpp
 TimeInterval.cpp
 TimeInvariant.cpp)
-add_dependencies(Colored rapidxml-ext ptrie-ext glpk-ext)
+add_dependencies(Colored rapidxml-ext)

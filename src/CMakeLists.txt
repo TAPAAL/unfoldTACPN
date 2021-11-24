@@ -5,7 +5,6 @@ add_subdirectory(PetriEngine)
 
 add_library(unfoldtacpn ${HEADER_FILES} unfoldtacpn.cpp)
 
-add_dependencies(unfoldtacpn glpk-ext)
 target_link_libraries(unfoldtacpn PRIVATE PetriParse PetriEngine)
 
 install(TARGETS unfoldtacpn PQL Colored PetriEngine PetriParse
