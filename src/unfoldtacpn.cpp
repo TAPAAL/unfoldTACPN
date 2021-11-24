@@ -44,16 +44,12 @@
 #include <memory>
 #include <utility>
 #include <functional>
-#ifdef VERIFYPN_MC_Simplification
-#include <thread>
-#include <iso646.h>
-#endif
+
 #include "unfoldtacpn.h"
 #include "PetriEngine/PQL/PQLParser.h"
 #include "PetriEngine/PQL/Contexts.h"
 #include "PetriEngine/Reducer.h"
 #include "PetriParse/QueryXMLParser.h"
-#include "PetriParse/QueryBinaryParser.h"
 #include "PetriParse/PNMLParser.h"
 #include "PetriEngine/PetriNetBuilder.h"
 #include "PetriEngine/PQL/PQL.h"
@@ -197,11 +193,6 @@ void writeQueries(vector<std::shared_ptr<Condition>>& queries, vector<std::strin
 
     for(uint32_t j = 0; j < queries.size(); j++) {
         auto i = order[j];
-        if(queries[i]->isTriviallyTrue())
-            queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(true));
-        else if(queries[i]->isTriviallyFalse())
-            queries[i] = std::make_shared<EFCondition>(std::make_shared<BooleanCondition>(false));
-
         out << "  <property>\n    <id>" << querynames[i] << "</id>\n    <description>Simplified</description>\n    <formula>\n";
         queries[i]->toXML(out, 3);
         out << "    </formula>\n  </property>\n";
@@ -243,16 +234,6 @@ void unfoldNet(std::ifstream& inputModelFile, std::ifstream& inputQueryFile, std
 
     std::vector<uint32_t> reorder(queries.size());
     for(uint32_t i = 0; i < queries.size(); ++i) reorder[i] = i;
-    std::sort(reorder.begin(), reorder.end(), [&queries](auto a, auto b){
-
-        if(queries[a]->isReachability() != queries[b]->isReachability())
-            return queries[a]->isReachability() > queries[b]->isReachability();
-        if(queries[a]->isLoopSensitive() != queries[b]->isLoopSensitive())
-            return queries[a]->isLoopSensitive() < queries[b]->isLoopSensitive();
-        if(queries[a]->containsNext() != queries[b]->containsNext())
-            return queries[a]->containsNext() < queries[b]->containsNext();
-        return queries[a]->formulaSize() < queries[b]->formulaSize();
-    });
 
     //Write queries to output file
     writeQueries(queries, querynames, reorder, outputQueryFile, builder.getPlaceNames());

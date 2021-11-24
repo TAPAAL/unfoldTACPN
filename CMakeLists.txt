@@ -15,50 +15,21 @@ endif ()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-set(VERIFYPN_VERSION 4.0.0)
-add_compile_definitions(VERIFYPN_VERSION=\"${VERIFYPN_VERSION}\")
+project(unfoldtacpn VERSION 0.0.2 LANGUAGES CXX C)
 
-project(verifypn VERSION ${VERIFYPN_VERSION} LANGUAGES CXX C)
-
-option(VERIFYPN_Static "Link libraries statically" ON)
-option(VERIFYPN_MC_Simplification "Enables multicore simplification, incompatible with static linking" OFF)
 option(VERIFYPN_GetDependencies "Fetch external dependencies from web." ON)
 
 
-if (VERIFYPN_Static)
-    set(BUILD_SHARED_LIBS OFF)
-    if (VERIFYPN_MC_Simplification)
-        message( FATAL_ERROR "Multicore Simplification is not compatible with static linking" )
-    endif(VERIFYPN_MC_Simplification)
-    if (NOT APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-    else(NOT APPLE)
-    	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
-    endif(NOT APPLE)
-else(VERIFYPN_Static)
+set(BUILD_SHARED_LIBS OFF)
+if (NOT APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+else(NOT APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
-endif (VERIFYPN_Static)
-
-if (VERIFYPN_MC_Simplification)
-    add_compile_definitions(VERIFYPN_MC_Simplification)
-endif(VERIFYPN_MC_Simplification)
-
-if (UNIX AND NOT APPLE)
-    set(ARCH_TYPE "linux64")
-elseif(APPLE)
-    set(ARCH_TYPE "osx64")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.8 -m64 ")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mmacosx-version-min=10.8 -m64 ")
-else()
-    set(ARCH_TYPE "win64")
-endif ()
+endif(NOT APPLE)
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -pedantic-errors -O3 -DNDEBUG")
 
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -O3 -DNDEBUG")
-if (VERIFYPN_Static AND NOT APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -static")
-endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

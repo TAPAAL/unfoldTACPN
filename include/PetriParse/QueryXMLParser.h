@@ -23,7 +23,7 @@
 #include <string.h>
 #include <vector>
 #include <memory>
-#include <sstream> 
+#include <sstream>
 #include <set>
 
 #include <rapidxml.hpp>
@@ -40,8 +40,6 @@ public:
     std::vector<QueryItem>  queries;
 
     bool parse(std::ifstream& xml, const std::set<size_t>& );
-    void printQueries();
-    void printQueries(size_t i);
 
 private:
     bool parsePropertySet(rapidxml::xml_node<>* element, const std::set<size_t>&);

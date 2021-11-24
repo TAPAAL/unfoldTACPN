@@ -2,7 +2,7 @@
  *  Copyright Peter G. Jensen, all rights reserved.
  */
 
-/* 
+/*
  * File:   Visitor.h
  * Author: Peter G. Jensen <root@petergjoel.dk>
  *
@@ -42,9 +42,8 @@ namespace PetriEngine
             virtual void _accept(const NotEqualCondition* element) = 0;
 
             virtual void _accept(const DeadlockCondition* element) = 0;
-            virtual void _accept(const CompareConjunction* element) = 0;
             virtual void _accept(const UnfoldedUpperBoundsCondition* element) = 0;
-            
+
             // Quantifiers, most uses of the visitor will not use the quantifiers - so we give a default implementation.
             // default behaviour is error
             virtual void _accept(const EFCondition*)
@@ -56,19 +55,19 @@ namespace PetriEngine
             virtual void _accept(const AFCondition*)
             {   assert(false); std::cerr << "No accept for AFCondition" << std::endl; exit(0);};
             virtual void _accept(const EXCondition*)
-            {   assert(false); std::cerr << "No accept for EXCondition" << std::endl; exit(0);};            
+            {   assert(false); std::cerr << "No accept for EXCondition" << std::endl; exit(0);};
             virtual void _accept(const AXCondition*)
-            {   assert(false); std::cerr << "No accept for AXCondition" << std::endl; exit(0);};            
+            {   assert(false); std::cerr << "No accept for AXCondition" << std::endl; exit(0);};
             virtual void _accept(const EUCondition*)
             {   assert(false); std::cerr << "No accept for EUCondition" << std::endl; exit(0);};
             virtual void _accept(const AUCondition*)
-            {   assert(false); std::cerr << "No accept for AUCondition" << std::endl; exit(0);};            
-            
+            {   assert(false); std::cerr << "No accept for AUCondition" << std::endl; exit(0);};
+
             // shallow elements, neither of these should exist in a compiled expression
-            virtual void _accept(const UnfoldedFireableCondition* element) 
+            virtual void _accept(const UnfoldedFireableCondition* element)
             {   assert(false); std::cerr << "No accept for UnfoldedFireableCondition" << std::endl; exit(0);};
             virtual void _accept(const FireableCondition* element)
-            {   assert(false); std::cerr << "No accept for FireableCondition" << std::endl; exit(0);};            
+            {   assert(false); std::cerr << "No accept for FireableCondition" << std::endl; exit(0);};
             virtual void _accept(const UpperBoundsCondition* element)
             {   assert(false); std::cerr << "No accept for UpperBoundsCondition" << std::endl; exit(0);};
             virtual void _accept(const LivenessCondition* element)
@@ -81,7 +80,7 @@ namespace PetriEngine
             {   assert(false); std::cerr << "No accept for StableMarkingCondition" << std::endl; exit(0);};
             virtual void _accept(const BooleanCondition* element)
             {   assert(false); std::cerr << "No accept for BooleanCondition" << std::endl; exit(0);};
-            
+
             // Expression
             virtual void _accept(const UnfoldedIdentifierExpr* element) = 0;
             virtual void _accept(const LiteralExpr* element) = 0;
@@ -89,11 +88,11 @@ namespace PetriEngine
             virtual void _accept(const MultiplyExpr* element) = 0;
             virtual void _accept(const MinusExpr* element) = 0;
             virtual void _accept(const SubtractExpr* element) = 0;
-            
+
             // shallow expression, default to error
             virtual void _accept(const IdentifierExpr* element)
             {   assert(false); std::cerr << "No accept for IdentifierExpr" << std::endl; exit(0);};
-        }; 
+        };
     }
 }
 
