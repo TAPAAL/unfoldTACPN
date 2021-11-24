@@ -41,7 +41,7 @@ QueryXMLParser::QueryXMLParser() = default;
 
 QueryXMLParser::~QueryXMLParser() = default;
 
-bool QueryXMLParser::parse(std::ifstream& xml, const std::set<size_t>& parse_only) {
+bool QueryXMLParser::parse(std::istream& xml, const std::set<size_t>& parse_only) {
     //Parse the xml
     rapidxml::xml_document<> doc;
     vector<char> buffer((istreambuf_iterator<char>(xml)), istreambuf_iterator<char>());
@@ -166,18 +166,6 @@ Condition_ptr QueryXMLParser::parseFormula(rapidxml::xml_node<>*  element) {
         }
         if(bound == nullptr) fatal_error(childName);
         return std::make_shared<KSafeCondition>(bound);
-    }
-    else if(childName == "quasi-liveness")
-    {
-        return std::make_shared<QuasiLivenessCondition>();
-    }
-    else if(childName == "stable-marking")
-    {
-        return std::make_shared<StableMarkingCondition>();
-    }
-    else if(childName == "liveness")
-    {
-        return std::make_shared<LivenessCondition>();
     }
     else if (childName == "place-bound") {
         std::vector<std::string> places;
@@ -468,23 +456,6 @@ Condition_ptr QueryXMLParser::parseBooleanFormula(rapidxml::xml_node<>*  element
         else if (elementName == "integer-le") return std::make_shared<LessThanOrEqualCondition>(expr1, expr2);
         else if (elementName == "integer-gt") return std::make_shared<GreaterThanCondition>(expr1, expr2);
         else if (elementName == "integer-ge") return std::make_shared<GreaterThanOrEqualCondition>(expr1, expr2);
-    } else if (elementName == "is-fireable") {
-        size_t nrOfChildren = getChildCount(element);
-        if (nrOfChildren == 0)
-        {
-            assert(false);
-            return nullptr;
-        }
-        std::vector<Condition_ptr> conds;
-        for (auto it = element->first_node(); it; it = it->next_sibling()) {
-            if (strcmp(it->name(), "transition") != 0)
-            {
-                assert(false);
-                return nullptr;
-            }
-            conds.emplace_back(std::make_shared<FireableCondition>(it->value()));
-        }
-        return std::make_shared<OrCondition>(conds);
     }
     fatal_error(elementName);
     return nullptr;

@@ -18,7 +18,7 @@
 
 #include "PetriEngine/Colored/Multiset.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored {
         Multiset::Multiset() : _set(), type(nullptr) {
         }

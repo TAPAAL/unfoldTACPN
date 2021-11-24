@@ -31,7 +31,7 @@
 
 using namespace std;
 
-namespace PetriEngine {
+namespace unfoldtacpn {
 
     PetriNet::PetriNet(uint32_t trans, uint32_t invariants, uint32_t places)
     : _ninvariants(invariants), _ntransitions(trans), _nplaces(places),

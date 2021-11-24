@@ -3,17 +3,17 @@
  *                     Thomas Søndersø Nielsen <primogens@gmail.com>,
  *                     Lars Kærlund Østergaard <larsko@gmail.com>,
  *                     Peter Gjøl Jensen <root@petergjoel.dk>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,14 +28,14 @@
 #include "Colored/TimeInvariant.h"
 #include "Colored/TimeInterval.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
 
     /** Abstract builder for petri nets */
-    class AbstractPetriNetBuilder {
+    class TAPNBuilderInterface {
     protected:
         bool _isColored = false;
         bool _isTimed = false;
-        
+
     public:
         /** Add a new place with a unique name */
         virtual void addPlace(const std::string& name,
@@ -123,7 +123,7 @@ namespace PetriEngine {
                 const std::string &transition,
                 bool inhibitor, bool transport,
                 int weight,
-                PetriEngine::Colored::TimeInterval &interval, std::string transportID)
+                unfoldtacpn::Colored::TimeInterval &interval, std::string transportID)
         {
             std::cerr << "Timed colored input arc are not supported in standard P/T nets" << std::endl;
             exit(ErrorCode);
@@ -132,7 +132,7 @@ namespace PetriEngine {
                                  const std::string &transition,
                                  bool inhibitor, bool transport,
                                  const Colored::ArcExpression_ptr& expr,
-                                 std::vector<PetriEngine::Colored::TimeInterval> &interval, int weight, std::string transportID)
+                                 std::vector<unfoldtacpn::Colored::TimeInterval> &interval, int weight, std::string transportID)
         {
             std::cerr << "Timed colored input arc are not supported in standard P/T nets" << std::endl;
             exit(ErrorCode);
@@ -175,7 +175,7 @@ namespace PetriEngine {
             std::cerr << "Color types are not supported in standard P/T nets" << std::endl;
             exit(ErrorCode);
         }
-        
+
         virtual void enableColors() {
             _isColored = true;
         }
@@ -192,9 +192,7 @@ namespace PetriEngine {
             return _isTimed;
         }
 
-        virtual void sort() = 0;
-        
-        virtual ~AbstractPetriNetBuilder() {
+        virtual ~TAPNBuilderInterface() {
         }
     };
 

@@ -27,7 +27,7 @@
 #include "PQL.h"
 #include "Contexts.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace PQL {
 
         std::string generateTabs(uint32_t tabs);
@@ -295,28 +295,6 @@ namespace PetriEngine {
         };
 
         /******************** CONDITIONS ********************/
-
-        class UnfoldedFireableCondition : public ShallowCondition {
-        public:
-            UnfoldedFireableCondition(const std::string& tname) : ShallowCondition(), _name(tname) {};
-            void visit(Visitor&) const override;
-        protected:
-            void _analyze(AnalysisContext& context) override;
-        private:
-            const std::string _name;
-        };
-
-        class FireableCondition : public ShallowCondition {
-        public:
-            FireableCondition(const std::string& tname) : _name(tname) {};
-            void visit(Visitor&) const override;
-        protected:
-            void _analyze(AnalysisContext& context) override;
-        private:
-            const std::string _name;
-        };
-
-        /* Logical conditon */
         class LogicalCondition : public Condition {
         public:
             void analyze(AnalysisContext& context) override;
@@ -470,33 +448,6 @@ namespace PetriEngine {
             void visit(Visitor&) const override;
         private:
             Expr_ptr _bound = nullptr;
-        };
-
-        class LivenessCondition : public ShallowCondition
-        {
-        public:
-            LivenessCondition() {}
-        protected:
-            void _analyze(AnalysisContext& context) override;
-            void visit(Visitor&) const override;
-        };
-
-        class QuasiLivenessCondition : public ShallowCondition
-        {
-        public:
-            QuasiLivenessCondition() {}
-        protected:
-            void _analyze(AnalysisContext& context) override;
-            void visit(Visitor&) const override;
-        };
-
-        class StableMarkingCondition : public ShallowCondition
-        {
-        public:
-            StableMarkingCondition() {}
-        protected:
-            void _analyze(AnalysisContext& context) override;
-            void visit(Visitor&) const override;
         };
 
         class UpperBoundsCondition : public ShallowCondition

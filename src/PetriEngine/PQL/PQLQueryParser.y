@@ -5,9 +5,9 @@
 #include "PetriEngine/PQL/PQL.h"
 #include "PetriEngine/PQL/Expressions.h"
 
-using namespace PetriEngine::PQL;
+using namespace unfoldtacpn::PQL;
 
-std::shared_ptr<PetriEngine::PQL::Condition> query;
+std::shared_ptr<unfoldtacpn::PQL::Condition> query;
 extern int pqlqlex();
 void pqlqerror(const char *s) {printf("ERROR: %s\n", s);}
 %}
@@ -17,8 +17,8 @@ void pqlqerror(const char *s) {printf("ERROR: %s\n", s);}
 
 /* Possible data representation */
 %union {
-	PetriEngine::PQL::Expr* expr;
-	PetriEngine::PQL::Condition* cond;
+	unfoldtacpn::PQL::Expr* expr;
+	unfoldtacpn::PQL::Condition* cond;
 	std::string *string;
 	int token;
 }

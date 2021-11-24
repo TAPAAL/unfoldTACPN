@@ -2,17 +2,17 @@
  * Copyright (C) 2011  Jonas Finnemann Jensen <jopsen@gmail.com>,
  *                     Thomas Søndersø Nielsen <primogens@gmail.com>,
  *                     Lars Kærlund Østergaard <larsko@gmail.com>,
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,19 +22,16 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <chrono>
-#include "AbstractPetriNetBuilder.h"
+#include "TAPNBuilderInterface.h"
 #include "PQL/PQL.h"
 #include "PetriNet.h"
-#include "Reducer.h"
 #include "NetStructures.h"
+#include "Colored/ColoredNetStructures.h"
 #include "Colored/TimeInvariant.h"
-namespace PetriEngine {
+namespace unfoldtacpn {
     /** Builder for building engine representations of PetriNets */
-    class PetriNetBuilder : public AbstractPetriNetBuilder {
-    public:
-        friend class Reducer;
-        
+    class PetriNetBuilder : public TAPNBuilderInterface {
+
     public:
         PetriNetBuilder();
         PetriNetBuilder(const PetriNetBuilder& other);
@@ -58,56 +55,34 @@ namespace PetriEngine {
                          bool inhibitor, bool transport,
                          int weight,
                          Colored::TimeInterval &interval, std::string transportID) override;
-        
-        void addOutputArc(const std::string& transition, const std::string& place, int weight = 1, bool transport = false, std::string transportID = "") override;
 
-        virtual void sort() override;
-        /** Make the resulting petri net, you take ownership */
-        PetriNet* makePetriNet(bool reorder = true);
-        /** Make the resulting initial marking, you take ownership */
+        void addOutputArc(const std::string& transition, const std::string& place, int weight = 1, bool transport = false, std::string transportID = "") override;
 
         MarkVal const * initMarking()
         {
             return initialMarking.data();
         }
-        
+
         uint32_t numberOfPlaces() const
         {
             return _placenames.size();
         }
-        
+
         uint32_t numberOfTransitions() const
         {
             return _transitionnames.size();
         }
-        
+
         const std::unordered_map<std::string, uint32_t>& getPlaceNames() const
         {
             return _placenames;
         }
-        
+
         const std::unordered_map<std::string, uint32_t>& getTransitionNames() const
         {
             return _transitionnames;
         }
-        
-        size_t RemovedTransitions() const
-        {
-            return reducer.RemovedTransitions();
-        }
-        
-        size_t RemovedPlaces() const
-        {
-            return reducer.RemovedPlaces();
-        }
 
-        void printStats(std::ostream& out)
-        {
-            reducer.printStats(out);
-        }
-        
-        Reducer* getReducer() { return &reducer; }
-        
         std::vector<std::pair<std::string, uint32_t>> orphanPlaces() const {
             std::vector<std::pair<std::string, uint32_t>> res;
             for(uint32_t p = 0; p < _places.size(); p++) {
@@ -123,25 +98,13 @@ namespace PetriEngine {
             return res;
         }
 
-        double getReductionTime() const {
-            // duration in seconds
-            auto end = std::chrono::high_resolution_clock::now();
-            return (std::chrono::duration_cast<std::chrono::microseconds>(end - _start).count())*0.000001;
-        }
-
-        void startTimer() {
-            _start = std::chrono::high_resolution_clock::now();
-        }
-
-        bool isTimed() {return timed;}
+        bool isTimed() { return timed; }
 
         void setTimed(bool timed) { this->timed = timed;}
 
         std::map<std::string, std::string> getInvariants() {return _invariantStrings;}
-        
+
     private:
-        uint32_t nextPlaceId(std::vector<uint32_t>& counts,  std::vector<uint32_t>& pcounts, std::vector<uint32_t>& ids, bool reorder);
-        std::chrono::high_resolution_clock::time_point _start;
         bool timed = false;
 
     protected:
@@ -152,12 +115,11 @@ namespace PetriEngine {
 
         std::vector< std::tuple<double, double> > _placelocations;
         std::vector< std::tuple<double, double> > _transitionlocations;
-        
-        std::vector<Transition> _transitions;
-        std::vector<Place> _places;
-        
+
+        std::vector<PetriEngine::Transition> _transitions;
+        std::vector<PetriEngine::Place> _places;
+
         std::vector<MarkVal> initialMarking;
-        Reducer reducer;
     };
 
 }

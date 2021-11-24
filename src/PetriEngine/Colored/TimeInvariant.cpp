@@ -5,7 +5,7 @@
 #include "PetriEngine/Colored/TimeInvariant.h"
 #include "PetriEngine/Colored/TimeInterval.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored {
 
         TimeInvariant TimeInvariant::createFor(const std::string& invariant, std::vector<const Colored::Color*> colors, std::unordered_map<std::string, uint32_t> constants){

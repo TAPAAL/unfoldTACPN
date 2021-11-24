@@ -13,13 +13,13 @@
 #include <locale>
 #include "Colors.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored{
         class TimeInvariant{
 
         public:
             TimeInvariant(Colored::Color color) : strictComparison(true), bound(std::numeric_limits<int>::max()), color(color) {};
-            TimeInvariant(bool strictComparison, int bound, PetriEngine::Colored::Color color) : strictComparison(strictComparison), bound(bound), color(color) { };
+            TimeInvariant(bool strictComparison, int bound, Colored::Color color) : strictComparison(strictComparison), bound(bound), color(color) { };
             TimeInvariant(const TimeInvariant& ti) : strictComparison(ti.strictComparison), bound(ti.bound), color(ti.color) { };
             TimeInvariant& operator=(const TimeInvariant& ti)
             {

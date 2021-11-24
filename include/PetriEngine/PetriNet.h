@@ -29,7 +29,7 @@
 #include <unordered_map>
 #include <cassert>
 
-namespace PetriEngine {
+namespace unfoldtacpn {
 
     namespace PQL {
         class Condition;

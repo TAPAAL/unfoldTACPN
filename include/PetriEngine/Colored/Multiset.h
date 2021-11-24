@@ -20,7 +20,7 @@
 #include "Colors.h"
 
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored {
         class Multiset {
         private:

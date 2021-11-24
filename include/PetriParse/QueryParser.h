@@ -4,7 +4,7 @@
 
 
 #include "PetriEngine/PQL/PQL.h"
-using namespace PetriEngine::PQL;
+using namespace unfoldtacpn::PQL;
 
 struct QueryItem {
     std::string id; // query name

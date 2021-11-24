@@ -30,7 +30,7 @@
 #include <map>
 #include <chrono>
 
-namespace PetriEngine {
+namespace unfoldtacpn {
 
     namespace PQL {
 
@@ -39,7 +39,6 @@ namespace PetriEngine {
         protected:
             const std::unordered_map<std::string, uint32_t>& _placeNames;
             const std::unordered_map<std::string, uint32_t>& _transitionNames;
-            const PetriNet* _net;
             std::vector<ExprError> _errors;
         public:
 
@@ -51,16 +50,10 @@ namespace PetriEngine {
                 bool success;
             };
 
-            AnalysisContext(const std::unordered_map<std::string, uint32_t>& places, const std::unordered_map<std::string, uint32_t>& tnames, const PetriNet* net)
-            : _placeNames(places), _transitionNames(tnames), _net(net) {
+            AnalysisContext(const std::unordered_map<std::string, uint32_t>& places,
+            const std::unordered_map<std::string, uint32_t>& tnames)
+            : _placeNames(places), _transitionNames(tnames) {
 
-            }
-
-            virtual void setHasDeadlock(){};
-
-            const PetriNet* net() const
-            {
-                return _net;
             }
 
             /** Resolve an identifier */
@@ -84,92 +77,24 @@ namespace PetriEngine {
         protected:
             const std::unordered_map<std::string, std::unordered_map<uint32_t , std::string>>& _coloredPlaceNames;
             const std::unordered_map<std::string, std::vector<std::string>>& _coloredTransitionNames;
-
-            bool _colored;
-
         public:
             ColoredAnalysisContext(const std::unordered_map<std::string, uint32_t>& places,
                                    const std::unordered_map<std::string, uint32_t>& tnames,
-                                   const PetriNet* net,
                                    const std::unordered_map<std::string, std::unordered_map<uint32_t , std::string>>& cplaces,
-                                   const std::unordered_map<std::string, std::vector<std::string>>& ctnames,
-                                   bool colored)
-                    : AnalysisContext(places, tnames, net),
+                                   const std::unordered_map<std::string, std::vector<std::string>>& ctnames)
+                    : AnalysisContext(places, tnames),
                       _coloredPlaceNames(cplaces),
-                      _coloredTransitionNames(ctnames),
-                      _colored(colored)
-            {}
+                      _coloredTransitionNames(ctnames)
+                    {}
 
             bool resolvePlace(const std::string& place, std::unordered_map<uint32_t,std::string>& out);
 
             bool resolveTransition(const std::string& transition, std::vector<std::string>& out);
 
-            bool isColored() const {
-                return _colored;
-            }
             auto& allColoredPlaceNames() const { return _coloredPlaceNames; }
             auto& allColoredTransitionNames() const { return _coloredTransitionNames; }
         };
-
-        /** Context provided for evalation */
-        class EvaluationContext {
-        public:
-
-            /** Create evaluation context, this doesn't take ownership */
-            EvaluationContext(const MarkVal* marking,
-                    const PetriNet* net) {
-                _marking = marking;
-                _net = net;
-            }
-
-            EvaluationContext() {};
-
-            const MarkVal* marking() const {
-                return _marking;
-            }
-
-            void setMarking(MarkVal* marking) {
-                _marking = marking;
-            }
-
-            const PetriNet* net() const {
-                return _net;
-            }
-        private:
-            const MarkVal* _marking = nullptr;
-            const PetriNet* _net = nullptr;
-        };
-
-        /** Context for distance computation */
-        class DistanceContext : public EvaluationContext {
-        public:
-
-            DistanceContext(const PetriNet* net,
-                    const MarkVal* marking)
-            : EvaluationContext(marking, net) {
-                _negated = false;
-            }
-
-
-            void negate() {
-                _negated = !_negated;
-            }
-
-            bool negated() const {
-                return _negated;
-            }
-
-        private:
-            bool _negated;
-        };
-
-        /** Context for condition to TAPAAL export */
-        class TAPAALConditionExportContext {
-        public:
-            bool failed;
-            std::string netName;
-        };
     } // PQL
-} // PetriEngine
+}
 
 #endif // CONTEXTS_H

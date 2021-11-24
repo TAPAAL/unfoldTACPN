@@ -6,7 +6,7 @@
 
 
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace PQL {
 
         bool ColoredAnalysisContext::resolvePlace(const std::string& place, std::unordered_map<uint32_t, std::string>& out)

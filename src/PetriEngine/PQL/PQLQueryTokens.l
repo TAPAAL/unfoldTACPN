@@ -16,7 +16,7 @@
 
 #define register      // Deprecated in C++11.
 extern "C" int pqlqwrap(){return 1;}
-extern std::shared_ptr<PetriEngine::PQL::Condition> query;
+extern std::shared_ptr<unfoldtacpn::PQL::Condition> query;
 extern int pqlqparse();
 %}
 %option prefix="pqlq"
@@ -57,7 +57,7 @@ letter        [a-zA-Z_]
 .							{printf("Unknown token %s!\n", pqlqtext); yyterminate();}
 
 %%
-namespace PetriEngine{ namespace PQL {
+namespace unfoldtacpn{ namespace PQL {
 std::shared_ptr<Condition> ParseQuery(const std::string& queryString, std::vector<std::string>& placenameforbound) {
 	//Load up input buffer in Flex
 	YY_BUFFER_STATE buf = pqlq_scan_string(queryString.c_str());
@@ -68,7 +68,7 @@ std::shared_ptr<Condition> ParseQuery(const std::string& queryString, std::vecto
 	//Delete the buffer
 	pqlq_delete_buffer(buf);
 	return query;
-} 
+}
 }}
 #ifdef __clang__
 #pragma clang diagnostic pop

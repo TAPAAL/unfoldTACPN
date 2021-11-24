@@ -27,7 +27,7 @@
 
 #include "../PetriNet.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace PQL {
         class Visitor;
         class AnalysisContext;
@@ -90,6 +90,6 @@ namespace PetriEngine {
         typedef std::shared_ptr<Condition> Condition_ptr;
         typedef std::shared_ptr<Expr> Expr_ptr;
     } // PQL
-} // PetriEngine
+}
 
 #endif // PQL_H

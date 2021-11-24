@@ -22,7 +22,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored {
         class ColorType;
         class TimeInvariant;

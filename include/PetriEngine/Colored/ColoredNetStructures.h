@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   ColoredNetStructures.h
  * Author: Klostergaard
  *
@@ -22,9 +22,9 @@
 #include "TimeInterval.h"
 #include "TimeInvariant.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored {
-        
+
         struct Arc {
             uint32_t place;
             uint32_t transition;
@@ -44,21 +44,19 @@ namespace PetriEngine {
             ArcExpression_ptr expr;
             std::vector<Colored::TimeInterval> interval;
         };
-        
+
         struct Transition {
             std::string name;
             GuardExpression_ptr guard;
             bool urgent;
             std::vector<Arc> arcs;
-            //bool inhibitor = false;
         };
-        
+
         struct Place {
             std::string name;
             ColorType* type;
             Multiset marking;
             std::vector<Colored::TimeInvariant> invariants;
-            //bool inhibitor = false;
         };
     }
 }

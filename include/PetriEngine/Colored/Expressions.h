@@ -27,7 +27,7 @@
 #include "Multiset.h"
 #include "../errorcodes.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     class ColoredPetriNetBuilder;
     
     namespace Colored {

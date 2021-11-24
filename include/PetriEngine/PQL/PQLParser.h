@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace PQL {
 
         class Condition;

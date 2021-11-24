@@ -30,7 +30,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 //}@
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored {
         std::ostream& operator<<(std::ostream& stream, const Color& color) {
             stream << color.toString();

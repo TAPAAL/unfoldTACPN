@@ -15,7 +15,7 @@
 #include <vector>
 #include "Colors.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace Colored{
         class TimeInterval
         {

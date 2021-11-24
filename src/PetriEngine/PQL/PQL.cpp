@@ -20,7 +20,7 @@
 #include "PetriEngine/PQL/Contexts.h"
 #include "PetriEngine/PQL/Expressions.h"
 
-namespace PetriEngine {
+namespace unfoldtacpn {
     namespace PQL {
 
         Expr::~Expr()= default;

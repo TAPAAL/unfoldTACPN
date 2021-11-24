@@ -15,7 +15,7 @@
 #include "PetriEngine/PQL/Expressions.h"
 #include <type_traits>
 
-namespace PetriEngine
+namespace unfoldtacpn
 {
     namespace PQL
     {
@@ -64,20 +64,10 @@ namespace PetriEngine
             {   assert(false); std::cerr << "No accept for AUCondition" << std::endl; exit(0);};
 
             // shallow elements, neither of these should exist in a compiled expression
-            virtual void _accept(const UnfoldedFireableCondition* element)
-            {   assert(false); std::cerr << "No accept for UnfoldedFireableCondition" << std::endl; exit(0);};
-            virtual void _accept(const FireableCondition* element)
-            {   assert(false); std::cerr << "No accept for FireableCondition" << std::endl; exit(0);};
             virtual void _accept(const UpperBoundsCondition* element)
             {   assert(false); std::cerr << "No accept for UpperBoundsCondition" << std::endl; exit(0);};
-            virtual void _accept(const LivenessCondition* element)
-            {   assert(false); std::cerr << "No accept for LivenessCondition" << std::endl; exit(0);};
             virtual void _accept(const KSafeCondition* element)
             {   assert(false); std::cerr << "No accept for KSafeCondition" << std::endl; exit(0);};
-            virtual void _accept(const QuasiLivenessCondition* element)
-            {   assert(false); std::cerr << "No accept for QuasiLivenessCondition" << std::endl; exit(0);};
-            virtual void _accept(const StableMarkingCondition* element)
-            {   assert(false); std::cerr << "No accept for StableMarkingCondition" << std::endl; exit(0);};
             virtual void _accept(const BooleanCondition* element)
             {   assert(false); std::cerr << "No accept for BooleanCondition" << std::endl; exit(0);};
 
