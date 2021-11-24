@@ -207,7 +207,7 @@ namespace unfoldtacpn {
             std::string name = place.name + "Sub" + std::to_string(i);
             const Colored::Color* color = &place.type->operator[](i);
             Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
-            builder.addPlace(name, place.marking[color], invariant, x, y);
+            builder.addPlace(name, place.marking[color], invariant.isBoundStrict(), invariant.getBound(), x, y);
             _invariantStrings[name] = invariant.toString();
 
             _ptplacenames[place.name][color->getId()] = std::move(name);
@@ -219,7 +219,7 @@ namespace unfoldtacpn {
         double y = yBuffer + std::get<1>(placePos);
         Colored::Color color;
         std::string placeName = place.name + "Sum";
-        builder.addPlace(placeName, place.marking.size(), Colored::TimeInvariant(color), x, y);
+        builder.addPlace(placeName, place.marking.size(), false, std::numeric_limits<int>::max(), x, y);
         _invariantStrings[placeName] = Colored::TimeInvariant(color).toString();
         _shadowPlacesNames[place.name] = std::move(placeName);
     }
@@ -233,7 +233,7 @@ namespace unfoldtacpn {
             } else {
                 bool matches = true;
                 Colored::Color color = element.getColor();
-                std::vector<const Colored::Color*> colors = color.getTuple();
+                const auto& colors = color.getTuple();
                 if (colors.size() == color.getTuple().size()) {
                     for(uint32_t i = 0;i < colors.size(); i++) {
                         if (colors[i]->getId() != color.getTuple()[i]->getId())
@@ -275,7 +275,7 @@ namespace unfoldtacpn {
             if (_transitions[inhibitorArcs[i].transition].name.compare(oldname) == 0) {
                 Colored::Arc inhibArc = inhibitorArcs[i];
                 std::string place = _shadowPlacesNames[_places[inhibArc.place].name];
-                builder.addInputArc(place, newname, inhibArc.inhibitor, inhibArc.weight);
+                builder.addInputArc(place, newname, inhibArc.inhibitor, inhibArc.weight, false, false, 0, 0);
             }
         }
     }
@@ -291,21 +291,53 @@ namespace unfoldtacpn {
             }
             shadowWeight += color.second;
             const std::string& pName = _ptplacenames[_places[arc.place].name][color.first->getId()];
-            if (!arc.input) {
-                builder.addOutputArc(tName, pName, color.second, arc.transport, arc.transportID);
-            } else {
-                Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
-                builder.addInputArc(pName, tName, arc.inhibitor, arc.transport, color.second, timeInterval, arc.transportID);
+            if(!arc.transport)
+            {
+                if (!arc.input) {
+                    builder.addOutputArc(tName, pName, color.second);
+                } else {
+                    Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
+                    builder.addInputArc(pName, tName, arc.inhibitor, color.second,
+                        timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                        timeInterval.getLowerBound(), timeInterval.getUpperBound());
+                }
+            }
+            else
+            {
+                if (!arc.input) {
+                    builder.addTransportOutArc(tName, pName, arc.transportID);
+                } else {
+                    Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
+                    builder.addTransportInArc(pName, tName, arc.transportID, color.second,
+                        timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                        timeInterval.getLowerBound(), timeInterval.getUpperBound());
+                }
             }
         }
         if(shadowWeight > 0) {
             std::string pName = _shadowPlacesNames[_places[arc.place].name];
-            if (!arc.input) {
-                builder.addOutputArc(tName, pName, shadowWeight, false, arc.transportID);
-            } else {
-                Colored::Color color;
-                Colored::TimeInterval timeInterval(color);
-                builder.addInputArc(pName, tName, arc.inhibitor, false, shadowWeight, timeInterval, arc.transportID);
+            if(!arc.transport)
+            {
+                if (!arc.input) {
+                    builder.addOutputArc(tName, pName, shadowWeight);
+                } else {
+                    Colored::Color color;
+                    Colored::TimeInterval timeInterval(color);
+                    builder.addInputArc(pName, tName, arc.inhibitor, shadowWeight,
+                    timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                    timeInterval.getLowerBound(), timeInterval.getUpperBound());
+                }
+            }
+            else
+            {
+                if (!arc.input) {
+                    builder.addTransportOutArc(tName, pName, arc.transportID);
+                } else {
+                    Colored::Color color;
+                    Colored::TimeInterval timeInterval(color);
+                    builder.addTransportInArc(pName, tName, arc.transportID, shadowWeight, timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                        timeInterval.getLowerBound(), timeInterval.getUpperBound());
+                }
             }
         }
     }
