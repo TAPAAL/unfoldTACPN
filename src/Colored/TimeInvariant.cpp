@@ -2,8 +2,8 @@
 // Created by niels on 3/20/19.
 //
 
-#include "PetriEngine/Colored/TimeInvariant.h"
-#include "PetriEngine/Colored/TimeInterval.h"
+#include "Colored/TimeInvariant.h"
+#include "Colored/TimeInterval.h"
 
 namespace unfoldtacpn {
     namespace Colored {

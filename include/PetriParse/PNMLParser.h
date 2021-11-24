@@ -26,12 +26,12 @@
 #include <fstream>
 #include <rapidxml.hpp>
 
-#include "PetriEngine/TAPNBuilderInterface.h"
-#include "PetriEngine/PQL/PQL.h"
-#include "PetriEngine/Colored/ColoredNetStructures.h"
-#include "PetriEngine/Colored/Expressions.h"
-#include "PetriEngine/Colored/Colors.h"
-#include "PetriEngine/Colored/ColoredPetriNetBuilder.h"
+#include "TAPNBuilderInterface.h"
+#include "PQL/PQL.h"
+#include "Colored/ColoredNetStructures.h"
+#include "Colored/Expressions.h"
+#include "Colored/Colors.h"
+#include "Colored/ColoredPetriNetBuilder.h"
 
 
 class PNMLParser {

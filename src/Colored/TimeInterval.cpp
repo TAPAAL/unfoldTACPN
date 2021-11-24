@@ -1,9 +1,10 @@
 //
 // Created by niels on 3/20/19.
 //
-#include "PetriEngine/Colored/TimeInterval.h"
-#include "PetriEngine/Colored/Colors.h"
-#include "PetriEngine/Colored/TimeInvariant.h"
+#include "Colored/TimeInterval.h"
+#include "Colored/Colors.h"
+#include "Colored/TimeInvariant.h"
+
 #include <vector>
 
 namespace unfoldtacpn {

@@ -8,7 +8,7 @@
 #include <chrono>
 #include <tuple>
 
-#include "PetriEngine/Colored/ColoredPetriNetBuilder.h"
+#include "Colored/ColoredPetriNetBuilder.h"
 #include "PetriParse/PNMLParser.h"
 
 namespace unfoldtacpn {

@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   Multiset.cpp
  * Author: andreas
- * 
+ *
  * Created on February 20, 2018, 10:37 AM
  */
 
@@ -16,7 +16,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "PetriEngine/Colored/Multiset.h"
+#include "Colored/Multiset.h"
 
 namespace unfoldtacpn {
     namespace Colored {

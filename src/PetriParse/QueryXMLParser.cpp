@@ -17,7 +17,7 @@
  */
 
 #include "PetriParse/QueryXMLParser.h"
-#include "PetriEngine/PQL/Expressions.h"
+#include "PQL/Expressions.h"
 
 #include <string>
 #include <cstdio>
@@ -166,25 +166,6 @@ Condition_ptr QueryXMLParser::parseFormula(rapidxml::xml_node<>*  element) {
         }
         if(bound == nullptr) fatal_error(childName);
         return std::make_shared<KSafeCondition>(bound);
-    }
-    else if (childName == "place-bound") {
-        std::vector<std::string> places;
-        for (auto it = child->first_node(); it ; it = it->next_sibling()) {
-            if (strcmp(it->name(), "place") != 0)
-            {
-                assert(false);
-                return nullptr;
-            }
-            auto place = parsePlace(it);
-            if (place.empty())
-            {
-                assert(false);
-                return nullptr; // invalid place name
-            }
-            places.push_back(place);
-        }
-        auto bnds = std::make_shared<UpperBoundsCondition>(places);
-        return std::make_shared<EFCondition>(bnds);
     } else if ((cond = parseBooleanFormula(child)) != nullptr) {
         return cond;
     } else {
@@ -497,7 +478,7 @@ Expr_ptr QueryXMLParser::parseIntegerExpression(rapidxml::xml_node<>*  element) 
         }
         if (ids.size() == 1) return ids[0];
 
-        return std::make_shared<PlusExpr>(std::move(ids), true);
+        return std::make_shared<PlusExpr>(std::move(ids));
     } else if (elementName == "integer-sum" || elementName == "integer-product") {
         auto children = element->first_node();
         bool isMult = false;

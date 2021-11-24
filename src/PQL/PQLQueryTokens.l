@@ -1,7 +1,7 @@
 %{
 #include <string>
 #include <memory>
-#include "PetriEngine/PQL/PQL.h"
+#include "PQL/PQL.h"
 #include "PQLQueryParser.parser.hpp"
 
 #define SAVE_TOKEN pqlqlval.string = new std::string(pqlqtext, pqlqleng)

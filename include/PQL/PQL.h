@@ -18,6 +18,8 @@
  */
 #ifndef PQL_H
 #define PQL_H
+
+
 #include <string>
 #include <list>
 #include <vector>
@@ -25,13 +27,10 @@
 #include <unordered_map>
 #include <memory>
 
-#include "../PetriNet.h"
-
 namespace unfoldtacpn {
     namespace PQL {
         class Visitor;
-        class AnalysisContext;
-        class TAPAALConditionExportContext;
+        class NamingContext;
 
         /** Representation of a PQL error */
         class ExprError {
@@ -69,7 +68,7 @@ namespace unfoldtacpn {
         class Expr {
         public:
             virtual ~Expr();
-            virtual void analyze(AnalysisContext& context) = 0;
+            virtual void analyze(NamingContext& context) = 0;
             virtual void visit(Visitor& visitor) const = 0;
             virtual void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const = 0;
         };
@@ -79,7 +78,7 @@ namespace unfoldtacpn {
         public:
             /** Virtual destructor */
             virtual ~Condition();
-            virtual void analyze(AnalysisContext& context) = 0;
+            virtual void analyze(NamingContext& context) = 0;
             virtual void visit(Visitor& visitor) const = 0;
             virtual void toXML(std::ostream&, uint32_t tabs) const = 0;
         protected:

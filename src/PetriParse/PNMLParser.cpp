@@ -28,7 +28,7 @@
 
 
 #include "PetriParse/PNMLParser.h"
-#include "PetriEngine/errorcodes.h"
+#include "errorcodes.h"
 
 using namespace unfoldtacpn;
 using namespace std;

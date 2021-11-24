@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "PetriEngine/PQL/PQL.h"
-#include "PetriEngine/PQL/Contexts.h"
-#include "PetriEngine/PQL/Expressions.h"
+#include "PQL/PQL.h"
+#include "PQL/Contexts.h"
+#include "PQL/Expressions.h"
 
 namespace unfoldtacpn {
     namespace PQL {

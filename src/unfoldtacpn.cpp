@@ -46,15 +46,14 @@
 #include <functional>
 
 #include "unfoldtacpn.h"
-#include "PetriEngine/PQL/PQLParser.h"
-#include "PetriEngine/PQL/Contexts.h"
+#include "PQL/PQLParser.h"
+#include "PQL/Contexts.h"
 #include "PetriParse/QueryXMLParser.h"
 #include "PetriParse/PNMLParser.h"
-#include "PetriEngine/PetriNetBuilder.h"
-#include "PetriEngine/PQL/PQL.h"
-#include "PetriEngine/errorcodes.h"
-#include "PetriEngine/PQL/Expressions.h"
-#include "PetriEngine/Colored/ColoredPetriNetBuilder.h"
+#include "PQL/PQL.h"
+#include "errorcodes.h"
+#include "PQL/Expressions.h"
+#include "Colored/ColoredPetriNetBuilder.h"
 
 using namespace std;
 using namespace unfoldtacpn;
@@ -62,23 +61,13 @@ using namespace unfoldtacpn::PQL;
 
 namespace unfoldtacpn {
 
-    ReturnValue contextAnalysis(ColoredPetriNetBuilder& cpnBuilder, PetriNetBuilder& builder, std::vector<std::shared_ptr<Condition> >& queries) {
+    void contextAnalysis(ColoredPetriNetBuilder& cpnBuilder, std::vector<std::shared_ptr<Condition> >& queries) {
         //Context analysis
-        ColoredAnalysisContext context(builder.getPlaceNames(),
-            builder.getTransitionNames(), cpnBuilder.getUnfoldedPlaceNames(),
+        NamingContext context(cpnBuilder.getUnfoldedPlaceNames(),
             cpnBuilder.getUnfoldedTransitionNames());
         for (auto& q : queries) {
             q->analyze(context);
-
-            //Print errors if any
-            if (context.errors().size() > 0) {
-                for (size_t i = 0; i < context.errors().size(); i++) {
-                    fprintf(stderr, "Query Context Analysis Error: %s\n", context.errors()[i].toString().c_str());
-                }
-                return ErrorCode;
-            }
         }
-        return ContinueCode;
     }
 
     auto readStringQueries(std::vector<std::string>& qstrings, ifstream& qfile) {

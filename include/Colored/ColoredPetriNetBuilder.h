@@ -13,7 +13,6 @@
 
 #include "ColoredNetStructures.h"
 #include "../TAPNBuilderInterface.h"
-#include "../PetriNetBuilder.h"
 
 namespace unfoldtacpn {
     class ColoredPetriNetBuilder {

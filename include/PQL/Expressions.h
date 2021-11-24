@@ -43,7 +43,7 @@ namespace unfoldtacpn {
 
             NaryExpr(std::vector<Expr_ptr>&& exprs) : _exprs(std::move(exprs)) {
             }
-            virtual void analyze(AnalysisContext& context) override;
+            virtual void analyze(NamingContext& context) override;
         protected:
             std::vector<Expr_ptr> _exprs;
         };
@@ -55,23 +55,18 @@ namespace unfoldtacpn {
         {
         public:
             friend CompareCondition;
-            virtual void analyze(AnalysisContext& context) override;
-            auto constant() const { return _constant; }
-            auto& places() const { return _ids; }
+            virtual void analyze(NamingContext& context) override;
         protected:
-            CommutativeExpr(int constant): _constant(constant) {};
+            CommutativeExpr() {};
             void init(std::vector<Expr_ptr>&& exprs);
-            int32_t _constant;
-            std::vector<std::pair<uint32_t,std::string>> _ids;
         };
 
         /** Binary plus expression */
         class PlusExpr : public CommutativeExpr {
         public:
 
-            PlusExpr(std::vector<Expr_ptr>&& exprs, bool tk = false);
+            PlusExpr(std::vector<Expr_ptr>&& exprs);
             void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
-            bool tk = false;
             void visit(Visitor& visitor) const override;
         protected:
         };
@@ -104,7 +99,7 @@ namespace unfoldtacpn {
             MinusExpr(const Expr_ptr expr) {
                 _expr = expr;
             }
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
             void visit(Visitor& visitor) const override;
 
@@ -119,7 +114,7 @@ namespace unfoldtacpn {
 
             LiteralExpr(int value) : _value(value) {
             }
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
             void visit(Visitor& visitor) const override;
             int value() const {
@@ -134,7 +129,7 @@ namespace unfoldtacpn {
         class IdentifierExpr : public Expr {
         public:
             IdentifierExpr(const std::string& name) : _name(name) {}
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             void toXML(std::ostream& os, uint32_t tabs, bool tokencount = false) const override {
                 _compiled->toXML(os, tabs, tokencount);
             }
@@ -148,19 +143,15 @@ namespace unfoldtacpn {
         class UnfoldedIdentifierExpr : public Expr {
         public:
             UnfoldedIdentifierExpr(const std::string& name, int offest)
-            : _offsetInMarking(offest), _name(name) {
+            : _name(name) {
             }
 
             UnfoldedIdentifierExpr(const std::string& name) : UnfoldedIdentifierExpr(name, -1) {
             }
 
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
 
-            /** Offset in marking or valuation */
-            int offset() const {
-                return _offsetInMarking;
-            }
             const std::string& name()
             {
                 return _name;
@@ -168,8 +159,6 @@ namespace unfoldtacpn {
 
             void visit(Visitor& visitor) const override;
         private:
-            /** Offset in marking, -1 if undefined, should be resolved during analysis */
-            int _offsetInMarking;
             /** Identifier text */
             std::string _name;
         };
@@ -178,13 +167,13 @@ namespace unfoldtacpn {
         {
             void toXML(std::ostream& out, uint32_t tabs) const override
             { _compiled->toXML(out, tabs); }
-            void analyze(AnalysisContext& context) override
+            void analyze(NamingContext& context) override
             {
                 if (_compiled) _compiled->analyze(context);
                 else _analyze(context);
             }
         protected:
-            virtual void _analyze(AnalysisContext& context) = 0;
+            virtual void _analyze(NamingContext& context) = 0;
             Condition_ptr _compiled = nullptr;
         };
 
@@ -195,7 +184,7 @@ namespace unfoldtacpn {
             NotCondition(const Condition_ptr cond) {
                 _cond = cond;
             }
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             void visit(Visitor&) const override;
             void toXML(std::ostream&, uint32_t tabs) const override;
             const Condition_ptr& operator[](size_t i) const { return _cond; };
@@ -217,7 +206,7 @@ namespace unfoldtacpn {
             SimpleQuantifierCondition(const Condition_ptr cond) {
                 _cond = cond;
             }
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             virtual const Condition_ptr& operator[] (size_t i) const override { return _cond;}
         protected:
             Condition_ptr _cond;
@@ -271,7 +260,7 @@ namespace unfoldtacpn {
                 _cond1 = cond1;
                 _cond2 = cond2;
             }
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             virtual const Condition_ptr& operator[] (size_t i) const override
             { if(i == 0) return _cond1; return _cond2;}
 
@@ -297,7 +286,7 @@ namespace unfoldtacpn {
         /******************** CONDITIONS ********************/
         class LogicalCondition : public Condition {
         public:
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             const Condition_ptr& operator[](size_t i) const
             {
                 return _conds[i];
@@ -343,7 +332,7 @@ namespace unfoldtacpn {
             CompareCondition(const Expr_ptr expr1, const Expr_ptr expr2)
             : _expr1(expr1), _expr2(expr2) {}
 
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             const Expr_ptr& operator[](uint32_t id) const
             {
                 if(id == 0) return _expr1;
@@ -415,7 +404,7 @@ namespace unfoldtacpn {
                     trivial = 2;
                 }
             }
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             void visit(Visitor&) const override;
             static Condition_ptr TRUE_CONSTANT;
             static Condition_ptr FALSE_CONSTANT;
@@ -431,7 +420,7 @@ namespace unfoldtacpn {
 
             DeadlockCondition() {
             }
-            void analyze(AnalysisContext& context) override;
+            void analyze(NamingContext& context) override;
             void visit(Visitor&) const override;
             void toXML(std::ostream&, uint32_t tabs) const override;
             static Condition_ptr DEADLOCK;
@@ -444,61 +433,10 @@ namespace unfoldtacpn {
             {}
 
         protected:
-            void _analyze(AnalysisContext& context) override;
+            void _analyze(NamingContext& context) override;
             void visit(Visitor&) const override;
         private:
             Expr_ptr _bound = nullptr;
-        };
-
-        class UpperBoundsCondition : public ShallowCondition
-        {
-        public:
-
-            UpperBoundsCondition(const std::vector<std::string>& places) : _places(places)
-            {}
-        protected:
-            void _analyze(AnalysisContext& context) override;
-            void visit(Visitor&) const override;
-        private:
-            std::vector<std::string> _places;
-        };
-
-        class UnfoldedUpperBoundsCondition : public Condition
-        {
-        public:
-            struct place_t {
-                std::string _name;
-                uint32_t _place = 0;
-                double _max = std::numeric_limits<double>::infinity();
-                bool _maxed_out = false;
-                place_t(const std::string& name)
-                {
-                    _name = name;
-                }
-                place_t(const place_t& other, double max)
-                {
-                    _name = other._name;
-                    _place = other._place;
-                    _max = max;
-                }
-                bool operator<(const place_t& other) const{
-                    return _place < other._place;
-                }
-            };
-
-            UnfoldedUpperBoundsCondition(const std::vector<std::string>& places)
-            {
-                for(auto& s : places) _places.push_back(s);
-            }
-            UnfoldedUpperBoundsCondition(const std::vector<place_t>& places)
-                    : _places(places) {
-            };
-            void visit(Visitor&) const override;
-            void analyze(AnalysisContext& context) override;
-            void toXML(std::ostream&, uint32_t tabs) const override;
-            const std::vector<place_t>& places() const { return _places; }
-        private:
-            std::vector<place_t> _places;
         };
 
     }

@@ -3,7 +3,7 @@
 #define QUERYPARSER_H
 
 
-#include "PetriEngine/PQL/PQL.h"
+#include "PQL/PQL.h"
 using namespace unfoldtacpn::PQL;
 
 struct QueryItem {

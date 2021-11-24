@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <memory>
 
-#include "PetriEngine/PQL/PQL.h"
-#include "PetriEngine/PQL/Expressions.h"
+#include "PQL/PQL.h"
+#include "PQL/Expressions.h"
 
 using namespace unfoldtacpn::PQL;
 

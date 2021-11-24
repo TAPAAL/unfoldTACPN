@@ -12,8 +12,10 @@
 #ifndef VISITOR_H
 #define VISITOR_H
 
-#include "PetriEngine/PQL/Expressions.h"
+#include "PQL/Expressions.h"
+
 #include <type_traits>
+#include <cassert>
 
 namespace unfoldtacpn
 {
@@ -42,7 +44,6 @@ namespace unfoldtacpn
             virtual void _accept(const NotEqualCondition* element) = 0;
 
             virtual void _accept(const DeadlockCondition* element) = 0;
-            virtual void _accept(const UnfoldedUpperBoundsCondition* element) = 0;
 
             // Quantifiers, most uses of the visitor will not use the quantifiers - so we give a default implementation.
             // default behaviour is error
@@ -64,8 +65,6 @@ namespace unfoldtacpn
             {   assert(false); std::cerr << "No accept for AUCondition" << std::endl; exit(0);};
 
             // shallow elements, neither of these should exist in a compiled expression
-            virtual void _accept(const UpperBoundsCondition* element)
-            {   assert(false); std::cerr << "No accept for UpperBoundsCondition" << std::endl; exit(0);};
             virtual void _accept(const KSafeCondition* element)
             {   assert(false); std::cerr << "No accept for KSafeCondition" << std::endl; exit(0);};
             virtual void _accept(const BooleanCondition* element)
