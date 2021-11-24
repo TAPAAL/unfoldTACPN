@@ -463,14 +463,6 @@ void PNMLParser::parseElement(rapidxml::xml_node<>* element) {
         } else if (strcmp(it->name(), "variable") == 0) {
             std::cerr << "variable not supported" << std::endl;
             exit(ErrorCode);
-        } else if (strcmp(it->name(),"queries") == 0) {
-            parseQueries(it);
-        } else if (strcmp(it->name(), "k-bound") == 0) {
-            //std::cerr << "k-bound should be given as command line option -k" << std::endl;
-            //exit(ErrorCode);
-        } else if (strcmp(it->name(),"query") == 0) {
-            //std::cerr << "query tag not supported, please use PQL or XML-style queries instead" << std::endl;
-            //exit(ErrorCode);
         }
         else
         {
@@ -512,19 +504,6 @@ std::pair<string, std::vector<const Colored::Color*>> PNMLParser::parseTimeConst
         }
     }
     return std::make_pair(inscription, colors);
-}
-
-void PNMLParser::parseQueries(rapidxml::xml_node<>* element) {
-    string query;
-
-    for (auto it = element->first_node(); it; it = it->next_sibling()) {
-        string name(element->first_attribute("name")->value());
-        parseValue(element, query);
-        Query q;
-        q.name = name;
-        q.text = query;
-        this->queries.push_back(q);
-    }
 }
 
 void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {

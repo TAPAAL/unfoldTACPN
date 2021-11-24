@@ -80,10 +80,6 @@ public:
     void parse(std::istream& xml,
             unfoldtacpn::ColoredPetriNetBuilder* builder);
 
-    std::vector<Query> getQueries() {
-        return queries;
-    }
-
 private:
     inline bool stringToBool(std::string b)
     {
@@ -111,7 +107,6 @@ private:
     void parseValue(rapidxml::xml_node<>* element, std::string& text);
     uint32_t parseNumberConstant(rapidxml::xml_node<>* element);
     void parsePosition(rapidxml::xml_node<>* element, double& x, double& y);
-    void parseQueries(rapidxml::xml_node<>* element);
     const unfoldtacpn::Colored::Color* findColor(const char* name) const;
     bool checkIsTimed(rapidxml::xml_node<> *netType);
     unfoldtacpn::ColoredPetriNetBuilder* builder;
@@ -120,7 +115,6 @@ private:
     TransitionList transitions;
     ColorTypeMap colorTypes;
     VariableMap variables;
-    std::vector<Query> queries;
     std::unordered_map<std::string, uint32_t> constantValues;
 };
 

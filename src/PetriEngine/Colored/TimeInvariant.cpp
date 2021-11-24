@@ -48,7 +48,6 @@ namespace unfoldtacpn {
             if (colors.size() == 1 ) {
                 return Color(colors.front()->getColorType(), colors.front()->getId(), colors.front()->getColorName().c_str());
             } else {
-                std::cerr << colors.size()  << " colors size";
                 return Color(colors.front()->getColorType(), colors.front()->getId(), colors);
             }
         }
