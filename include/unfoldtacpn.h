@@ -1,24 +1,16 @@
-#include <iostream>
 #ifndef LIBUNFOLDTACPN_H
 #define LIBUNFOLDTACPN_H
 
-#include <ctype.h>
-#include <stddef.h>
-#include <limits>
+#include "PQL/PQL.h"
+
+#include <vector>
 #include <set>
-#include <string.h>
-#include <cctype>
-#include <iostream>
-
-
 
 namespace unfoldtacpn {
     class ColoredPetriNetBuilder;
-    class PetriNetBuilder;
-    namespace PQL {
-        class Expr;
-        class Condition;
-    }
+    std::vector<PQL::Condition_ptr> readStringQueries(ColoredPetriNetBuilder& builder, std::ifstream& qfile);
+    std::vector<PQL::Condition_ptr> readXMLQueries(ColoredPetriNetBuilder& builder,
+            std::ifstream& qfile, const std::set<size_t>& to_parse);
 }
 
 #endif

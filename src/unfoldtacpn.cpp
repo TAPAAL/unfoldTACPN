@@ -70,36 +70,18 @@ namespace unfoldtacpn {
         }
     }
 
-    auto readStringQueries(std::vector<std::string>& qstrings, ifstream& qfile) {
-        std::vector<Condition_ptr > conditions;
-        string querystring; // excluding EF and AG
-
-        //Read everything
+    std::vector<Condition_ptr> readStringQueries(ColoredPetriNetBuilder& builder, ifstream& qfile) {
         stringstream buffer;
         buffer << qfile.rdbuf();
-        string querystr = buffer.str(); // including EF and AG
-        //Parse XML the queries and querystr let be the index of xmlquery
-
-        qstrings.push_back(querystring);
-        //Validate query type
-        if (querystr.substr(0, 2) != "EF" && querystr.substr(0, 2) != "AG") {
-            fprintf(stderr, "Error: Query type \"%s\" not supported, only (EF and AG is supported)\n", querystr.substr(0, 2).c_str());
-            return conditions;
-        }
-        //Check if is invariant
-        bool isInvariant = querystr.substr(0, 2) == "AG";
-
-        //Wrap in not if isInvariant
-        querystring = querystr.substr(2);
-        std::vector<std::string> tmp;
-        conditions.emplace_back(ParseQuery(querystring, tmp));
-        if (isInvariant) conditions.back() = std::make_shared<AGCondition>(conditions.back());
-        else conditions.back() = std::make_shared<EFCondition>(conditions.back());
-        return conditions;
+        string querystring = buffer.str(); // including EF and AG
+        std::vector<Condition_ptr> r;
+        r.emplace_back(parseQuery(querystring));
+        contextAnalysis(builder, r);
+        return r;
     }
 
-    std::vector<Condition_ptr > readXMLQueries(ifstream& qfile, const std::set<size_t>& to_parse) {
-        std::vector<Condition_ptr > conditions;
+    std::vector<Condition_ptr> readXMLQueries(ColoredPetriNetBuilder& builder, ifstream& qfile, const std::set<size_t>& to_parse) {
+        std::vector<Condition_ptr> conditions;
 
         QueryXMLParser parser;
         if (!parser.parse(qfile, to_parse)) {
@@ -128,8 +110,7 @@ namespace unfoldtacpn {
             }
 
         }
+        contextAnalysis(builder, conditions);
         return conditions;
     }
-
-
 }

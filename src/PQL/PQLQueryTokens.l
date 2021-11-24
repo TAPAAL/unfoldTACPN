@@ -54,11 +54,15 @@ letter        [a-zA-Z_]
 "-"							{return TOKEN(MINUS);}
 "*"							{return TOKEN(MULTIPLY);}
 "="							{return TOKEN(EQUAL);}
+"AG"						{return TOKEN(AG);}
+"EG"						{return TOKEN(EG);}
+"AF"						{return TOKEN(AF);}
+"EF"						{return TOKEN(EF);}
 .							{printf("Unknown token %s!\n", pqlqtext); yyterminate();}
 
 %%
 namespace unfoldtacpn{ namespace PQL {
-std::shared_ptr<Condition> ParseQuery(const std::string& queryString, std::vector<std::string>& placenameforbound) {
+std::shared_ptr<Condition> parseQuery(const std::string& queryString) {
 	//Load up input buffer in Flex
 	YY_BUFFER_STATE buf = pqlq_scan_string(queryString.c_str());
 

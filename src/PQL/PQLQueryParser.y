@@ -30,6 +30,7 @@ void pqlqerror(const char *s) {printf("ERROR: %s\n", s);}
 %token <token> AND OR NOT
 %token <token> EQUAL NEQUAL LESS LESSEQUAL GREATER GREATEREQUAL
 %token <token> PLUS MINUS MULTIPLY
+%token <token> EF AG AF EG
 
 /* Terminal associativity */
 %left AND OR
@@ -45,7 +46,10 @@ void pqlqerror(const char *s) {printf("ERROR: %s\n", s);}
 
 %%
 
-query	: logic						{ query = Condition_ptr($1); }
+query	: EF logic					{ query = std::make_shared<EFCondition>(Condition_ptr($2)); }
+        | AG logic                  { query = std::make_shared<AGCondition>(Condition_ptr($2)); }
+        | EG logic                  { query = std::make_shared<EGCondition>(Condition_ptr($2)); }
+        | AF logic                  { query = std::make_shared<AFCondition>(Condition_ptr($2)); }
 		| error						{ yyerrok; }
 		;
 
