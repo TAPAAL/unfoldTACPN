@@ -75,6 +75,25 @@ namespace unfoldtacpn {
             std::cout << "Place '" << place << "' not found." << std::endl;
             std::exit(ErrorCode);
         }
+
+        if(weight <= 0)
+        {
+            std::cout << "Arc between " << source << " and " << target << " is 0" << std::endl;
+            std::exit(ErrorCode);
+        }
+
+        if(inhibitor && &place != &source)
+        {
+            std::cout << "Source of inhibitor must be a place, but is " << source << std::endl;
+            std::exit(ErrorCode);
+        }
+
+        if(inhibitor && intervals.size() != 0)
+        {
+            std::cout << "Source inhibitors cannot have guards, between " << source << " and " << target << std::endl;
+            std::exit(ErrorCode);
+        }
+
         uint32_t p = _placenames[place];
         uint32_t t = _transitionnames[transition];
 
@@ -92,9 +111,9 @@ namespace unfoldtacpn {
         arc.interval = intervals;
         arc.inhibitor = inhibitor;
         if(inhibitor){
-            _inhibitorArcs.push_back(std::move(arc));
+            _inhibitorArcs.emplace_back(std::move(arc));
         } else {
-            _transitions[t].arcs.push_back(std::move(arc));
+            _transitions[t].arcs.emplace_back(std::move(arc));
         }
     }
 
@@ -130,6 +149,7 @@ namespace unfoldtacpn {
         transportArc.expr = expr;
         transportArc.interval = interval;
         transportArc.weight = weight;
+        _transitions[t].transport.emplace_back(std::move(transportArc));
     }
 
     void ColoredPetriNetBuilder::addColorType(const std::string& id, Colored::ColorType* type) {
@@ -220,6 +240,10 @@ namespace unfoldtacpn {
             for (auto& arc : transition.arcs) {
                 unfoldArc(builder, arc, b, name);
             }
+            for (auto& transport : transition.transport)
+            {
+                unfoldTransport(builder, transport, b, name);
+            }
             unfoldInhibitorArc(builder, transition.name, name);
             buffer += 250;
         }
@@ -233,6 +257,10 @@ namespace unfoldtacpn {
                 builder.addInputArc(place, newname, inhibArc.inhibitor, inhibArc.weight, false, false, 0, 0);
             }
         }
+    }
+
+    void ColoredPetriNetBuilder::unfoldTransport(TAPNBuilderInterface& builder, Colored::TransportArc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {
+
     }
 
     void ColoredPetriNetBuilder::unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {

@@ -105,14 +105,6 @@ void PNMLParser::parseDeclarations(rapidxml::xml_node<>* element) {
     }
 }
 
-bool isInitialBinding(std::vector<const unfoldtacpn::Colored::Color*>& binding) {
-    for (auto color : binding) {
-        if (color->getId() != 0)
-            return false;
-    }
-    return true;
-}
-
 void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
     auto type = element->first_node();
     auto ct = strcmp(type->name(), "productsort") == 0 ?

@@ -80,12 +80,9 @@ namespace unfoldtacpn {
             return _pttransitionnames;
         }
 
-        std::map<std::string, std::string> getInvariants() {return _invariantStrings;}
-
         void unfold(TAPNBuilderInterface& builder);
         void clear() { _shadowPlacesNames.clear(); _pttransitionnames.clear(); _ptplacenames.clear(); }
     private:
-        std::map<std::string, std::string> _invariantStrings;
         std::unordered_map<std::string,uint32_t> _placenames;
         std::unordered_map<std::string,uint32_t> _transitionnames;
         PTPlaceMap _ptplacenames;
@@ -96,30 +93,18 @@ namespace unfoldtacpn {
 
         std::vector<Colored::Transition> _transitions;
         std::vector<Colored::Place> _places;
-        std::vector<Colored::Arc> _arcs;
         std::vector<Colored::Arc> _inhibitorArcs;
         ColorTypeMap _colors;
         double _time;
 
         std::string arcToString(Colored::Arc& arc) const ;
 
-        void addArc(const std::string& place,
-                const std::string& transition,
-                const Colored::ArcExpression_ptr& expr,
-                bool input, bool inhibitor, int weight);
-
-        void addTimedArc(const std::string& place,
-                         const std::string& transition,
-                         const Colored::ArcExpression_ptr& expr,
-                         std::vector<Colored::TimeInterval>& interval,
-                         bool inhibitor, bool transport,
-                         bool input, int weight, std::string transportID);
-
         Colored::TimeInterval getTimeIntervalForArc(std::vector< Colored::TimeInterval> timeIntervals,const Colored::Color* color);
         void unfoldPlace(TAPNBuilderInterface& builder, Colored::Place& place);
         Colored::TimeInvariant getTimeInvariantForPlace(std::vector< Colored::TimeInvariant> TimeInvariants, const Colored::Color* color);
         void unfoldTransition(TAPNBuilderInterface& builder, Colored::Transition& transition);
         void unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);
+        void unfoldTransport(TAPNBuilderInterface& builder, Colored::TransportArc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);
         void unfoldInhibitorArc(TAPNBuilderInterface& builder, std::string &oldname, std::string &newname);
     };
 

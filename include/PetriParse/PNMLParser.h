@@ -42,13 +42,8 @@ public:
     typedef std::unordered_map<std::string, unfoldtacpn::Colored::Variable*> VariableMap;
 
 public:
-
-    struct Query {
-        std::string name, text;
-    };
-
     PNMLParser() {
-        builder = NULL;
+        builder = nullptr;
     }
     void parse(std::istream& xml,
             unfoldtacpn::ColoredPetriNetBuilder* builder);

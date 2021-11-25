@@ -49,6 +49,7 @@ namespace unfoldtacpn {
             GuardExpression_ptr guard;
             bool urgent;
             std::vector<Arc> arcs;
+            std::vector<TransportArc> transport;
         };
 
         struct Place {
