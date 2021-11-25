@@ -30,16 +30,18 @@
 #include "PetriParse/PNMLParser.h"
 #include "errorcodes.h"
 
-using namespace unfoldtacpn;
 using namespace std;
 using namespace unfoldtacpn::PQL;
 
+inline bool stringToBool(std::string b)
+{
+    return b == "true" ? 1 : 0;
+}
+
+namespace unfoldtacpn {
 void PNMLParser::parse(istream& xml,
         ColoredPetriNetBuilder* builder) {
     //Clear any left overs
-    id2name.clear();
-    arcs.clear();
-    transitions.clear();
     colorTypes.clear();
 
     //Set the builder
@@ -83,80 +85,8 @@ void PNMLParser::parse(istream& xml,
     }
     parseElement(root);
 
-    //Add all the transition
-    for (auto & transition : transitions)
-        builder->addTransition(transition.id, transition.expr, transition.urgent, transition.x, transition.y);
-
-    //Add all the arcs
-    for (auto & arc : arcs) {
-        auto a = arc;
-
-        //Check that source id exists
-        if (id2name.find(arc.source) == id2name.end()) {
-            fprintf(stderr,
-                    "XML Parsing error: Arc source with id=\"%s\" wasn't found!\n",
-                    arc.source.c_str());
-            continue;
-        }
-        //Check that target id exists
-        if (id2name.find(arc.target) == id2name.end()) {
-            fprintf(stderr,
-                    "XML Parsing error: Arc target with id=\"%s\" wasn't found!\n",
-                    arc.target.c_str());
-            continue;
-        }
-        //Find source and target
-        NodeName source = id2name[arc.source];
-        NodeName target = id2name[arc.target];
-
-        if (source.isPlace && !target.isPlace) {
-            builder->addInputArc(source.id, target.id, arc.inhib, arc.transport, arc.expr, arc.interval, arc.weight, arc.transportID);
-        } else if (!source.isPlace && target.isPlace) {
-            builder->addOutputArc(source.id, target.id, arc.expr, arc.transport, arc.transportID);
-        } else {
-            fprintf(stderr,
-                    "XML Parsing error: Arc from \"%s\" to \"%s\" is neither input nor output!\n",
-                    source.id.c_str(),
-                    target.id.c_str());
-        }
-    }
-    //Unset the builder
-    this->builder = nullptr;
-
     //Cleanup
-    id2name.clear();
-    arcs.clear();
-    transitions.clear();
     colorTypes.clear();
-}
-
-bool PNMLParser::checkIsTimed(rapidxml::xml_node<> *netType){
-    rapidxml::xml_node<char> * placeElement = netType->first_node("place");
-    rapidxml::xml_node<char> * arcElement = netType->first_node("inputArc");
-    while(placeElement == nullptr && netType != nullptr){
-        netType = netType->first_node();
-        if(netType != nullptr){
-            placeElement = netType->first_node("place");
-        }
-    }
-    while(arcElement == nullptr && netType != nullptr){
-        netType = netType->first_node();
-        if(netType != nullptr){
-            arcElement = netType->first_node("inputArc");
-        }
-    }
-    if(placeElement != nullptr){
-        if(placeElement->first_attribute("invariant") == nullptr){
-            return false;
-        }
-    }
-    if(arcElement != nullptr){
-        if(arcElement->first_attribute("inscription") == nullptr){
-            return false;
-        }
-    }
-
-    return true;
 }
 
 void PNMLParser::parseDeclarations(rapidxml::xml_node<>* element) {
@@ -452,10 +382,10 @@ void PNMLParser::parseElement(rapidxml::xml_node<>* element) {
             parsePlace(it);
         } else if (strcmp(it->name(),"transition") == 0) {
             parseTransition(it);
-        } else if ( strcmp(it->name(),"arc") == 0 ||
-                    strcmp(it->name(), "inputArc") == 0 ||
-                    strcmp(it->name(), "outputArc") == 0) {
-            parseArc(it);
+        } else if ( strcmp(it->name(), "inputArc") == 0) {
+            parseArc(it, false);
+        } else if ( strcmp(it->name(), "outputArc") == 0) {
+            parseArc(it, false);
         } else if (strcmp(it->name(),"transportArc") == 0) {
             parseTransportArc(it);
         } else if (strcmp(it->name(),"inhibitorArc") == 0) {
@@ -551,7 +481,7 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
         }
     }
 
-    if(initialMarking > std::numeric_limits<int>::max())
+    if(initialMarking >= std::numeric_limits<int>::max())
     {
         std::cerr << "Number of tokens in " << id << " exceeded " << std::numeric_limits<int>::max() << std::endl;
         exit(ErrorCode);
@@ -561,44 +491,42 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
         type = Colored::DotConstant::dotConstant(nullptr)->getColorType();
     }
     builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, x, y);
-    //Map id to name
-    NodeName nn;
-    nn.id = id;
-    nn.isPlace = true;
-    id2name[id] = nn;
 }
 
-void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
-    string source = element->first_attribute("source")->value(),
-            target = element->first_attribute("target")->value();
-    int weight = 1;
-    auto type = element->first_attribute("type");
-    bool transport = false;
-    string starInterval;
-    bool normal = false;
-    std::string transportID = "0";
-    std::vector<Colored::TimeInterval> timeIntervals;
-    if((type && strcmp(type->value(), "timed") == 0) || (element && strcmp(element->name(), "timedArc") == 0))
-    {
-        //TODO:: parse standard interval
+unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml::xml_node<>* element)
+{
+    unfoldtacpn::Colored::ArcExpression_ptr expr;
+    bool first = true;
+    for (auto it = element->first_node("hlinscription"); it; it = it->next_sibling("hlinscription")) {
+        expr = parseArcExpression(it->first_node("structure"));
+        if(!first)
+        {
+            std::cerr << "ERROR: Multiple hlinscription tags in xml" << std::endl;
+            exit(ErrorCode);
+        }
+        first = false;
     }
-    else if((type && strcmp(type->value(), "inhibitor") == 0) || (element && strcmp(element->name(), "inhibitorArc") == 0) || (type && strcmp(type->value(), "tapnInhibitor") == 0))
-    {
-        inhibitor = true;
-    }
-    else if((type && strcmp(type->value(), "transport") == 0) || (element && strcmp(element->name(), "transportArc") == 0))
-    {
-        transportID = element->first_attribute("transportID")->value();
-        transport = true;
-    }
-    else if ((type && strcmp(type->value(), "normal") == 0) || (element && (strcmp(element->name(), "inputArc") == 0 || strcmp(element->name(), "outputArc") == 0))) {
-        normal = true;
-    }
+    return expr;
+}
 
+std::vector<Colored::TimeInterval> PNMLParser::parseTimeGuard(rapidxml::xml_node<>* element) {
+    auto interval = element->first_attribute("inscription")->value();
+    std::vector<const Colored::Color*> colors;
+    colors.push_back(new Colored::Color());
+    std::vector<Colored::TimeInterval> intervals;
+    intervals.push_back(Colored::TimeInterval::createFor(interval, colors, constantValues));
+    for (auto it = element->first_node("colorinterval"); it; it = it->next_sibling("colorinterval")) {
+        std::pair<string, std::vector<const Colored::Color*>> pair = parseTimeConstraint(it);
+        intervals.push_back(Colored::TimeInterval::createFor(pair.first, pair.second, constantValues));
+    }
+    return intervals;
+}
+
+int PNMLParser::parseWeight(rapidxml::xml_node<>* element) {
+    int weight = 1;
     bool first = true;
     auto weightTag = element->first_attribute("weight");
     if(weightTag != nullptr){
-        string text;
         weight = atoi(weightTag->value());
         assert(weight > 0);
     } else {
@@ -606,63 +534,28 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
             string text;
             parseValue(it, text);
             weight = atoi(text.c_str());
-            /*
-            if(std::find_if(text.begin(), text.end(), [](char c) { return !std::isdigit(c) && !std::isblank(c); }) != text.end())
-            {
-                std::cerr << "ERROR: Found non-integer-text in inscription-tag (weight) on arc from " << source << " to " << target << " with value \"" << text << "\". An integer was expected." << std::endl;
-                exit(ErrorCode);
-            }*/
             assert(weight > 0);
             if(!first)
             {
-                std::cerr << "ERROR: Multiple inscription tags in xml of a arc from " << source << " to " << target << "." << std::endl;
+                std::cerr << "ERROR: Multiple inscription tags in xml of a arc";
                 exit(ErrorCode);
             }
             first = false;
         }
     }
+    return weight;
+}
 
-    unfoldtacpn::Colored::ArcExpression_ptr expr;
-    first = true;
-    for (auto it = element->first_node("hlinscription"); it; it = it->next_sibling("hlinscription")) {
-        expr = parseArcExpression(it->first_node("structure"));
-        if(!first)
-        {
-            std::cerr << "ERROR: Multiple hlinscription tags in xml of a arc from " << source << " to " << target << "." << std::endl;
-            exit(ErrorCode);
-        }
-        first = false;
-    }
-    if(!normal && !inhibitor) {
-        starInterval = element->first_attribute("inscription")->value();
-        std::vector<const Colored::Color*> colors;
-        colors.push_back(new Colored::Color());
-        timeIntervals.push_back(Colored::TimeInterval::createFor(starInterval, colors, constantValues));
-        for (auto it = element->first_node("colorinterval"); it; it = it->next_sibling("colorinterval")) {
-            std::pair<string, std::vector<const Colored::Color*>> pair = parseTimeConstraint(it);
-            timeIntervals.push_back(Colored::TimeInterval::createFor(pair.first, pair.second, constantValues));
-        }
-    }
-
-    if (!normal && !inhibitor)
-        assert(expr != nullptr);
-    Arc arc;
-    arc.source = source;
-    arc.target = target;
-    arc.weight = weight;
-    arc.inhib = inhibitor;
-    arc.transport = transport;
-    arc.normal = normal;
-    arc.transportID = transportID;
-    if(!inhibitor)
-        arc.expr = expr;
-    if(!normal && !inhibitor)
-        arc.interval = timeIntervals;
-    assert(weight > 0);
+void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
+    string source = element->first_attribute("source")->value(),
+           target = element->first_attribute("target")->value();
+    auto weight = parseWeight(element);
+    auto expr = parseHLInscriptions(element);
+    auto intervals = parseTimeGuard(element);
 
     if(weight != 0)
     {
-        arcs.push_back(arc);
+        builder->addArc(source, target, weight, inhibitor, expr, intervals);
     }
     else
     {
@@ -673,58 +566,47 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
 
 void PNMLParser::parseTransportArc(rapidxml::xml_node<>* element){
     string source	= element->first_attribute("source")->value(),
-           transiton	= element->first_attribute("transition")->value(),
+           transition	= element->first_attribute("transition")->value(),
            target	= element->first_attribute("target")->value();
-    int weight = 1;
-
-    for(auto it = element->first_node("inscription"); it; it = it->next_sibling("inscription")){
-        string text;
-        parseValue(it, text);
-        weight = atoi(text.c_str());
+    auto weight = parseWeight(element);
+    auto expr = parseHLInscriptions(element);
+    auto intervals = parseTimeGuard(element);
+    if(weight != 0)
+    {
+        builder->addTransportArc(source, transition, target, weight, expr, intervals);
     }
-
-    Arc inArc;
-    inArc.source = source;
-    inArc.target = transiton;
-    inArc.weight = weight;
-    arcs.push_back(inArc);
-
-    Arc outArc;
-    outArc.source = transiton;
-    outArc.target = target;
-    outArc.weight = weight;
-    arcs.push_back(outArc);
+    else
+    {
+        std::cerr << "ERROR: Arc from " << source << " to " << target << " has non-sensible weight 0." << std::endl;
+        exit(ErrorCode);
+    }
 }
 
 void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
-    Transition t;
-    t.x = 0;
-    t.y = 0;
-    t.id = element->first_attribute("id")->value();
-    t.expr = nullptr;
-    t.urgent = false;
-
+    double x = 0, y = 0;
+    bool urgent = false;
+    unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
 
     auto posX = element->first_attribute("positionX");
     if (posX != nullptr){
-         t.x = atoll(posX->value());
+        x = atoll(posX->value());
     }
     auto posY = element->first_attribute("positionY");
     if ( posY != nullptr){
-        t.y = atoll(posY->value());
+        y = atoll(posY->value());
     }
-    auto urgent = element->first_attribute("urgent");
-    if (urgent != nullptr) {
-        t.urgent = stringToBool(urgent->value());
+    auto urg_el = element->first_attribute("urgent");
+    if (urg_el != nullptr) {
+        urgent = stringToBool(urg_el->value());
     }
 
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         // name element is ignored
         if (strcmp(it->name(), "graphics") == 0) {
-            parsePosition(it, t.x, t.y);
+            parsePosition(it, x, y);
         } else if (strcmp(it->name(), "condition") == 0) {
-            t.expr = parseGuardExpression(it->first_node("structure"));
+            expr = parseGuardExpression(it->first_node("structure"));
         } else if (strcmp(it->name(), "conditions") == 0) {
             std::cerr << "conditions not supported" << std::endl;
             exit(ErrorCode);
@@ -733,13 +615,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    //Add transition to list
-    transitions.push_back(t);
-    //Map id to name
-    NodeName nn;
-    nn.id = t.id;
-    nn.isPlace = false;
-    id2name[t.id] = nn;
+    builder->addTransition(element->first_attribute("id")->value(), expr, urgent, x, y);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, string& text) {
@@ -783,3 +659,4 @@ const unfoldtacpn::Colored::Color* PNMLParser::findColor(const char* name) const
     exit(ErrorCode);
 }
 
+}

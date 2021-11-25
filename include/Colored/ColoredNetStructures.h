@@ -31,10 +31,8 @@ namespace unfoldtacpn {
             ArcExpression_ptr expr;
             bool input;
             bool inhibitor = false;
-            bool transport;
             int weight;
             std::vector<Colored::TimeInterval> interval;
-            std::string transportID;
         };
 
         struct TransportArc {
@@ -42,6 +40,7 @@ namespace unfoldtacpn {
             uint32_t transition;
             uint32_t destination;
             ArcExpression_ptr expr;
+            int weight;
             std::vector<Colored::TimeInterval> interval;
         };
 

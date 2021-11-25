@@ -38,25 +38,17 @@ namespace unfoldtacpn {
                            bool urgent,
                            double x,
                            double y);
-         void addInputArc(const std::string &place,
-                const std::string &transition,
-                bool inhibitor, bool transport,
-                const Colored::ArcExpression_ptr& expr,
-                std::vector<unfoldtacpn::Colored::TimeInterval> &interval,
-                int weight,
-                std::string transportID);
+        void addArc(const std::string& source, const std::string& target,
+                    int weight, bool inhibitor, const unfoldtacpn::Colored::ArcExpression_ptr &expr,
+                                             const std::vector<unfoldtacpn::Colored::TimeInterval>& intervals);
 
-        void addOutputArc(const std::string& transition,
-                          const std::string& place,
-                          const Colored::ArcExpression_ptr& expr,
-                          bool transport,
-                          std::string transportID);
         void addColorType(const std::string& id,
                 Colored::ColorType* type);
 
         void addTransportArc(const std::string& source,
                 const std::string& transition,
                 const std::string& destination,
+                int weight,
                 const Colored::ArcExpression_ptr& expr,
                 std::vector<Colored::TimeInterval>& interval);
 
@@ -105,7 +97,7 @@ namespace unfoldtacpn {
         std::vector<Colored::Transition> _transitions;
         std::vector<Colored::Place> _places;
         std::vector<Colored::Arc> _arcs;
-        std::vector<Colored::Arc> inhibitorArcs;
+        std::vector<Colored::Arc> _inhibitorArcs;
         ColorTypeMap _colors;
         double _time;
 

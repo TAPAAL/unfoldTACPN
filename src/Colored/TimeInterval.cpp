@@ -6,22 +6,19 @@
 #include "Colored/TimeInvariant.h"
 
 #include <vector>
+#include <sstream>
 
 namespace unfoldtacpn {
     namespace Colored {
         TimeInterval TimeInterval::createFor(const std::string &interval, std::vector<const Colored::Color*> colors, std::unordered_map<std::string, uint32_t> constantValues) {
             Colored::Color color = Colored::TimeInvariant::createColor(colors);
             bool leftStrict = false;
-            std::string leftParentheses = "(";
-            std::size_t foundLeft = interval.find(leftParentheses);
-            if(foundLeft != std::string::npos){
+            if(interval.find("(") != std::string::npos){
                 leftStrict = true;
             }
 
             bool rightStrict = false;
-            std::string rightParentheses = ")";
-            std::size_t foundRight = interval.find(rightParentheses);
-            if(foundRight != std::string::npos) {
+            if(interval.find(")") != std::string::npos) {
                 rightStrict = true;
             }
 
@@ -57,21 +54,15 @@ namespace unfoldtacpn {
 
         void TimeInterval::print(std::ostream &out) const
         {
-            std::string leftParenthesis = leftStrict ? "(" : "[";
-            std::string rightParenthesis = rightStrict ? ")" : "]";
-            std::string strLowerBound = std::to_string(lowerBound);
             std::string strUpperBound = upperBound == std::numeric_limits<int>().max() ? "inf" : std::to_string(upperBound);
-
-            out << leftParenthesis << strLowerBound << "," << strUpperBound << rightParenthesis;
+            out << (leftStrict ? "(" : "[") << lowerBound << ","
+                << strUpperBound << (rightStrict ? ")" : "]");
         }
 
         std::string TimeInterval::toString() {
-            std::string leftParenthesis = leftStrict ? "(" : "[";
-            std::string rightParenthesis = rightStrict ? ")" : "]";
-            std::string strLowerBound = std::to_string(lowerBound);
-            std::string strUpperBound = upperBound == std::numeric_limits<int>().max() ? "inf" : std::to_string(upperBound);
-
-            return leftParenthesis + strLowerBound + "," + strUpperBound + rightParenthesis;
+            std::stringstream ss;
+            print(ss);
+            return ss.str();
         }
         void TimeInterval::divideBoundsBy(int divider) {
             if(lowerBound != 0 )

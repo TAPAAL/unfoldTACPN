@@ -32,38 +32,11 @@
 #include "Colored/Expressions.h"
 #include "Colored/Colors.h"
 #include "Colored/ColoredPetriNetBuilder.h"
+#include "Colored/TimeInterval.h"
 
-
+namespace unfoldtacpn {
 class PNMLParser {
-
-    struct Arc {
-        std::string source,
-        target;
-        int weight;
-        bool transport;
-        bool normal;
-        bool inhib;
-        unfoldtacpn::Colored::ArcExpression_ptr expr;
-        std::vector<unfoldtacpn::Colored::TimeInterval> interval;
-        std::string transportID;
-    };
-    typedef std::vector<Arc> ArcList;
-    typedef ArcList::iterator ArcIter;
-
-    struct Transition {
-        std::string id;
-        double x, y;
-        unfoldtacpn::Colored::GuardExpression_ptr expr;
-        bool urgent;
-    };
-    typedef std::vector<Transition> TransitionList;
-    typedef TransitionList::iterator TransitionIter;
-
-    struct NodeName {
-        std::string id;
-        bool isPlace;
-    };
-    typedef std::unordered_map<std::string, NodeName> NodeNameMap;
+public:
 
     typedef std::unordered_map<std::string, unfoldtacpn::Colored::ColorType*> ColorTypeMap;
     typedef std::unordered_map<std::string, unfoldtacpn::Colored::Variable*> VariableMap;
@@ -81,15 +54,13 @@ public:
             unfoldtacpn::ColoredPetriNetBuilder* builder);
 
 private:
-    inline bool stringToBool(std::string b)
-    {
-        return b == "true" ? 1 : 0;
-    }
+    int parseWeight(rapidxml::xml_node<>* element);
+    unfoldtacpn::Colored::ArcExpression_ptr parseHLInscriptions(rapidxml::xml_node<>* element);
+    std::vector<Colored::TimeInterval> parseTimeGuard(rapidxml::xml_node<>* element);
     void parseElement(rapidxml::xml_node<>* element);
     void parsePlace(rapidxml::xml_node<>* element);
     std::pair<std::string, std::vector<const unfoldtacpn::Colored::Color*>> parseTimeConstraint(rapidxml::xml_node<> *element);
     void parseArc(rapidxml::xml_node<>* element, bool inhibitor = false);
-    void parseInterval(rapidxml::xml_node<>* element);
     void parseTransition(rapidxml::xml_node<>* element);
     void parseDeclarations(rapidxml::xml_node<>* element);
     void parseNamedSort(rapidxml::xml_node<>* element);
@@ -108,15 +79,11 @@ private:
     uint32_t parseNumberConstant(rapidxml::xml_node<>* element);
     void parsePosition(rapidxml::xml_node<>* element, double& x, double& y);
     const unfoldtacpn::Colored::Color* findColor(const char* name) const;
-    bool checkIsTimed(rapidxml::xml_node<> *netType);
     unfoldtacpn::ColoredPetriNetBuilder* builder;
-    NodeNameMap id2name;
-    ArcList arcs;
-    TransitionList transitions;
     ColorTypeMap colorTypes;
     VariableMap variables;
     std::unordered_map<std::string, uint32_t> constantValues;
 };
-
+}
 #endif // PNMLPARSER_H
 

@@ -59,55 +59,12 @@ namespace unfoldtacpn {
         }
     }
 
-    void ColoredPetriNetBuilder::addInputArc(const std::string &place,
-                                             const std::string &transition,
-                                             bool inhibitor, bool transport,
-                                             const Colored::ArcExpression_ptr& expr,
-                                             std::vector<unfoldtacpn::Colored::TimeInterval> &interval, int weight, std::string transportID) {
-        addTimedArc(place,transition,expr,interval,inhibitor, transport, true, weight, transportID);
+    void ColoredPetriNetBuilder::addArc(const std::string& source, const std::string& target,
+                    int weight, bool inhibitor, const unfoldtacpn::Colored::ArcExpression_ptr &expr,
+                                             const std::vector<unfoldtacpn::Colored::TimeInterval>& intervals) {
+        auto& transition = _transitionnames.count(source) == 0 ? target : source;
+        auto& place = _transitionnames.count(source) == 0 ? source : target;
 
-    }
-
-    void ColoredPetriNetBuilder::addOutputArc(const std::string& transition, const std::string& place, const Colored::ArcExpression_ptr& expr, bool transport, std::string transportID) {
-        std::vector<unfoldtacpn::Colored::TimeInterval> intervals;
-        addTimedArc(place, transition, expr, intervals, false, transport, false, 0, transportID);
-    }
-
-    void ColoredPetriNetBuilder::addArc(const std::string& place, const std::string& transition, const Colored::ArcExpression_ptr& expr, bool input, bool inhibitor, int weight) {
-        if(_transitionnames.count(transition) == 0)
-        {
-            std::cout << "Transition '" << transition << "' not found." << std::endl;
-            std::exit(ErrorCode);
-        }
-        if(_placenames.count(place) == 0)
-        {
-            std::cout << "Place '" << place << "' not found." << std::endl;
-            std::exit(ErrorCode);
-        }
-        uint32_t p = _placenames[place];
-        uint32_t t = _transitionnames[transition];
-
-        assert(t < _transitions.size());
-        assert(p < _places.size());
-
-        Colored::Arc arc;
-        arc.place = p;
-        arc.transition = t;
-        if(!inhibitor)
-            assert(expr != nullptr);
-        arc.expr = std::move(expr);
-        arc.input = input;
-        if(inhibitor){
-            inhibitorArcs.push_back(std::move(arc));
-        } else {
-            _transitions[t].arcs.push_back(std::move(arc));
-        }
-    }
-
-    void ColoredPetriNetBuilder::addTimedArc(const std::string &place, const std::string &transition,
-                                             const unfoldtacpn::Colored::ArcExpression_ptr &expr,
-                                             std::vector<unfoldtacpn::Colored::TimeInterval> &interval, bool inhibitor, bool transport,
-                                             bool input, int weight, std::string transportID) {
         if(_transitionnames.count(transition) == 0)
         {
             std::cout << "Transition '" << transition << "' not found." << std::endl;
@@ -130,22 +87,19 @@ namespace unfoldtacpn {
         if(!inhibitor)
             assert(expr != nullptr);
         arc.expr = expr;
-        arc.input = input;
+        arc.input = (&source) == (&place);
         arc.weight = weight;
-        arc.interval = interval;
+        arc.interval = intervals;
         arc.inhibitor = inhibitor;
-        arc.transport = transport;
-        arc.transportID = transportID;
         if(inhibitor){
-            inhibitorArcs.push_back(std::move(arc));
+            _inhibitorArcs.push_back(std::move(arc));
         } else {
             _transitions[t].arcs.push_back(std::move(arc));
         }
-
     }
 
     void ColoredPetriNetBuilder::addTransportArc(const std::string &source, const std::string &transition,
-                                                 const std::string &destination,
+                                                 const std::string &destination, int weight,
                                                  const unfoldtacpn::Colored::ArcExpression_ptr &expr,
                                                  std::vector<unfoldtacpn::Colored::TimeInterval> &interval) {
         if(_transitionnames.count(transition) == 0)
@@ -175,6 +129,7 @@ namespace unfoldtacpn {
         assert(expr != nullptr);
         transportArc.expr = expr;
         transportArc.interval = interval;
+        transportArc.weight = weight;
     }
 
     void ColoredPetriNetBuilder::addColorType(const std::string& id, Colored::ColorType* type) {
@@ -271,9 +226,9 @@ namespace unfoldtacpn {
     }
 
     void ColoredPetriNetBuilder::unfoldInhibitorArc(TAPNBuilderInterface& builder, std::string &oldname, std::string &newname) {
-        for (uint32_t i = 0; i < inhibitorArcs.size(); ++i) {
-            if (_transitions[inhibitorArcs[i].transition].name.compare(oldname) == 0) {
-                Colored::Arc inhibArc = inhibitorArcs[i];
+        for (uint32_t i = 0; i < _inhibitorArcs.size(); ++i) {
+            if (_transitions[_inhibitorArcs[i].transition].name.compare(oldname) == 0) {
+                Colored::Arc inhibArc = _inhibitorArcs[i];
                 std::string place = _shadowPlacesNames[_places[inhibArc.place].name];
                 builder.addInputArc(place, newname, inhibArc.inhibitor, inhibArc.weight, false, false, 0, 0);
             }
@@ -291,53 +246,25 @@ namespace unfoldtacpn {
             }
             shadowWeight += color.second;
             const std::string& pName = _ptplacenames[_places[arc.place].name][color.first->getId()];
-            if(!arc.transport)
-            {
-                if (!arc.input) {
-                    builder.addOutputArc(tName, pName, color.second);
-                } else {
-                    Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
-                    builder.addInputArc(pName, tName, arc.inhibitor, color.second,
-                        timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
-                        timeInterval.getLowerBound(), timeInterval.getUpperBound());
-                }
-            }
-            else
-            {
-                if (!arc.input) {
-                    builder.addTransportOutArc(tName, pName, arc.transportID);
-                } else {
-                    Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
-                    builder.addTransportInArc(pName, tName, arc.transportID, color.second,
-                        timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
-                        timeInterval.getLowerBound(), timeInterval.getUpperBound());
-                }
+            if (!arc.input) {
+                builder.addOutputArc(tName, pName, color.second);
+            } else {
+                Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
+                builder.addInputArc(pName, tName, arc.inhibitor, color.second,
+                    timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                    timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
         }
         if(shadowWeight > 0) {
             std::string pName = _shadowPlacesNames[_places[arc.place].name];
-            if(!arc.transport)
-            {
-                if (!arc.input) {
-                    builder.addOutputArc(tName, pName, shadowWeight);
-                } else {
-                    Colored::Color color;
-                    Colored::TimeInterval timeInterval(color);
-                    builder.addInputArc(pName, tName, arc.inhibitor, shadowWeight,
-                    timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
-                    timeInterval.getLowerBound(), timeInterval.getUpperBound());
-                }
-            }
-            else
-            {
-                if (!arc.input) {
-                    builder.addTransportOutArc(tName, pName, arc.transportID);
-                } else {
-                    Colored::Color color;
-                    Colored::TimeInterval timeInterval(color);
-                    builder.addTransportInArc(pName, tName, arc.transportID, shadowWeight, timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
-                        timeInterval.getLowerBound(), timeInterval.getUpperBound());
-                }
+            if (!arc.input) {
+                builder.addOutputArc(tName, pName, shadowWeight);
+            } else {
+                Colored::Color color;
+                Colored::TimeInterval timeInterval(color);
+                builder.addInputArc(pName, tName, arc.inhibitor, shadowWeight,
+                timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
         }
     }
