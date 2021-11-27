@@ -36,6 +36,10 @@ letter        [a-zA-Z_]
 "OR"            {return TOKEN(OR);}
 "not"           {return TOKEN(NOT);}
 "NOT"           {return TOKEN(NOT);}
+"AG"						{return TOKEN(AG);}
+"EG"						{return TOKEN(EG);}
+"AF"						{return TOKEN(AF);}
+"EF"						{return TOKEN(EF);}
 {letter}({letter}|{digit})* {SAVE_TOKEN; return ID;}
 {digit}+          {SAVE_TOKEN; return INT;}
 (\"(\\.|[^"])*\") {SAVE_QUOTED_TOKEN; return ID;}
@@ -54,10 +58,6 @@ letter        [a-zA-Z_]
 "-"							{return TOKEN(MINUS);}
 "*"							{return TOKEN(MULTIPLY);}
 "="							{return TOKEN(EQUAL);}
-"AG"						{return TOKEN(AG);}
-"EG"						{return TOKEN(EG);}
-"AF"						{return TOKEN(AF);}
-"EF"						{return TOKEN(EF);}
 .							{printf("Unknown token %s!\n", pqlqtext); yyterminate();}
 
 %%

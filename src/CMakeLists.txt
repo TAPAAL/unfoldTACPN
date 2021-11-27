@@ -6,7 +6,7 @@ add_subdirectory(PQL)
 
 add_library(unfoldtacpn ${HEADER_FILES} unfoldtacpn.cpp)
 
-target_link_libraries(unfoldtacpn PRIVATE PetriParse PetriEngine)
+target_link_libraries(unfoldtacpn PRIVATE PQL PetriParse PetriEngine)
 
 install(TARGETS unfoldtacpn PQL Colored PetriParse
     RUNTIME DESTINATION bin
