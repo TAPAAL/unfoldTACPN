@@ -18,6 +18,7 @@ install(FILES ../include/PQL/PQL.h ../include/PQL/Visitor.h ../include/PQL/Expre
 install(FILES ../include/Colored/ColoredNetStructures.h
               ../include/Colored/ColoredPetriNetBuilder.h
               ../include/Colored/Colors.h
+              ../include/Colored/Multiset.h
               ../include/Colored/Expressions.h
               ../include/Colored/TimeInterval.h
               ../include/Colored/TimeInvariant.h  DESTINATION include/Colored/)
