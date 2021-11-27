@@ -48,7 +48,7 @@ public:
         builder = nullptr;
     }
     void parse(std::istream& xml,
-            unfoldtacpn::ColoredPetriNetBuilder* builder);
+        ColoredPetriNetBuilder* builder);
 
 private:
     int parseWeight(rapidxml::xml_node<>* element);

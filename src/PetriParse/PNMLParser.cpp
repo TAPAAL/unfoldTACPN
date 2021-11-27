@@ -30,7 +30,6 @@
 #include "PetriParse/PNMLParser.h"
 #include "errorcodes.h"
 
-using namespace std;
 using namespace unfoldtacpn::PQL;
 
 inline bool stringToBool(std::string b)
@@ -39,7 +38,7 @@ inline bool stringToBool(std::string b)
 }
 
 namespace unfoldtacpn {
-void PNMLParser::parse(istream& xml,
+void PNMLParser::parse(std::istream& xml,
         ColoredPetriNetBuilder* builder) {
     //Clear any left overs
     colorTypes.clear();
@@ -49,7 +48,7 @@ void PNMLParser::parse(istream& xml,
 
     //Parser the xml
     rapidxml::xml_document<> doc;
-    vector<char> buffer((istreambuf_iterator<char>(xml)), istreambuf_iterator<char>());
+    std::vector<char> buffer((std::istreambuf_iterator<char>(xml)), std::istreambuf_iterator<char>());
     buffer.push_back('\0');
     doc.parse<0>(&buffer[0]);
 
@@ -430,17 +429,17 @@ void PNMLParser::handleArc(rapidxml::xml_node<>* element)
     }
 }
 
-std::pair<string, std::vector<const Colored::Color*>> PNMLParser::parseTimeConstraint(rapidxml::xml_node<> *element) { // parses the inscription and colors belonging to either an interval or invariant and returns it.
-    string colorTypeName;
-    string inscription;
+std::pair<std::string, std::vector<const Colored::Color*>> PNMLParser::parseTimeConstraint(rapidxml::xml_node<> *element) { // parses the inscription and colors belonging to either an interval or invariant and returns it.
+    std::string colorTypeName;
+    std::string inscription;
     std::vector<const Colored::Color*> colors;
     for (auto i = element->first_node(); i; i = i->next_sibling()) {
         if (strcmp(i->name(), "colortype") == 0) {
             colorTypeName = i->first_attribute("name")->value();
 
             if (colorTypes.find(colorTypeName) == colorTypes.end()) {
-                cerr << "The color type " << colorTypeName << " does not exist" << std::endl;
-                exit(ErrorCode);
+                std::cerr << "The color type " << colorTypeName << " does not exist" << std::endl;
+                std::exit(ErrorCode);
             }
             else {
                 for (auto it = i->first_node(); it; it = it->next_sibling()) {
@@ -467,8 +466,8 @@ std::pair<string, std::vector<const Colored::Color*>> PNMLParser::parseTimeConst
 
 void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     double x = 0, y = 0;
-    string starInvariant;
-    string id(element->first_attribute("id")->value());
+    std::string starInvariant;
+    std::string id(element->first_attribute("id")->value());
 
     auto initial = element->first_attribute("initialMarking");
     long long initialMarking = 0;
@@ -499,7 +498,7 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         // name element is ignored
         if (strcmp(it->name(), "colorinvariant") == 0) {
-            std::pair<string, std::vector<const Colored::Color*>> pair = parseTimeConstraint(it);
+            auto pair = parseTimeConstraint(it);
             timeInvariants.push_back(Colored::TimeInvariant::createFor(pair.first, pair.second, constantValues));
         } else if (strcmp(it->name(),"hlinitialMarking") == 0) {
             std::unordered_map<std::string, const unfoldtacpn::Colored::Color*> binding;
@@ -547,7 +546,7 @@ std::vector<Colored::TimeInterval> PNMLParser::parseTimeGuard(rapidxml::xml_node
     std::vector<Colored::TimeInterval> intervals;
     intervals.push_back(Colored::TimeInterval::createFor(interval, colors, constantValues));
     for (auto it = element->first_node("colorinterval"); it; it = it->next_sibling("colorinterval")) {
-        std::pair<string, std::vector<const Colored::Color*>> pair = parseTimeConstraint(it);
+        auto pair = parseTimeConstraint(it);
         intervals.push_back(Colored::TimeInterval::createFor(pair.first, pair.second, constantValues));
     }
     return intervals;
@@ -562,7 +561,7 @@ int PNMLParser::parseWeight(rapidxml::xml_node<>* element) {
         assert(weight > 0);
     } else {
         for (auto it = element->first_node("inscription"); it; it = it->next_sibling("inscription")) {
-            string text;
+            std::string text;
             parseValue(it, text);
             weight = atoi(text.c_str());
             assert(weight > 0);
@@ -578,7 +577,7 @@ int PNMLParser::parseWeight(rapidxml::xml_node<>* element) {
 }
 
 void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
-    string source = element->first_attribute("source")->value(),
+    std::string source = element->first_attribute("source")->value(),
            target = element->first_attribute("target")->value();
     auto weight = parseWeight(element);
     auto expr = parseHLInscriptions(element);
@@ -591,7 +590,7 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
     else
     {
         std::cerr << "ERROR: Arc from " << source << " to " << target << " has non-sensible weight 0." << std::endl;
-        exit(ErrorCode);
+        std::exit(ErrorCode);
     }
 }
 
@@ -603,9 +602,9 @@ void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
         std::cerr << "ERROR: Missing transportID on transport-arc." << std::endl;
         exit(ErrorCode);
     }
-    string source	= element->first_attribute("source")->value();
-    string target	= element->first_attribute("target")->value();
-    string& trans = transitions.count(source) == 1 ? source : target;
+    std::string source	= element->first_attribute("source")->value();
+    std::string target	= element->first_attribute("target")->value();
+    std::string& trans = transitions.count(source) == 1 ? source : target;
     if(transitions.count(trans) != 1)
     {
         std::cerr << "ERROR: Could not find transition '" << trans << "' for transport arc" << std::endl;
@@ -633,7 +632,7 @@ void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
 }
 
 void PNMLParser::parseTransportArc(rapidxml::xml_node<>* element){
-    string source	= element->first_attribute("source")->value(),
+    std::string source	= element->first_attribute("source")->value(),
            transition	= element->first_attribute("transition")->value(),
            target	= element->first_attribute("target")->value();
     auto weight = parseWeight(element);
@@ -686,7 +685,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     transitions.emplace(name);
 }
 
-void PNMLParser::parseValue(rapidxml::xml_node<>* element, string& text) {
+void PNMLParser::parseValue(rapidxml::xml_node<>* element, std::string& text) {
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "value") == 0 || strcmp(it->name(), "text") == 0) {
             text = it->value();
