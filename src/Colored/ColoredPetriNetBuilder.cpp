@@ -40,8 +40,6 @@ namespace unfoldtacpn {
             uint32_t next = _placenames.size();
             _places.emplace_back(Colored::Place{name, type, tokens, invariant});
             _placenames[name] = next;
-
-            _invariantStrings[name] = invariant.size() ? invariant[0].toString(): "< inf";
             _placelocations.push_back(std::tuple<double, double>(x,y));
         }
     }
@@ -119,7 +117,8 @@ namespace unfoldtacpn {
 
     void ColoredPetriNetBuilder::addTransportArc(const std::string &source, const std::string &transition,
                                                  const std::string &destination, int weight,
-                                                 const unfoldtacpn::Colored::ArcExpression_ptr &expr,
+                                                 const unfoldtacpn::Colored::ArcExpression_ptr &in_expr,
+                                                 const unfoldtacpn::Colored::ArcExpression_ptr &out_expr,
                                                  std::vector<unfoldtacpn::Colored::TimeInterval> &interval) {
         if(_transitionnames.count(transition) == 0)
         {
@@ -146,7 +145,8 @@ namespace unfoldtacpn {
         transportArc.source = s;
         transportArc.transition = t;
         assert(expr != nullptr);
-        transportArc.expr = expr;
+        transportArc.in_expr = in_expr;
+        transportArc.out_expr = out_expr;
         transportArc.interval = interval;
         transportArc.weight = weight;
         _transitions[t].transport.emplace_back(std::move(transportArc));
@@ -183,7 +183,6 @@ namespace unfoldtacpn {
             const Colored::Color* color = &place.type->operator[](i);
             Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
             builder.addPlace(name, place.marking[color], invariant.isBoundStrict(), invariant.getBound(), x, y);
-            _invariantStrings[name] = invariant.toString();
 
             _ptplacenames[place.name][color->getId()] = std::move(name);
             xBuffer += 50;
@@ -192,10 +191,8 @@ namespace unfoldtacpn {
         }
         double x = xBuffer + std::get<0>(placePos);
         double y = yBuffer + std::get<1>(placePos);
-        Colored::Color color;
         std::string placeName = place.name + "Sum";
         builder.addPlace(placeName, place.marking.size(), false, std::numeric_limits<int>::max(), x, y);
-        _invariantStrings[placeName] = Colored::TimeInvariant(color).toString();
         _shadowPlacesNames[place.name] = std::move(placeName);
     }
 
@@ -260,7 +257,31 @@ namespace unfoldtacpn {
     }
 
     void ColoredPetriNetBuilder::unfoldTransport(TAPNBuilderInterface& builder, Colored::TransportArc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {
-
+        Colored::ExpressionContext context {binding, _colors};
+        auto in_ms = arc.in_expr->eval(context);
+        auto out_ms = arc.out_expr->eval(context);
+        if(out_ms.size() != 1) { std::cerr << "ERROR: Ill-formed transport-arc color" << std::endl; std::exit(ErrorCode); }
+        if(in_ms.size() != 1) { std::cerr << "ERROR: Ill-formed transport-arc color" << std::endl; std::exit(ErrorCode); }
+        const auto in_color = *in_ms.begin();
+        const auto out_color = *out_ms.begin();
+        const std::string& inName = _ptplacenames[_places[arc.source].name][in_color.first->getId()];
+        const std::string& outName = _ptplacenames[_places[arc.destination].name][out_color.first->getId()];
+        {
+            // add actual transport
+            Colored::TimeInterval timeInterval = getTimeIntervalForArc(arc.interval, in_color.first);
+            builder.addTransportArc(inName, tName, outName, in_color.second,
+                    timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                    timeInterval.getLowerBound(), timeInterval.getUpperBound());
+        }
+        {
+            // add shadow
+            Colored::Color color;
+            Colored::TimeInterval timeInterval(color);
+            builder.addInputArc(inName, tName, false, in_color.second,
+                timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                timeInterval.getLowerBound(), timeInterval.getUpperBound());
+            builder.addOutputArc(tName, outName, out_color.second);
+        }
     }
 
     void ColoredPetriNetBuilder::unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {

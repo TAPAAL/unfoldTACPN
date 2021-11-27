@@ -49,7 +49,8 @@ namespace unfoldtacpn {
                 const std::string& transition,
                 const std::string& destination,
                 int weight,
-                const Colored::ArcExpression_ptr& expr,
+                const Colored::ArcExpression_ptr& in_expr,
+                const Colored::ArcExpression_ptr& out_expr,
                 std::vector<Colored::TimeInterval>& interval);
 
         double getUnfoldTime() const {

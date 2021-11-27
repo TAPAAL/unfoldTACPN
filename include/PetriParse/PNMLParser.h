@@ -20,12 +20,6 @@
 #ifndef PNMLPARSER_H
 #define PNMLPARSER_H
 
-#include <map>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <rapidxml.hpp>
-
 #include "TAPNBuilderInterface.h"
 #include "PQL/PQL.h"
 #include "Colored/ColoredNetStructures.h"
@@ -33,6 +27,14 @@
 #include "Colored/Colors.h"
 #include "Colored/ColoredPetriNetBuilder.h"
 #include "Colored/TimeInterval.h"
+
+#include <unordered_map>
+#include <map>
+#include <unordered_set>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <rapidxml.hpp>
 
 namespace unfoldtacpn {
 class PNMLParser {
@@ -56,6 +58,7 @@ private:
     void parsePlace(rapidxml::xml_node<>* element);
     std::pair<std::string, std::vector<const unfoldtacpn::Colored::Color*>> parseTimeConstraint(rapidxml::xml_node<> *element);
     void parseArc(rapidxml::xml_node<>* element, bool inhibitor = false);
+    void handleArc(rapidxml::xml_node<>* element);
     void parseTransition(rapidxml::xml_node<>* element);
     void parseDeclarations(rapidxml::xml_node<>* element);
     void parseNamedSort(rapidxml::xml_node<>* element);
@@ -70,6 +73,7 @@ private:
     std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> cartesianProduct(std::vector<unfoldtacpn::Colored::ColorExpression_ptr> rightSet, std::vector<unfoldtacpn::Colored::ColorExpression_ptr> leftSet);
     std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> cartesianProduct(std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> rightSet, std::vector<unfoldtacpn::Colored::ColorExpression_ptr> leftSet);
     void parseTransportArc(rapidxml::xml_node<>* element);
+    void parseSingleTransportArc(rapidxml::xml_node<>* element);
     void parseValue(rapidxml::xml_node<>* element, std::string& text);
     uint32_t parseNumberConstant(rapidxml::xml_node<>* element);
     void parsePosition(rapidxml::xml_node<>* element, double& x, double& y);
@@ -78,6 +82,8 @@ private:
     ColorTypeMap colorTypes;
     VariableMap variables;
     std::unordered_map<std::string, uint32_t> constantValues;
+    std::map<std::pair<std::string,std::string>, rapidxml::xml_node<>*> transportArcs;
+    std::unordered_set<std::string> transitions;
 };
 }
 #endif // PNMLPARSER_H

@@ -86,6 +86,17 @@ void PNMLParser::parse(istream& xml,
     parseElement(root);
 
     //Cleanup
+    if(!transportArcs.empty())
+    {
+        std::cerr << "ERROR: Could not match the following transport-arcs";
+        for(auto& kv : transportArcs)
+        {
+            std::cerr << "\tgoing through transition " << kv.first.first << " with id " << kv.first.second << std::endl;
+        }
+        std::exit(ErrorCode);
+    }
+    transportArcs.clear();
+    transitions.clear();
     colorTypes.clear();
 }
 
@@ -382,6 +393,8 @@ void PNMLParser::parseElement(rapidxml::xml_node<>* element) {
             parseTransportArc(it);
         } else if (strcmp(it->name(),"inhibitorArc") == 0) {
             parseArc(it, true);
+        } else if (strcmp(it->name(),"arc") == 0) {
+            handleArc(it);
         } else if (strcmp(it->name(), "variable") == 0) {
             std::cerr << "variable not supported" << std::endl;
             exit(ErrorCode);
@@ -390,6 +403,30 @@ void PNMLParser::parseElement(rapidxml::xml_node<>* element) {
         {
             parseElement(it);
         }
+    }
+}
+
+void PNMLParser::handleArc(rapidxml::xml_node<>* element)
+{
+    auto t = element->first_attribute("type")->value();
+    if(t == nullptr ||
+       strcmp(t, "normal") == 0 ||
+       strcmp(t, "timed") == 0)
+    {
+        parseArc(element, false);
+    }
+    else if(strcmp(t, "inhibitor") == 0)
+    {
+        parseArc(element, true);
+    }
+    else if(strcmp(t, "transport") == 0)
+    {
+        parseSingleTransportArc(element);
+    }
+    else
+    {
+        std::cerr << "Arc type '" << t << "' not supported";
+        std::exit(ErrorCode);
     }
 }
 
@@ -502,7 +539,9 @@ unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml
 }
 
 std::vector<Colored::TimeInterval> PNMLParser::parseTimeGuard(rapidxml::xml_node<>* element) {
-    auto interval = element->first_attribute("inscription")->value();
+    auto el = element->first_attribute("inscription");
+    if(el == nullptr) return {};
+    auto interval = el->value();
     std::vector<const Colored::Color*> colors;
     colors.push_back(new Colored::Color());
     std::vector<Colored::TimeInterval> intervals;
@@ -556,16 +595,52 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
     }
 }
 
+void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
+{
+    const char* tid = element->first_attribute("transportID")->value();
+    if(tid == nullptr)
+    {
+        std::cerr << "ERROR: Missing transportID on transport-arc." << std::endl;
+        exit(ErrorCode);
+    }
+    string source	= element->first_attribute("source")->value();
+    string target	= element->first_attribute("target")->value();
+    string& trans = transitions.count(source) == 1 ? source : target;
+    if(transitions.count(trans) != 1)
+    {
+        std::cerr << "ERROR: Could not find transition '" << trans << "' for transport arc" << std::endl;
+        std::exit(ErrorCode);
+    }
+    auto* other = transportArcs[{trans,tid}];
+    if(other == nullptr)
+    {
+        transportArcs[{trans,tid}] = element;
+    }
+    else
+    {
+        transportArcs.erase({trans,tid});
+        rapidxml::xml_node<>* in = element, *out = other;
+        if(&target != &trans)
+        {
+            std::swap(in, out);
+        }
+        auto weight = parseWeight(in);
+        auto intervals = parseTimeGuard(in);
+        auto in_expr = parseHLInscriptions(in);
+        auto out_expr = parseHLInscriptions(out);
+        builder->addTransportArc(source, trans, target, weight, in_expr, out_expr, intervals);
+    }
+}
+
 void PNMLParser::parseTransportArc(rapidxml::xml_node<>* element){
     string source	= element->first_attribute("source")->value(),
            transition	= element->first_attribute("transition")->value(),
            target	= element->first_attribute("target")->value();
     auto weight = parseWeight(element);
-    auto expr = parseHLInscriptions(element);
     auto intervals = parseTimeGuard(element);
     if(weight != 0)
     {
-        builder->addTransportArc(source, transition, target, weight, expr, intervals);
+        builder->addTransportArc(source, transition, target, weight, nullptr, nullptr, intervals);
     }
     else
     {
@@ -594,7 +669,6 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
 
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
-        // name element is ignored
         if (strcmp(it->name(), "graphics") == 0) {
             parsePosition(it, x, y);
         } else if (strcmp(it->name(), "condition") == 0) {
@@ -607,7 +681,9 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    builder->addTransition(element->first_attribute("id")->value(), expr, urgent, x, y);
+    auto name = element->first_attribute("id")->value();
+    builder->addTransition(name, expr, urgent, x, y);
+    transitions.emplace(name);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, string& text) {

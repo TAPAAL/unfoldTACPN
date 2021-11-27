@@ -39,7 +39,8 @@ namespace unfoldtacpn {
             uint32_t source;
             uint32_t transition;
             uint32_t destination;
-            ArcExpression_ptr expr;
+            ArcExpression_ptr in_expr;
+            ArcExpression_ptr out_expr;
             int weight;
             std::vector<Colored::TimeInterval> interval;
         };

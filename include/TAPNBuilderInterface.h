@@ -54,15 +54,10 @@ namespace unfoldtacpn {
                 int weight) = 0;
 
         /* Add transport arc with given arc expression */
-        virtual void addTransportInArc(const std::string& source,
+        virtual void addTransportArc(const std::string& source,
                 const std::string& transition,
-                const std::string& transport_id, int weight,
+                const std::string& target, int weight,
                 bool lstrict, bool ustrict, int lower, int upper) = 0;
-
-        virtual void addTransportOutArc(const std::string& transition,
-                const std::string& destination,
-                const std::string& transport_id) = 0;
-
     };
 }
 
