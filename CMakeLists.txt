@@ -20,12 +20,16 @@ project(unfoldtacpn VERSION 0.0.2 LANGUAGES CXX C)
 option(VERIFYPN_GetDependencies "Fetch external dependencies from web." ON)
 
 
-set(BUILD_SHARED_LIBS OFF)
-if (NOT APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-else(NOT APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
-endif(NOT APPLE)
+if(NOT BUILD_TESTING)
+    set(BUILD_SHARED_LIBS OFF)
+    if (NOT APPLE)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+    else(NOT APPLE)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+    endif(NOT APPLE)
+else ()
+    set(BUILD_SHARED_LIBS ON)
+endif()
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -pedantic-errors -O3 -DNDEBUG")
 
@@ -57,3 +61,9 @@ endif (VERIFYPN_GetDependencies)
 include_directories(include)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/)
+
+if(BUILD_TESTING)
+    enable_testing()
+    add_subdirectory(test)
+endif()
+
