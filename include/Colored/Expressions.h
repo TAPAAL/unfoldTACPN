@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   Expressions.h
  * Author: andreas
  *
@@ -25,39 +25,20 @@
 
 #include "Colors.h"
 #include "Multiset.h"
-#include "../errorcodes.h"
 
 namespace unfoldtacpn {
     class ColoredPetriNetBuilder;
-    
+
     namespace Colored {
         struct ExpressionContext {
             typedef std::unordered_map<std::string, const Color*> BindingMap;
 
             BindingMap& binding;
             std::unordered_map<std::string, ColorType*>& colorTypes;
-            
-            const Color* findColor(const std::string& color) const {
-                if (color.compare("dot") == 0)
-                    return DotConstant::dotConstant(nullptr);
-                for (auto& elem : colorTypes) {
-                    auto col = (*elem.second)[color];
-                    if (col)
-                        return col;
-                }
-                printf("Could not find color: %s\nCANNOT_COMPUTE\n", color.c_str());
-                exit(ErrorCode);
-            }
 
-            ProductType* findProductColorType(const std::vector<const ColorType*>& types) const {
-                for (auto& elem : colorTypes) {
-                    auto* pt = dynamic_cast<ProductType*>(elem.second);
-                    if (pt && pt->containsTypes(types)) {
-                        return pt;
-                    }
-                }
-                return nullptr;
-            }
+            const Color* findColor(const std::string& color) const;
+
+            ProductType* findProductColorType(const std::vector<const ColorType*>& types) const;
         };
 
         class WeightException : public std::exception {
@@ -70,14 +51,14 @@ namespace unfoldtacpn {
                 return ("Undefined weight: " + _message).c_str();
             }
         };
-        
+
         class Expression {
         public:
             Expression() {}
-            
+
             virtual void getVariables(std::set<Variable*>& variables) const {
             }
-            
+
             virtual void expressionType() {
                 std::cout << "Expression" << std::endl;
             }
@@ -86,19 +67,19 @@ namespace unfoldtacpn {
                 return "Unsupported";
             }
         };
-        
+
         class ColorExpression : public Expression {
         public:
             ColorExpression() {}
             virtual ~ColorExpression() {}
-            
+
             virtual const Color* eval(ExpressionContext& context) const = 0;
 
             virtual ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const = 0;
 
             virtual void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const = 0;
         };
-        
+
         class DotConstantExpression : public ColorExpression {
         public:
             const Color* eval(ExpressionContext& context) const override {
@@ -116,16 +97,16 @@ namespace unfoldtacpn {
         };
 
         typedef std::shared_ptr<ColorExpression> ColorExpression_ptr;
-        
+
         class VariableExpression : public ColorExpression {
         private:
             Variable* _variable;
-            
+
         public:
             const Color* eval(ExpressionContext& context) const override {
                 return context.binding[_variable->name];
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 variables.insert(_variable);
             }
@@ -144,11 +125,11 @@ namespace unfoldtacpn {
             VariableExpression(Variable* variable)
                     : _variable(variable) {}
         };
-        
+
         class UserOperatorExpression : public ColorExpression {
         private:
             const Color* _userOperator;
-            
+
         public:
             const Color* eval(ExpressionContext& context) const override {
                 return _userOperator;
@@ -169,11 +150,11 @@ namespace unfoldtacpn {
             UserOperatorExpression(const Color* userOperator)
                     : _userOperator(userOperator) {}
         };
-        
+
         class UserSortExpression : public Expression {
         private:
             ColorType* _userSort;
-            
+
         public:
             ColorType* eval(ExpressionContext& context) const {
                 return _userSort;
@@ -188,31 +169,31 @@ namespace unfoldtacpn {
         };
 
         typedef std::shared_ptr<UserSortExpression> UserSortExpression_ptr;
-        
+
         class NumberConstantExpression : public Expression {
         private:
             uint32_t _number;
-            
+
         public:
             uint32_t eval(ExpressionContext& context) const {
                 return _number;
             }
-            
+
             NumberConstantExpression(uint32_t number)
                     : _number(number) {}
         };
 
         typedef std::shared_ptr<NumberConstantExpression> NumberConstantExpression_ptr;
-        
+
         class SuccessorExpression : public ColorExpression {
         private:
             ColorExpression_ptr _color;
-            
+
         public:
             const Color* eval(ExpressionContext& context) const override {
                 return &++(*_color->eval(context));
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _color->getVariables(variables);
             }
@@ -235,16 +216,16 @@ namespace unfoldtacpn {
             SuccessorExpression(ColorExpression_ptr&& color)
                     : _color(std::move(color)) {}
         };
-        
+
         class PredecessorExpression : public ColorExpression {
         private:
             ColorExpression_ptr _color;
-            
+
         public:
             const Color* eval(ExpressionContext& context) const override {
                 return &--(*_color->eval(context));
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _color->getVariables(variables);
             }
@@ -267,12 +248,12 @@ namespace unfoldtacpn {
             PredecessorExpression(ColorExpression_ptr&& color)
                     : _color(std::move(color)) {}
         };
-        
+
         class TupleExpression : public ColorExpression {
         private:
             std::vector<ColorExpression_ptr> _colors;
             ColorType* _colorType;
-            
+
         public:
             const Color* eval(ExpressionContext& context) const override {
                 std::vector<const Color*> colors;
@@ -314,7 +295,7 @@ namespace unfoldtacpn {
                     index++;
                 }
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 for (auto elem : _colors) {
                     elem->getVariables(variables);
@@ -333,192 +314,192 @@ namespace unfoldtacpn {
             TupleExpression(std::vector<ColorExpression_ptr>&& colors)
                     : _colors(std::move(colors)) {}
         };
-        
+
         class GuardExpression : public Expression {
         public:
             GuardExpression() {}
             virtual ~GuardExpression() {}
-            
+
             virtual bool eval(ExpressionContext& context) const = 0;
         };
 
         typedef std::shared_ptr<GuardExpression> GuardExpression_ptr;
-        
+
         class LessThanExpression : public GuardExpression {
         private:
             ColorExpression_ptr _left;
             ColorExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) < _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             LessThanExpression(ColorExpression_ptr&& left, ColorExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class GreaterThanExpression : public GuardExpression {
         private:
             ColorExpression_ptr _left;
             ColorExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) > _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             GreaterThanExpression(ColorExpression_ptr&& left, ColorExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class LessThanEqExpression : public GuardExpression {
         private:
             ColorExpression_ptr _left;
             ColorExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) <= _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             LessThanEqExpression(ColorExpression_ptr&& left, ColorExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class GreaterThanEqExpression : public GuardExpression {
         private:
             ColorExpression_ptr _left;
             ColorExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) >= _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             GreaterThanEqExpression(ColorExpression_ptr&& left, ColorExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class EqualityExpression : public GuardExpression {
         private:
             ColorExpression_ptr _left;
             ColorExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) == _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             EqualityExpression(ColorExpression_ptr&& left, ColorExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class InequalityExpression : public GuardExpression {
         private:
             ColorExpression_ptr _left;
             ColorExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) != _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             InequalityExpression(ColorExpression_ptr&& left, ColorExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class NotExpression : public GuardExpression {
         private:
             GuardExpression_ptr _expr;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return !_expr->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _expr->getVariables(variables);
             }
-            
+
             NotExpression(GuardExpression_ptr&& expr) : _expr(std::move(expr)) {}
         };
-        
+
         class AndExpression : public GuardExpression {
         private:
             GuardExpression_ptr _left;
             GuardExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) && _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             AndExpression(GuardExpression_ptr&& left, GuardExpression_ptr&& right)
                     : _left(left), _right(right) {}
         };
-        
+
         class OrExpression : public GuardExpression {
         private:
             GuardExpression_ptr _left;
             GuardExpression_ptr _right;
-            
+
         public:
             bool eval(ExpressionContext& context) const override {
                 return _left->eval(context) || _right->eval(context);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
-            
+
             OrExpression(GuardExpression_ptr&& left, GuardExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class ArcExpression : public Expression {
         public:
             ArcExpression() {}
             virtual ~ArcExpression() {}
 
             virtual void getConstants(std::unordered_map<uint32_t, std::vector<const Color*>> &constantMap, uint32_t &index) const = 0;
-            
+
             virtual Multiset eval(ExpressionContext& context) const = 0;
 
             virtual void expressionType() override {
@@ -529,11 +510,11 @@ namespace unfoldtacpn {
         };
 
         typedef std::shared_ptr<ArcExpression> ArcExpression_ptr;
-        
+
         class AllExpression : public Expression {
         private:
             ColorType* _sort;
-            
+
         public:
             virtual ~AllExpression() {};
             std::vector<const Color*> eval(ExpressionContext& context) const {
@@ -559,20 +540,20 @@ namespace unfoldtacpn {
                 return _sort->getName() + ".all";
             }
 
-            AllExpression(ColorType* sort) : _sort(sort) 
+            AllExpression(ColorType* sort) : _sort(sort)
             {
                 assert(sort != nullptr);
             }
         };
 
         typedef std::shared_ptr<AllExpression> AllExpression_ptr;
-        
+
         class NumberOfExpression : public ArcExpression {
         private:
             uint32_t _number;
             std::vector<ColorExpression_ptr> _color;
             AllExpression_ptr _all;
-            
+
         public:
             Multiset eval(ExpressionContext& context) const override {
                 std::vector<const Color*> colors;
@@ -602,7 +583,7 @@ namespace unfoldtacpn {
                     index++;//not sure if index should be increased here, but no number expression have multiple elements
                 }
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 if (_all != nullptr)
                     return;
@@ -648,11 +629,11 @@ namespace unfoldtacpn {
         };
 
         typedef std::shared_ptr<NumberOfExpression> NumberOfExpression_ptr;
-        
+
         class AddExpression : public ArcExpression {
         private:
             std::vector<ArcExpression_ptr> _constituents;
-            
+
         public:
             Multiset eval(ExpressionContext& context) const override {
                 Multiset ms;
@@ -669,7 +650,7 @@ namespace unfoldtacpn {
                     elem->getConstants(constantMap, localIndex);
                 }
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 for (auto elem : _constituents) {
                     elem->getVariables(variables);
@@ -695,12 +676,12 @@ namespace unfoldtacpn {
             AddExpression(std::vector<ArcExpression_ptr>&& constituents)
                     : _constituents(std::move(constituents)) {}
         };
-        
+
         class SubtractExpression : public ArcExpression {
         private:
             ArcExpression_ptr _left;
             ArcExpression_ptr _right;
-            
+
         public:
             Multiset eval(ExpressionContext& context) const override {
                 return _left->eval(context) - _right->eval(context);
@@ -711,7 +692,7 @@ namespace unfoldtacpn {
                 _left->getConstants(constantMap, index);
                 _right->getConstants(constantMap, rIndex);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
@@ -738,12 +719,12 @@ namespace unfoldtacpn {
             SubtractExpression(ArcExpression_ptr&& left, ArcExpression_ptr&& right)
                     : _left(std::move(left)), _right(std::move(right)) {}
         };
-        
+
         class ScalarProductExpression : public ArcExpression {
         private:
             uint32_t _scalar;
             ArcExpression_ptr _expr;
-            
+
         public:
             Multiset eval(ExpressionContext& context) const override {
                 return _expr->eval(context) * _scalar;
@@ -752,7 +733,7 @@ namespace unfoldtacpn {
             void getConstants(std::unordered_map<uint32_t, std::vector<const Color*>> &constantMap, uint32_t &index) const override {
                 _expr->getConstants(constantMap, index);
             }
-            
+
             void getVariables(std::set<Variable*>& variables) const override {
                 _expr->getVariables(variables);
             }

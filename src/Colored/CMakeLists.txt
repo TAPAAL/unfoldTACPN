@@ -4,5 +4,6 @@ add_library(Colored ColoredPetriNetBuilder.cpp
 Colors.cpp
 Multiset.cpp
 TimeInterval.cpp
-TimeInvariant.cpp)
+TimeInvariant.cpp
+Expression.cpp)
 add_dependencies(Colored rapidxml-ext)

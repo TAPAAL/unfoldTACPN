@@ -10,6 +10,7 @@
 
 #include "Colored/ColoredPetriNetBuilder.h"
 #include "PetriParse/PNMLParser.h"
+#include "errorcodes.h"
 
 namespace unfoldtacpn {
     ColoredPetriNetBuilder::ColoredPetriNetBuilder() {
