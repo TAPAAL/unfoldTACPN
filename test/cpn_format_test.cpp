@@ -91,3 +91,65 @@ BOOST_AUTO_TEST_CASE(Places) {
     b.unfold(p);
 }
 
+BOOST_AUTO_TEST_CASE(RegularArc) {
+
+    class PBuilder : public DummyBuilder {
+
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+            BOOST_REQUIRE_EQUAL("P0", name);
+            BOOST_REQUIRE_EQUAL(strict, false);
+            BOOST_REQUIRE_EQUAL(bound, 9);
+            BOOST_REQUIRE_EQUAL(tokens, 10);
+        }
+
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+            BOOST_REQUIRE_EQUAL("T2", name);
+            BOOST_REQUIRE(!urgent);
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE_EQUAL("T2", transition);
+            BOOST_REQUIRE_EQUAL("P0", place);
+            BOOST_REQUIRE_EQUAL(weight, 3);
+            BOOST_REQUIRE_EQUAL(lstrict, false);
+            BOOST_REQUIRE_EQUAL(ustrict, false);
+            BOOST_REQUIRE_EQUAL(lower, 1);
+            BOOST_REQUIRE_EQUAL(upper, 5);
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+            BOOST_REQUIRE_EQUAL("T2", transition);
+            BOOST_REQUIRE_EQUAL("P0", place);
+            BOOST_REQUIRE_EQUAL(weight, 4);
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("regular_arc.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+}

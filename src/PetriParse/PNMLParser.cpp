@@ -136,7 +136,6 @@ void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
 
     if (strcmp(type->name(), "dot") == 0) {
         return;
-        ct->addDot();
     } else if (strcmp(type->name(), "productsort") == 0) {
         for (auto it = type->first_node(); it; it = it->next_sibling()) {
             if (strcmp(it->name(), "usersort") == 0) {
@@ -470,7 +469,6 @@ std::pair<std::string, std::vector<const Colored::Color*>> PNMLParser::parseTime
             }
         } else if (strcmp(i->name(), "inscription") == 0) {
             inscription = i->first_attribute("inscription")->value();
-            std::cerr << "Got " << inscription << std::endl;
         }
     }
     return std::make_pair(inscription, colors);
@@ -599,7 +597,16 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
            target = element->first_attribute("target")->value();
     auto weight = parseWeight(element);
     auto expr = parseHLInscriptions(element);
-    auto intervals = parseTimeGuard(element);
+    if(transitions.count(source) + transitions.count(target) != 1)
+    {
+        std::cerr << "ERROR: at least one of '" << source << "' or '" << target << "' of an arc must be a transition" << std::endl;
+        std::exit(ErrorCode);
+    }
+    std::vector<Colored::TimeInterval> intervals;
+    if(transitions.count(target) == 1)
+    {
+        intervals = parseTimeGuard(element);
+    }
 
     if(weight != 0)
     {

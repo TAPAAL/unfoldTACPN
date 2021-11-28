@@ -107,8 +107,6 @@ namespace unfoldtacpn {
         Colored::Arc arc;
         arc.place = p;
         arc.transition = t;
-        if(!inhibitor)
-            assert(expr != nullptr);
         arc.expr = expr;
         arc.input = (&source) == (&place);
         arc.weight = weight;
