@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   Multiset.h
  * Author: andreas
  *
@@ -41,14 +41,15 @@ namespace unfoldtacpn {
             };
 
             typedef std::vector<std::pair<uint32_t,uint32_t>> Internal;
-            
+
         public:
             Multiset();
             Multiset(const Multiset& orig);
+            Multiset(const Color* color, uint32_t count);
             Multiset(std::pair<const Color*,uint32_t> color);
             Multiset(std::vector<std::pair<const Color*,uint32_t>>& colors);
             virtual ~Multiset();
-            
+
             Multiset operator+ (const Multiset& other) const;
             Multiset operator- (const Multiset& other) const;
             Multiset operator* (uint32_t scalar) const;
@@ -57,7 +58,7 @@ namespace unfoldtacpn {
             void operator*= (uint32_t scalar);
             uint32_t operator[] (const Color* color) const;
             uint32_t& operator[] (const Color* color);
-            
+
             bool empty() const;
             void clean();
 
@@ -66,12 +67,12 @@ namespace unfoldtacpn {
             }
 
             size_t size() const;
-            
+
             Iterator begin();
             Iterator end();
 
             std::string toString() const;
-            
+
         private:
             Internal _set;
             ColorType* type;

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(DirectoryTest) {
 
 std::ifstream loadFile(const char* file) {
     std::stringstream ss;
-    ss << getenv("TEST_FILES") << "/old_format/" << file;
+    ss << getenv("TEST_FILES") << "/cpn_format/" << file;
     std::cerr << "Loading '" << ss.str() << "'" << std::endl;
     return std::ifstream(ss.str());
 }
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(Places) {
             int bound,
             double x,
             double y) {
-            BOOST_REQUIRE_EQUAL("TAPN1_P0Sub0", name);
+            BOOST_REQUIRE_EQUAL("P0", name);
             BOOST_REQUIRE_EQUAL(strict, false);
             BOOST_REQUIRE_EQUAL(bound, 9);
             BOOST_REQUIRE_EQUAL(tokens, 3);

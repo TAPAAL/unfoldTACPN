@@ -43,6 +43,11 @@ namespace unfoldtacpn {
             _placenames[name] = next;
             _placelocations.push_back(std::tuple<double, double>(x,y));
         }
+        else
+        {
+            std::cerr << "ERROR: Adding place " << name << " twice!" << std::endl;
+            std::exit(ErrorCode);
+        }
     }
 
     void ColoredPetriNetBuilder::addTransition(const std::string& name,
@@ -145,7 +150,6 @@ namespace unfoldtacpn {
         Colored::TransportArc transportArc;
         transportArc.source = s;
         transportArc.transition = t;
-        assert(expr != nullptr);
         transportArc.in_expr = in_expr;
         transportArc.out_expr = out_expr;
         transportArc.interval = interval;
@@ -177,43 +181,58 @@ namespace unfoldtacpn {
         double yBuffer = 0;
         uint32_t index = _placenames[place.name];
         auto placePos = _placelocations[index];
-        for (size_t i = 0; i < place.type->size(); ++i) {
+        size_t size = place.type == nullptr ? 1 : place.type->size();
+        if(size != 1)
+        {
+            size_t i = 0;
+            for (; i < place.type->size(); ++i) {
+                double x = xBuffer + std::get<0>(placePos);
+                double y = yBuffer + std::get<1>(placePos);
+                std::string name = place.name + "Sub" + std::to_string(i);
+                const Colored::Color* color = &place.type->operator[](i);
+                Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
+                builder.addPlace(name, place.marking[color], invariant.isBoundStrict(), invariant.getBound(), x, y);
+
+                _ptplacenames[place.name][color->getId()] = std::move(name);
+                xBuffer += 50;
+                yBuffer += 0;
+
+            }
             double x = xBuffer + std::get<0>(placePos);
             double y = yBuffer + std::get<1>(placePos);
-            std::string name = place.name + "Sub" + std::to_string(i);
-            const Colored::Color* color = &place.type->operator[](i);
-            Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
-            builder.addPlace(name, place.marking[color], invariant.isBoundStrict(), invariant.getBound(), x, y);
-
-            _ptplacenames[place.name][color->getId()] = std::move(name);
-            xBuffer += 50;
-            yBuffer += 0;
-
+            std::string placeName = place.name + "Sum";
+            builder.addPlace(placeName, place.marking.size(), false, std::numeric_limits<int>::max(), x, y);
+            _shadowPlacesNames[place.name] = std::move(placeName);
         }
-        double x = xBuffer + std::get<0>(placePos);
-        double y = yBuffer + std::get<1>(placePos);
-        std::string placeName = place.name + "Sum";
-        builder.addPlace(placeName, place.marking.size(), false, std::numeric_limits<int>::max(), x, y);
-        _shadowPlacesNames[place.name] = std::move(placeName);
+        else
+        {
+            const unfoldtacpn::Colored::Color* color = place.type ? &(*place.type)[0] : (const unfoldtacpn::Colored::Color*)nullptr;
+            Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color);
+            builder.addPlace(place.name, place.marking.size(), invariant.isBoundStrict(), invariant.getBound(),
+                std::get<0>(placePos), std::get<1>(placePos));
+        }
     }
 
     Colored::TimeInvariant ColoredPetriNetBuilder::getTimeInvariantForPlace(std::vector< Colored::TimeInvariant> TimeInvariants, const Colored::Color* color) {
-        for (Colored::TimeInvariant element : TimeInvariants) {
-            if (!element.getColor().isTuple()) {
-                if (element.getColor().getId() == color->getId()) {
-                    return element;
-                }
-            } else {
-                bool matches = true;
-                Colored::Color color = element.getColor();
-                const auto& colors = color.getTuple();
-                if (colors.size() == color.getTuple().size()) {
-                    for(uint32_t i = 0;i < colors.size(); i++) {
-                        if (colors[i]->getId() != color.getTuple()[i]->getId())
-                            matches = false;
-                    }
-                    if (matches)
+        if(color != nullptr)
+        {
+            for (Colored::TimeInvariant element : TimeInvariants) {
+                if (!element.getColor().isTuple()) {
+                    if (element.getColor().getId() == color->getId()) {
                         return element;
+                    }
+                } else {
+                    bool matches = true;
+                    Colored::Color color = element.getColor();
+                    const auto& colors = color.getTuple();
+                    if (colors.size() == color.getTuple().size()) {
+                        for(uint32_t i = 0;i < colors.size(); i++) {
+                            if (colors[i]->getId() != color.getTuple()[i]->getId())
+                                matches = false;
+                        }
+                        if (matches)
+                            return element;
+                    }
                 }
             }
         }

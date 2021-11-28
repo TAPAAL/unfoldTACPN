@@ -28,6 +28,16 @@ namespace unfoldtacpn {
             type = orig.type;
         }
 
+        Multiset::Multiset(const Color* color, uint32_t count)
+        : _set(), type(nullptr) {
+            (*this)[color] = count;
+        }
+
+        Multiset::Multiset(std::pair<const Color*,uint32_t> el)
+        : _set(), type(nullptr) {
+            (*this)[el.first] = el.second;
+        }
+
         Multiset::Multiset(std::vector<std::pair<const Color*,uint32_t>>& colors)
                 : _set(), type(nullptr)
         {

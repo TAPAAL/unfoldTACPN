@@ -84,6 +84,7 @@ private:
     std::unordered_map<std::string, uint32_t> constantValues;
     std::map<std::pair<std::string,std::string>, rapidxml::xml_node<>*> transportArcs;
     std::unordered_set<std::string> transitions;
+    unfoldtacpn::Colored::ColorType* base_dot;
 };
 }
 #endif // PNMLPARSER_H

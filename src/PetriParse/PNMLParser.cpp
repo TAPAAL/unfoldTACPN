@@ -53,6 +53,12 @@ void PNMLParser::parse(std::istream& xml,
     doc.parse<0>(&buffer[0]);
 
     rapidxml::xml_node<>* root = doc.first_node();
+
+    if(root == nullptr)
+    {
+        std::cerr << "ERROR: Could not open the file for reading " << std::endl;
+    }
+
     if(strcmp(root->name(), "pnml") != 0)
     {
         std::cerr << "expecting <pnml> tag as root-node in xml tree." << std::endl;
@@ -62,6 +68,13 @@ void PNMLParser::parse(std::istream& xml,
     auto declarations = root->first_node("declaration");
     if(declarations == nullptr){
         declarations = root->first_node("net")->first_node("declaration");
+    }
+
+    {   // add the default color-type
+        auto ct = new unfoldtacpn::Colored::ColorType("dot");
+        ct->addDot();
+        colorTypes["dot"] = ct;
+        builder->addColorType("dot", ct);
     }
 
     if (declarations) {
@@ -122,6 +135,7 @@ void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
               new unfoldtacpn::Colored::ColorType(std::string(element->first_attribute("id")->value()));
 
     if (strcmp(type->name(), "dot") == 0) {
+        return;
         ct->addDot();
     } else if (strcmp(type->name(), "productsort") == 0) {
         for (auto it = type->first_node(); it; it = it->next_sibling()) {
@@ -454,11 +468,9 @@ std::pair<std::string, std::vector<const Colored::Color*>> PNMLParser::parseTime
                     }
                 }
             }
-
-
         } else if (strcmp(i->name(), "inscription") == 0) {
             inscription = i->first_attribute("inscription")->value();
-
+            std::cerr << "Got " << inscription << std::endl;
         }
     }
     return std::make_pair(inscription, colors);
@@ -495,6 +507,7 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     colors.push_back(new Colored::Color());
     timeInvariants.push_back(Colored::TimeInvariant::createFor(starInvariant, colors, constantValues));
 
+    bool found_hl = false;
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         // name element is ignored
         if (strcmp(it->name(), "colorinvariant") == 0) {
@@ -504,6 +517,7 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
             std::unordered_map<std::string, const unfoldtacpn::Colored::Color*> binding;
             unfoldtacpn::Colored::ExpressionContext context {binding, colorTypes};
             hlinitialMarking = parseArcExpression(it->first_node("structure"))->eval(context);
+            found_hl = true;
         } else if (strcmp(it->name(), "type") == 0) {
             type = parseUserSort(it);
         }
@@ -515,8 +529,12 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
         exit(ErrorCode);
     }
     //Create place
-    if (!type) {
-        type = Colored::DotConstant::dotConstant(nullptr)->getColorType();
+    if (type == nullptr) {
+        type = colorTypes["dot"];
+    }
+    if(!found_hl && type->size() == 1)
+    {
+        hlinitialMarking = unfoldtacpn::Colored::Multiset(&(*type)[0], initialMarking);
     }
     builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, x, y);
 }
