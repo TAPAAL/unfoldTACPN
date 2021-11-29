@@ -95,6 +95,7 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
 
     class PBuilder : public DummyBuilder {
 
+        bool seen_place = false;
         void addPlace(const std::string& name,
             int tokens,
             bool strict,
@@ -105,15 +106,21 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
             BOOST_REQUIRE_EQUAL(strict, false);
             BOOST_REQUIRE_EQUAL(bound, 9);
             BOOST_REQUIRE_EQUAL(tokens, 10);
+            BOOST_REQUIRE(!seen_place);
+            seen_place = true;
         }
 
+        bool seen_transition = false;
         virtual void addTransition(const std::string &name, bool urgent,
             double, double) {
             BOOST_REQUIRE_EQUAL("T2", name);
             BOOST_REQUIRE(!urgent);
+            BOOST_REQUIRE(!seen_transition);
+            seen_transition = true;
         };
 
         /* Add timed colored input arc with given arc expression*/
+        bool seen_input = false;
         virtual void addInputArc(const std::string &place,
             const std::string &transition,
             bool inhibitor,
@@ -126,15 +133,19 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
             BOOST_REQUIRE_EQUAL(ustrict, false);
             BOOST_REQUIRE_EQUAL(lower, 1);
             BOOST_REQUIRE_EQUAL(upper, 5);
+            BOOST_REQUIRE(!seen_input);
+            seen_input = true;
         };
 
         /** Add output arc with given weight */
+        bool seen_output = false;
         virtual void addOutputArc(const std::string& transition,
             const std::string& place,
             int weight) {
             BOOST_REQUIRE_EQUAL("T2", transition);
             BOOST_REQUIRE_EQUAL("P0", place);
             BOOST_REQUIRE_EQUAL(weight, 4);
+            BOOST_REQUIRE(!seen_output);
         };
 
         /* Add transport arc with given arc expression */

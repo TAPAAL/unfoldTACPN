@@ -108,6 +108,12 @@ namespace unfoldtacpn {
         arc.place = p;
         arc.transition = t;
         arc.expr = expr;
+        if(arc.expr == nullptr)
+        {
+            std::vector<Colored::ColorExpression_ptr> colors{std::make_shared<Colored::DotConstantExpression>()};
+            arc.expr = std::make_shared<Colored::NumberOfExpression>(
+                                                std::move(colors), weight);
+        }
         arc.input = (&source) == (&place);
         arc.weight = weight;
         arc.interval = intervals;
@@ -204,6 +210,7 @@ namespace unfoldtacpn {
         }
         else
         {
+            _ptplacenames[place.name][0] = place.name;
             const unfoldtacpn::Colored::Color* color = place.type ? &(*place.type)[0] : (const unfoldtacpn::Colored::Color*)nullptr;
             Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color);
             builder.addPlace(place.name, place.marking.size(), invariant.isBoundStrict(), invariant.getBound(),
@@ -249,7 +256,9 @@ namespace unfoldtacpn {
         auto transitionPos = _transitionlocations[transitionId];
         size_t i = 0;
         for (auto& b : gen) {
-            std::string name = transition.name + "Sub" + std::to_string(i++);
+            std::string name = transition.name;
+            if(!gen.isInitial())
+                name += "Sub" + std::to_string(i++);
             builder.addTransition(name, transition.urgent, std::get<0>(transitionPos) + buffer, std::get<1>(transitionPos));
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
@@ -307,12 +316,17 @@ namespace unfoldtacpn {
         auto ms = arc.expr->eval(context);
         int shadowWeight = 0;
         std::vector<Colored::TimeInterval>& timeIntervals = arc.interval;
+        bool is_singular = true;
         for (const auto& color : ms) {
             if (color.second == 0) {
                 continue;
             }
             shadowWeight += color.second;
-            const std::string& pName = _ptplacenames[_places[arc.place].name][color.first->getId()];
+            is_singular &= color.first->getColorType()->size() == 1;
+            auto it = _ptplacenames.find(_places[arc.place].name);
+            const std::string& pName = it == std::end(_ptplacenames) ?
+                _places[arc.place].name :
+                it->second[color.first->getId()];
             if (!arc.input) {
                 builder.addOutputArc(tName, pName, color.second);
             } else {
@@ -322,8 +336,9 @@ namespace unfoldtacpn {
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
         }
-        if(shadowWeight > 0) {
-            std::string pName = _shadowPlacesNames[_places[arc.place].name];
+        if(shadowWeight > 0 && !is_singular) { // we only add shadow-places if we have a non-singleton color
+            auto it = _shadowPlacesNames.find(_places[arc.place].name);
+            const std::string& pName = it == std::end(_shadowPlacesNames) ? _places[arc.place].name : it->second;
             if (!arc.input) {
                 builder.addOutputArc(tName, pName, shadowWeight);
             } else {
