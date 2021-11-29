@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
         }
     };
 
-    auto f = loadFile("single_place.xml");
+    auto f = loadFile("single_colored_place.xml");
     BOOST_REQUIRE(f);
     ColoredPetriNetBuilder b;
     b.parseNet(f);
