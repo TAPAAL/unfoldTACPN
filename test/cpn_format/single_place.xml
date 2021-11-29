@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
   <net active="true" id="TAPN1" type="P/T net">
-    <place displayName="true" id="P0" initialMarking="3" invariant="&lt;= 9" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="195" positionY="195">
+    <place displayName="true" id="P0" initialMarking="9" invariant="&lt;= 10" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="180" positionY="210">
       <type>
-        <text>dot</text>
+        <text>T</text>
         <structure>
-          <usersort declaration="dot"/>
+          <usersort declaration="T"/>
         </structure>
       </type>
       <hlinitialMarking>
-        <text>(3'dot)</text>
+        <text>(1'0 + 3'1 + 5'2)</text>
         <structure>
           <add>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="1">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="0"/>
+                </subterm>
+              </numberof>
+            </subterm>
             <subterm>
               <numberof>
                 <subterm>
@@ -20,7 +32,19 @@
                   </numberconstant>
                 </subterm>
                 <subterm>
-                  <useroperator declaration="dot"/>
+                  <useroperator declaration="1"/>
+                </subterm>
+              </numberof>
+            </subterm>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="5">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="2"/>
                 </subterm>
               </numberof>
             </subterm>
@@ -28,9 +52,15 @@
         </structure>
       </hlinitialMarking>
       <colorinvariant>
-        <inscription inscription="&lt;= 9"/>
-        <colortype name="dot">
-          <color value="dot"/>
+        <inscription inscription="&lt;= 1"/>
+        <colortype name="T">
+          <color value="1"/>
+        </colortype>
+      </colorinvariant>
+      <colorinvariant>
+        <inscription inscription="&lt;= 15"/>
+        <colortype name="T">
+          <color value="2"/>
         </colortype>
       </colorinvariant>
     </place>
@@ -40,6 +70,13 @@
       <declarations>
         <namedsort id="dot" name="dot">
           <dot/>
+        </namedsort>
+        <namedsort id="T" name="T">
+          <cyclicenumeration>
+            <feconstant id="0" name="T"/>
+            <feconstant id="1" name="T"/>
+            <feconstant id="2" name="T"/>
+          </cyclicenumeration>
         </namedsort>
       </declarations>
     </structure>

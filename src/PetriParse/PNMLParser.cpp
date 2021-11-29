@@ -461,9 +461,8 @@ std::pair<std::string, std::vector<const Colored::Color*>> PNMLParser::parseTime
             else {
                 for (auto it = i->first_node(); it; it = it->next_sibling()) {
                     if (strcmp(it->name(), "color") == 0) {
-                        Colored::Color* test = new Colored::Color(colorTypes[colorTypeName], 0, it->first_attribute("value")->value());
-                        colors.push_back(test);
-
+                        auto* type = colorTypes[colorTypeName];
+                        colors.emplace_back(&(*type)[it->first_attribute("value")->value()]);
                     }
                     else {
                         std::cerr << "the colortype to the place element " << element->first_attribute("id")->value() << " does not have or should only have colors" << std::endl;
@@ -747,7 +746,7 @@ void PNMLParser::parsePosition(rapidxml::xml_node<>* element, double& x, double&
 
 const unfoldtacpn::Colored::Color* PNMLParser::findColor(const char* name) const {
     for (const auto& elem : colorTypes) {
-        auto col = (*elem.second)[name];
+        auto* col = &(*elem.second)[name];
         if (col)
             return col;
     }

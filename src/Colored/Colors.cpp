@@ -5,6 +5,7 @@
  */
 
 #include "Colored/Colors.h"
+#include "errorcodes.h"
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -43,7 +44,7 @@ namespace unfoldtacpn {
             _colorType = new ColorType("*");
         }
 
-        Color::Color(ColorType* colorType, uint32_t id, std::vector<const Color*>& colors)
+        Color::Color(ColorType* colorType, uint32_t id, const std::vector<const Color*>& colors)
                 : _tuple(colors), _colorType(colorType), _colorName(""), _id(id)
         {
             if (colorType != nullptr)
@@ -152,19 +153,26 @@ namespace unfoldtacpn {
         }
 
         void ColorType::addColor(const char* colorName) {
-            _colors.emplace_back(this, _colors.size(), colorName);
+            auto nid = _colors.size();
+            _colors.emplace_back(this, nid, colorName);
+            for(size_t i = 0; i < _colors.size(); ++i)
+                assert(i == _colors[i].getId());
         }
 
         void ColorType::addColor(std::vector<const Color*>& colors) {
-            _colors.emplace_back(this, (uint32_t)_colors.size(), colors);
+            auto nid = _colors.size();
+            _colors.emplace_back(this, nid, colors);
+            for(size_t i = 0; i < _colors.size(); ++i)
+                assert(i == _colors[i].getId());
         }
 
-        const Color* ColorType::operator[] (const char* index) {
+        const Color& ColorType::operator[] (const char* index) {
             for (size_t i = 0; i < _colors.size(); i++) {
                 if (strcmp(operator[](i).toString().c_str(), index) == 0)
-                    return &operator[](i);
+                    return operator[](i);
             }
-            return nullptr;
+            std::cerr << "ERROR: Couldn't find color '" << index << "'";
+            std::exit(ErrorCode);
         }
 
         const Color& ProductType::operator[](size_t index) {
@@ -201,26 +209,27 @@ namespace unfoldtacpn {
             return &operator[](sum);
         }
 
-        const Color* ProductType::operator[](const char* index) {
+        const Color& ProductType::operator[](const char* index) {
             return operator[](std::string(index));
         }
 
-        const Color* ProductType::operator[](const std::string& index) {
+        const Color& ProductType::operator[](const std::string& index) {
             std::string str(index.substr(1, index.size() - 2));
             std::vector<std::string> parts = split(str, ',');
 
             if (parts.size() != constituents.size()) {
-                return nullptr;
+                std::cerr << "ERROR: Zero color constituents" << std::endl;
+                std::exit(ErrorCode);
             }
 
             size_t sum = 0;
             size_t mult = 1;
             for (size_t i = 0; i < parts.size(); ++i) {
-                sum += mult * (*constituents[i])[parts[i]]->getId();
+                sum += mult * (*constituents[i])[parts[i]].getId();
                 mult *= constituents[i]->size();
             }
 
-            return &operator[](sum);
+            return operator[](sum);
         }
 
     }

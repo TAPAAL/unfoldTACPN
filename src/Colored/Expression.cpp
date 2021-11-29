@@ -9,9 +9,7 @@ namespace Colored {
         if (color.compare("dot") == 0)
            return DotConstant::dotConstant(nullptr);
        for (auto& elem : colorTypes) {
-           auto col = (*elem.second)[color];
-           if (col)
-               return col;
+           return &(*elem.second)[color];
        }
        printf("Could not find color: %s\nCANNOT_COMPUTE\n", color.c_str());
        exit(ErrorCode);

@@ -39,6 +39,8 @@ namespace unfoldtacpn {
                                           double y) {
         if(_placenames.count(name) == 0){
             uint32_t next = _placenames.size();
+            if(type == nullptr)
+                type = _colors["dot"];
             _places.emplace_back(Colored::Place{name, type, tokens, invariant});
             _placenames[name] = next;
             _placelocations.push_back(std::tuple<double, double>(x,y));
@@ -213,7 +215,7 @@ namespace unfoldtacpn {
         else
         {
             _ptplacenames[place.name][0] = place.name;
-            const unfoldtacpn::Colored::Color* color = place.type ? &(*place.type)[0] : (const unfoldtacpn::Colored::Color*)nullptr;
+            const unfoldtacpn::Colored::Color* color = &(*place.type)[0];
             Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color);
             builder.addPlace(place.name, place.marking.size(), invariant.isBoundStrict(), invariant.getBound(),
                 std::get<0>(placePos), std::get<1>(placePos));
@@ -223,7 +225,7 @@ namespace unfoldtacpn {
     Colored::TimeInvariant ColoredPetriNetBuilder::getTimeInvariantForPlace(std::vector< Colored::TimeInvariant> TimeInvariants, const Colored::Color* color) {
         if(color != nullptr)
         {
-            for (Colored::TimeInvariant element : TimeInvariants) {
+            for (Colored::TimeInvariant& element : TimeInvariants) {
                 if (!element.getColor().isTuple()) {
                     if (element.getColor().getId() == color->getId()) {
                         return element;
@@ -238,7 +240,9 @@ namespace unfoldtacpn {
                                 matches = false;
                         }
                         if (matches)
+                        {
                             return element;
+                        }
                     }
                 }
             }

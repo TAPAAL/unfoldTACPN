@@ -18,8 +18,8 @@ namespace unfoldtacpn {
         class TimeInvariant{
 
         public:
-            TimeInvariant(Colored::Color color) : strictComparison(true), bound(std::numeric_limits<int>::max()), color(color) {};
-            TimeInvariant(bool strictComparison, int bound, Colored::Color color) : strictComparison(strictComparison), bound(bound), color(color) { };
+            TimeInvariant(Colored::Color&& color) : strictComparison(true), bound(std::numeric_limits<int>::max()), color(std::move(color)) {};
+            TimeInvariant(bool strictComparison, int bound, Colored::Color&& color) : strictComparison(strictComparison), bound(bound), color(std::move(color)) { };
             TimeInvariant(const TimeInvariant& ti) : strictComparison(ti.strictComparison), bound(ti.bound), color(ti.color) { };
             TimeInvariant& operator=(const TimeInvariant& ti)
             {
@@ -38,8 +38,8 @@ namespace unfoldtacpn {
             inline const Colored::Color getColor() {return color;}
 
         public: // statics
-            static TimeInvariant createFor(const std::string& invariant, std::vector<const Colored::Color*> colors, std::unordered_map<std::string, uint32_t> constants);
-            static Colored::Color createColor(std::vector<const Colored::Color*> colors);
+            static TimeInvariant createFor(const std::string& invariant, const std::vector<const Colored::Color*>& colors, const std::unordered_map<std::string, uint32_t>& constants);
+            static Colored::Color createColor(const std::vector<const Colored::Color*>& colors);
 
         private: // data
             bool strictComparison;

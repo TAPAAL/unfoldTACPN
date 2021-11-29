@@ -8,8 +8,7 @@
 namespace unfoldtacpn {
     namespace Colored {
 
-        TimeInvariant TimeInvariant::createFor(const std::string& invariant, std::vector<const Colored::Color*> colors, std::unordered_map<std::string, uint32_t> constants){
-            Colored::Color color = createColor(colors);
+        TimeInvariant TimeInvariant::createFor(const std::string& invariant, const std::vector<const Colored::Color*>& colors, const std::unordered_map<std::string, uint32_t>& constants){
             bool strict = false;
 
             std::string leq = "<=";
@@ -34,17 +33,17 @@ namespace unfoldtacpn {
                 if (constants.find(number) == constants.end())
                     bound = std::stoi(number);
                 else
-                    bound = constants[number];
+                    bound = constants.find(number)->second;
             }
 
-
+            Colored::Color color = createColor(colors);
             if (bound == std::numeric_limits<int>().max())
-                return TimeInvariant(color);
+                return TimeInvariant(std::move(color));
             else
-                return TimeInvariant(strict, bound, color);
+                return TimeInvariant(strict, bound, std::move(color));
         }
 
-        Colored::Color TimeInvariant::createColor(std::vector<const Colored::Color*> colors) {
+        Colored::Color TimeInvariant::createColor(const std::vector<const Colored::Color*>& colors) {
             if (colors.size() == 1 ) {
                 return Color(colors.front()->getColorType(), colors.front()->getId(), colors.front()->getColorName().c_str());
             } else {
