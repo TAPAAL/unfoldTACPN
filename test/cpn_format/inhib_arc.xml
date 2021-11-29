@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <net active="true" id="TAPN1" type="P/T net">
+    <place displayName="true" id="P0" initialMarking="8" invariant="&lt;= 5" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="240" positionY="180">
+      <type>
+        <text>t</text>
+        <structure>
+          <usersort declaration="t"/>
+        </structure>
+      </type>
+      <hlinitialMarking>
+        <text>(2'0 + 1'1 + 5'2)</text>
+        <structure>
+          <add>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="2">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="0"/>
+                </subterm>
+              </numberof>
+            </subterm>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="1">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="1"/>
+                </subterm>
+              </numberof>
+            </subterm>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="5">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="2"/>
+                </subterm>
+              </numberof>
+            </subterm>
+          </add>
+        </structure>
+      </hlinitialMarking>
+    </place>
+    <transition angle="0" displayName="true" id="T0" infiniteServer="false" name="T0" nameOffsetX="0" nameOffsetY="0" player="0" positionX="240" positionY="330" priority="0" urgent="false"/>
+    <arc id="I0" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="P0" target="T0" type="tapnInhibitor" weight="3">
+      <hlinscription>
+        <text>1'dot.all</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <all>
+                <usersort declaration="dot"/>
+              </all>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="255" yCoord="210"/>
+      <arcpath arcPointType="false" id="1" xCoord="255" yCoord="330"/>
+    </arc>
+  </net>
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="t" name="t">
+          <cyclicenumeration>
+            <feconstant id="0" name="t"/>
+            <feconstant id="1" name="t"/>
+            <feconstant id="2" name="t"/>
+          </cyclicenumeration>
+        </namedsort>
+      </declarations>
+    </structure>
+  </declaration>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>

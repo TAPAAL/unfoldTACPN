@@ -98,8 +98,14 @@ namespace unfoldtacpn {
         ColorTypeMap _colors;
         double _time;
 
-        std::string arcToString(Colored::Arc& arc) const ;
-
+        std::string arcToString(Colored::Arc& arc) const;
+        const std::string& findShadowName(const std::string& id);
+        const std::string& findShadowName(uint32_t id) { return findShadowName(_places[id].name); }
+        const std::string& findPlaceName(uint32_t id, const Colored::Color* color)
+        {
+            return findPlaceName(_places[id].name, color);
+        }
+        const std::string& findPlaceName(const std::string& place, const Colored::Color* color);
         Colored::TimeInterval getTimeIntervalForArc(std::vector< Colored::TimeInterval> timeIntervals,const Colored::Color* color);
         void unfoldPlace(TAPNBuilderInterface& builder, Colored::Place& place);
         Colored::TimeInvariant getTimeInvariantForPlace(std::vector< Colored::TimeInvariant> TimeInvariants, const Colored::Color* color);

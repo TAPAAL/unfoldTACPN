@@ -92,7 +92,8 @@ namespace unfoldtacpn {
             std::exit(ErrorCode);
         }
 
-        if(inhibitor && intervals.size() != 0)
+        // if we have an inhibitor, call intervals/guards must be zero-infinity.
+        if(inhibitor && std::any_of(std::begin(intervals), std::end(intervals), [](auto& i){ return !i.isZeroInfinity();}))
         {
             std::cout << "Source inhibitors cannot have guards, between " << source << " and " << target << std::endl;
             std::exit(ErrorCode);
@@ -195,7 +196,8 @@ namespace unfoldtacpn {
                 std::string name = place.name + "Sub" + std::to_string(i);
                 const Colored::Color* color = &place.type->operator[](i);
                 Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
-                builder.addPlace(name, place.marking[color], invariant.isBoundStrict(), invariant.getBound(), x, y);
+                auto r = place.marking[color];
+                builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), x, y);
 
                 _ptplacenames[place.name][color->getId()] = std::move(name);
                 xBuffer += 50;
@@ -277,8 +279,8 @@ namespace unfoldtacpn {
         for (uint32_t i = 0; i < _inhibitorArcs.size(); ++i) {
             if (_transitions[_inhibitorArcs[i].transition].name.compare(oldname) == 0) {
                 Colored::Arc inhibArc = _inhibitorArcs[i];
-                std::string place = _shadowPlacesNames[_places[inhibArc.place].name];
-                builder.addInputArc(place, newname, inhibArc.inhibitor, inhibArc.weight, false, false, 0, 0);
+                auto& place = findShadowName(inhibArc.place);
+                builder.addInputArc(place, newname, true, inhibArc.weight, false, true, 0, std::numeric_limits<int>::max());
             }
         }
     }
@@ -291,8 +293,8 @@ namespace unfoldtacpn {
         if(in_ms.size() != 1) { std::cerr << "ERROR: Ill-formed transport-arc color" << std::endl; std::exit(ErrorCode); }
         const auto in_color = *in_ms.begin();
         const auto out_color = *out_ms.begin();
-        const std::string& inName = _ptplacenames[_places[arc.source].name][in_color.first->getId()];
-        const std::string& outName = _ptplacenames[_places[arc.destination].name][out_color.first->getId()];
+        const std::string& inName = findPlaceName(arc.source, in_color.first);
+        const std::string& outName = findPlaceName(arc.destination, out_color.first);
         {
             // add actual transport
             Colored::TimeInterval timeInterval = getTimeIntervalForArc(arc.interval, in_color.first);
@@ -304,11 +306,29 @@ namespace unfoldtacpn {
             // add shadow
             Colored::Color color;
             Colored::TimeInterval timeInterval(color);
-            builder.addInputArc(inName, tName, false, in_color.second,
+            builder.addInputArc(findShadowName(arc.source), tName, false, in_color.second,
                 timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
                 timeInterval.getLowerBound(), timeInterval.getUpperBound());
-            builder.addOutputArc(tName, outName, out_color.second);
+            builder.addOutputArc(tName, findShadowName(arc.destination), out_color.second);
         }
+    }
+
+    const std::string& ColoredPetriNetBuilder::findShadowName(const std::string& id)
+    {
+        auto it = _shadowPlacesNames.find(id);
+        if(it == std::end(_shadowPlacesNames))
+            return id;
+        else
+            return it->second;
+    }
+
+    const std::string& ColoredPetriNetBuilder::findPlaceName(const std::string& place, const Colored::Color* color)
+    {
+        auto it = _ptplacenames.find(place);
+        if(it == std::end(_ptplacenames))
+            return place;
+        else
+            return it->second[color->getId()];
     }
 
     void ColoredPetriNetBuilder::unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {
@@ -323,10 +343,7 @@ namespace unfoldtacpn {
             }
             shadowWeight += color.second;
             is_singular &= color.first->getColorType()->size() == 1;
-            auto it = _ptplacenames.find(_places[arc.place].name);
-            const std::string& pName = it == std::end(_ptplacenames) ?
-                _places[arc.place].name :
-                it->second[color.first->getId()];
+            auto& pName = findPlaceName(arc.place, color.first);
             if (!arc.input) {
                 builder.addOutputArc(tName, pName, color.second);
             } else {
@@ -337,8 +354,7 @@ namespace unfoldtacpn {
             }
         }
         if(shadowWeight > 0 && !is_singular) { // we only add shadow-places if we have a non-singleton color
-            auto it = _shadowPlacesNames.find(_places[arc.place].name);
-            const std::string& pName = it == std::end(_shadowPlacesNames) ? _places[arc.place].name : it->second;
+            const std::string& pName = findShadowName(arc.place);
             if (!arc.input) {
                 builder.addOutputArc(tName, pName, shadowWeight);
             } else {

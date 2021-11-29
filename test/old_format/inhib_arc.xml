@@ -1,0 +1,9 @@
+<pnml>
+<net id="ComposedModel" type="P/T net">
+<place id="TAPN1_P0" name="TAPN1_P0" invariant="&lt;= 5" initialMarking="2" >
+<graphics><position x="240" y="180" /></graphics></place>
+<transition player="0" id="TAPN1_T0" name="TAPN1_T0" urgent="false">
+<graphics><position x="240" y="330" /></graphics></transition>
+<inhibitorArc inscription="[0,inf)" source="TAPN1_P0" target="TAPN1_T0" weight="3"/>
+</net>
+</pnml>

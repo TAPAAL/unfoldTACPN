@@ -431,6 +431,10 @@ void PNMLParser::handleArc(rapidxml::xml_node<>* element)
     {
         parseArc(element, true);
     }
+    else if(strcmp(t, "tapnInhibitor") == 0)
+    {
+        parseArc(element, true);
+    }
     else if(strcmp(t, "transport") == 0)
     {
         parseSingleTransportArc(element);

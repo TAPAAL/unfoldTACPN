@@ -164,3 +164,91 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
     PBuilder p;
     b.unfold(p);
 }
+
+BOOST_AUTO_TEST_CASE(InhibitorArc) {
+
+    class PBuilder : public DummyBuilder {
+    public:
+        size_t n_places = 0;
+        std::set<std::string> place_names{"P0Sub0","P0Sub1", "P0Sub2"};
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+            ++n_places;
+            if(name.compare("P0Sum") != 0)
+            {
+                BOOST_REQUIRE(place_names.count(name) == 1);
+                place_names.erase(name);
+                BOOST_REQUIRE_EQUAL(strict, false);
+                BOOST_REQUIRE_EQUAL(bound, 5);
+                if(name == "P0Sub0")
+                    BOOST_REQUIRE_EQUAL(tokens, 2);
+                else if(name == "P0Sub1")
+                    BOOST_REQUIRE_EQUAL(tokens, 1);
+                else if(name == "P0Sub2")
+                    BOOST_REQUIRE_EQUAL(tokens, 5);
+            }
+            else
+            {
+                BOOST_REQUIRE_EQUAL(tokens, 8);
+            }
+            BOOST_REQUIRE_LE(n_places, 4);
+        }
+
+        size_t n_trans = 0;
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+            ++n_trans;
+            BOOST_REQUIRE_EQUAL("T0", name);
+            BOOST_REQUIRE(!urgent);
+            BOOST_REQUIRE_LE(n_trans, 1);
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        size_t n_input = 0;
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            ++n_input;
+            BOOST_REQUIRE_EQUAL("T0", transition);
+            BOOST_REQUIRE_EQUAL("P0Sum", place);
+            BOOST_REQUIRE_EQUAL(weight, 3);
+            BOOST_REQUIRE_EQUAL(lstrict, false);
+            BOOST_REQUIRE_EQUAL(ustrict, true);
+            BOOST_REQUIRE_EQUAL(lower, 0);
+            BOOST_REQUIRE_EQUAL(inhibitor, true);
+            BOOST_REQUIRE_EQUAL(upper, std::numeric_limits<int>::max());
+            BOOST_REQUIRE_LE(n_input, 1);
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+            BOOST_REQUIRE(false);
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("inhib_arc.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+    BOOST_REQUIRE_EQUAL(p.n_places, 4);
+    BOOST_REQUIRE_EQUAL(p.n_trans, 1);
+    BOOST_REQUIRE_EQUAL(p.n_input, 1);
+}
