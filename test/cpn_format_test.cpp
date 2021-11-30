@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
                 BOOST_REQUIRE_EQUAL(strict, true);
                 BOOST_REQUIRE_EQUAL(bound, std::numeric_limits<int>::max());
             }
-            BOOST_REQUIRE_LE(n_places, 8);
+            BOOST_REQUIRE_LE(n_places, 6);
         }
 
         size_t n_trans = 0;
@@ -506,7 +506,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
     b.parseNet(f);
     PBuilder p;
     b.unfold(p);
-    BOOST_REQUIRE_EQUAL(p.n_places, 8);
+    BOOST_REQUIRE_EQUAL(p.n_places, 6);
     BOOST_REQUIRE_EQUAL(p.n_trans, 3);
     BOOST_REQUIRE_EQUAL(p.n_transport, 3);
 }

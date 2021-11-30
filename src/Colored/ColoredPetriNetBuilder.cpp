@@ -489,11 +489,17 @@ namespace unfoldtacpn {
         if (_expr != nullptr) {
             _expr->getVariables(variables);
         }
-        for (auto arc : transition.arcs) {
+        for (auto& arc : transition.arcs) {
             assert(arc.expr != nullptr);
             arc.expr->getVariables(variables);
         }
-        for (auto var : variables) {
+        for (auto& arc : transition.transport) {
+            assert(arc.in_expr != nullptr);
+            assert(arc.out_expr != nullptr);
+            arc.in_expr->getVariables(variables);
+            arc.out_expr->getVariables(variables);
+        }
+        for (auto& var : variables) {
             _bindings[var->name] = &var->colorType->operator[](0);
         }
 
