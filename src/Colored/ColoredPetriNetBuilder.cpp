@@ -123,6 +123,7 @@ namespace unfoldtacpn {
         arc.inhibitor = inhibitor;
         if(inhibitor){
             _inhibitorArcs[arc.transition].emplace_back(std::move(arc));
+            _places[p].inhibitor = true;
         } else {
             _transitions[t].arcs.emplace_back(std::move(arc));
         }
