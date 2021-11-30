@@ -17,7 +17,7 @@
 namespace unfoldtacpn {
     class ColoredPetriNetBuilder {
     public:
-        typedef std::unordered_map<std::string, Colored::ColorType*> ColorTypeMap;
+        typedef std::unordered_map<std::string, const Colored::ColorType*> ColorTypeMap;
         typedef std::unordered_map<std::string, std::unordered_map<uint32_t , std::string>> PTPlaceMap;
         typedef std::unordered_map<std::string, std::vector<std::string>> PTTransitionMap;
 
@@ -29,8 +29,8 @@ namespace unfoldtacpn {
 
         void addPlace(const std::string& name,
                       Colored::Multiset&& tokens,
-                      Colored::ColorType* type,
-                      std::vector<Colored::TimeInvariant>& invariant,
+                      const Colored::ColorType* type,
+                      const std::vector<Colored::TimeInvariant>& invariant,
                       double x = 0,
                       double y = 0);
         void addTransition(const std::string& name,
@@ -43,7 +43,7 @@ namespace unfoldtacpn {
                                              const std::vector<unfoldtacpn::Colored::TimeInterval>& intervals);
 
         void addColorType(const std::string& id,
-                Colored::ColorType* type);
+                const Colored::ColorType* type);
 
         void addTransportArc(const std::string& source,
                 const std::string& transition,
@@ -51,7 +51,7 @@ namespace unfoldtacpn {
                 int weight,
                 const Colored::ArcExpression_ptr& in_expr,
                 const Colored::ArcExpression_ptr& out_expr,
-                std::vector<Colored::TimeInterval>& interval);
+                const std::vector<Colored::TimeInterval>& interval);
 
         double getUnfoldTime() const {
             return _time;
@@ -98,20 +98,20 @@ namespace unfoldtacpn {
         ColorTypeMap _colors;
         double _time;
 
-        std::string arcToString(Colored::Arc& arc) const;
-        const std::string& findsumName(const std::string& id);
-        const std::string& findsumName(uint32_t id) { return findsumName(_places[id].name); }
-        const std::string& findPlaceName(uint32_t id, const Colored::Color* color)
+        std::string arcToString(const Colored::Arc& arc) const;
+        const std::string& findsumName(const std::string& id) const;
+        const std::string& findsumName(uint32_t id) const { return findsumName(_places[id].name); }
+        const std::string& findPlaceName(uint32_t id, const Colored::Color* color) const
         {
             return findPlaceName(_places[id].name, color);
         }
-        const std::string& findPlaceName(const std::string& place, const Colored::Color* color);
-        Colored::TimeInterval getTimeIntervalForArc(const std::vector< Colored::TimeInterval>& timeIntervals,const Colored::Color* color);
-        void unfoldPlace(TAPNBuilderInterface& builder, Colored::Place& place);
-        Colored::TimeInvariant getTimeInvariantForPlace(const std::vector< Colored::TimeInvariant>& TimeInvariants, const Colored::Color* color);
-        void unfoldTransition(TAPNBuilderInterface& builder, Colored::Transition& transition);
-        void unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);
-        void unfoldTransport(TAPNBuilderInterface& builder, Colored::TransportArc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);
+        const std::string& findPlaceName(const std::string& place, const Colored::Color* color) const;
+        const Colored::TimeInterval& getTimeIntervalForArc(const std::vector< Colored::TimeInterval>& timeIntervals,const Colored::Color* color) const;
+        void unfoldPlace(TAPNBuilderInterface& builder, const Colored::Place& place);
+        const Colored::TimeInvariant& getTimeInvariantForPlace(const std::vector< Colored::TimeInvariant>& TimeInvariants, const Colored::Color* color) const;
+        void unfoldTransition(TAPNBuilderInterface& builder, const Colored::Transition& transition);
+        void unfoldArc(TAPNBuilderInterface& builder, const Colored::Arc& arc, const Colored::ExpressionContext::BindingMap& binding, const std::string& name);
+        void unfoldTransport(TAPNBuilderInterface& builder, const Colored::TransportArc& arc, const Colored::ExpressionContext::BindingMap& binding, const std::string& name);
         void unfoldInhibitorArc(TAPNBuilderInterface& builder, uint32_t transition, const std::string &newname);
     };
 
@@ -133,13 +133,13 @@ namespace unfoldtacpn {
     private:
         Colored::GuardExpression_ptr _expr;
         Colored::ExpressionContext::BindingMap _bindings;
-        ColoredPetriNetBuilder::ColorTypeMap& _colorTypes;
+        const ColoredPetriNetBuilder::ColorTypeMap& _colorTypes;
 
         bool eval();
 
     public:
-        BindingGenerator(Colored::Transition& transition,
-                ColoredPetriNetBuilder::ColorTypeMap& colorTypes);
+        BindingGenerator(const Colored::Transition& transition,
+                const ColoredPetriNetBuilder::ColorTypeMap& colorTypes);
 
         Colored::ExpressionContext::BindingMap& nextBinding();
         Colored::ExpressionContext::BindingMap& currentBinding();

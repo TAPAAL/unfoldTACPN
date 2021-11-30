@@ -74,7 +74,7 @@ namespace unfoldtacpn {
                 throw "You cannot add Multisets over different sets";
             }
             for (auto c : other._set) {
-                const Color* color = DotConstant::dotConstant(nullptr);
+                const Color* color = Color::dotConstant();
                 if (type != nullptr)
                     color = &((*type)[c.first]);
                 (*this)[color] += c.second;
@@ -89,7 +89,7 @@ namespace unfoldtacpn {
                 throw "You cannot add Multisets over different sets";
             }
             for (auto c : _set) {
-                const Color* color = DotConstant::dotConstant(nullptr);
+                const Color* color = Color::dotConstant();
                 if (type != nullptr)
                     color = &((*type)[c.first]);
                 (*this)[color] = std::min(c.second - other[color], c.second);
@@ -173,7 +173,7 @@ namespace unfoldtacpn {
 
         std::pair<const Color *, uint32_t> Multiset::Iterator::operator*() {
             auto& item = ms->_set[index];
-            const Color* color = DotConstant::dotConstant(nullptr);
+            const Color* color = Color::dotConstant();
             if (ms->type != nullptr)
                 color = &(*ms->type)[item.first];
             return {color, uint32_t{item.second}};

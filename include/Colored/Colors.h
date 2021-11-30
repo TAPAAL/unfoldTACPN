@@ -66,6 +66,8 @@ namespace unfoldtacpn {
                 return _id;
             }
 
+            static const Color* dotConstant();
+
             const Color* operator[] (size_t index) const;
             bool operator< (const Color& other) const;
             bool operator> (const Color& other) const;
@@ -85,31 +87,6 @@ namespace unfoldtacpn {
             std::string toString() const;
             static std::string toString(const Color* color);
             static std::string toString(const std::vector<const Color*>& colors);
-        };
-
-        /*
-         *  Singleton pattern from:
-         * https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
-         */
-        class DotConstant : public Color {
-        private:
-            DotConstant();
-
-        public:
-            static const Color* dotConstant(ColorType *ct) {
-                static DotConstant _instance;
-                if(ct != nullptr){
-                    _instance._colorType = ct;
-                }
-                return &_instance;
-            }
-
-            DotConstant(DotConstant const&) = delete;
-            void operator=(DotConstant const&) = delete;
-
-            bool operator== (const DotConstant& other) {
-                return true;
-            }
         };
 
         class ColorType {
@@ -166,9 +143,6 @@ namespace unfoldtacpn {
 
             virtual void addColor(const char* colorName);
             virtual void addColor(std::vector<const Color*>& colors);
-            virtual void addDot() {
-                _colors.push_back(*DotConstant::dotConstant(this));
-            }
 
             virtual size_t size() const {
                 return _colors.size();
@@ -234,7 +208,7 @@ namespace unfoldtacpn {
 
         class ProductType : public ColorType {
         private:
-            std::vector<ColorType*> constituents;
+            std::vector<const ColorType*> constituents;
             mutable std::unordered_map<size_t,Color> cache;
 
         public:
@@ -242,13 +216,12 @@ namespace unfoldtacpn {
             ~ProductType() {
             }
 
-            void addType(ColorType* type) {
+            void addType(const ColorType* type) {
                 constituents.push_back(type);
             }
 
             void addColor(const char* colorName) override {}
             void addColor(std::vector<const Color*>& colors) override {}
-            void addDot() override {}
 
             size_t size() const override {
                 size_t product = 1;
@@ -270,7 +243,7 @@ namespace unfoldtacpn {
                 return true;
             }
 
-            const Color* getColor(const std::vector<const Color*>& colors);
+            const Color* getColor(const std::vector<const Color*>& colors) const;
 
             const Color& operator[](size_t index) const override;
             const Color& operator[](int index) const override {
@@ -286,11 +259,11 @@ namespace unfoldtacpn {
 
         struct Variable {
             std::string name;
-            ColorType* colorType;
+            const ColorType* colorType;
         };
 
         struct Binding {
-            Variable* var;
+            const Variable* var;
             const Color* color;
 
             bool operator==(Binding& other) {

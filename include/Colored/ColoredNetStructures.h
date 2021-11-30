@@ -55,7 +55,7 @@ namespace unfoldtacpn {
 
         struct Place {
             std::string name;
-            ColorType* type;
+            const ColorType* type;
             Multiset marking;
             std::vector<Colored::TimeInvariant> invariants;
             bool inhibiting = false;

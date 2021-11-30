@@ -144,8 +144,13 @@ namespace unfoldtacpn {
         }
 
 
-        DotConstant::DotConstant() : Color(nullptr, 0, "dot")
-        {
+        const Color* Color::dotConstant() {
+            static ColorType* _instance = nullptr;
+            if(_instance == nullptr){
+                _instance = new ColorType("dot");
+                _instance->addColor("dot");
+            }
+            return &(*_instance)[0];
         }
 
         StarColorType::StarColorType() : ColorType("*") {
@@ -193,7 +198,7 @@ namespace unfoldtacpn {
             return cache.at(index);
         }
 
-        const Color* ProductType::getColor(const std::vector<const Color*>& colors) {
+        const Color* ProductType::getColor(const std::vector<const Color*>& colors) const {
             size_t product = 1;
             size_t sum = 0;
 

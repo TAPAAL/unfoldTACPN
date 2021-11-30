@@ -40,8 +40,8 @@ namespace unfoldtacpn {
 class PNMLParser {
 public:
 
-    typedef std::unordered_map<std::string, unfoldtacpn::Colored::ColorType*> ColorTypeMap;
-    typedef std::unordered_map<std::string, unfoldtacpn::Colored::Variable*> VariableMap;
+    typedef std::unordered_map<std::string, const unfoldtacpn::Colored::ColorType*> ColorTypeMap;
+    typedef std::unordered_map<std::string, const unfoldtacpn::Colored::Variable*> VariableMap;
 
 public:
     PNMLParser() {
@@ -66,7 +66,7 @@ private:
     unfoldtacpn::Colored::GuardExpression_ptr parseGuardExpression(rapidxml::xml_node<>* element);
     unfoldtacpn::Colored::ColorExpression_ptr parseColorExpression(rapidxml::xml_node<>* element);
     unfoldtacpn::Colored::AllExpression_ptr parseAllExpression(rapidxml::xml_node<>* element);
-    unfoldtacpn::Colored::ColorType* parseUserSort(rapidxml::xml_node<>* element);
+    const unfoldtacpn::Colored::ColorType* parseUserSort(rapidxml::xml_node<>* element);
     unfoldtacpn::Colored::ArcExpression_ptr parseNumberOfExpression(rapidxml::xml_node<>* element);
     void collectColorsInTuple(rapidxml::xml_node<>* element, std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors);
     unfoldtacpn::Colored::ArcExpression_ptr constructAddExpressionFromTupleExpression(rapidxml::xml_node<>* element,std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> collectedColors, uint32_t numberof);
@@ -84,7 +84,6 @@ private:
     std::unordered_map<std::string, uint32_t> constantValues;
     std::map<std::pair<std::string,std::string>, rapidxml::xml_node<>*> transportArcs;
     std::unordered_set<std::string> transitions;
-    unfoldtacpn::Colored::ColorType* base_dot;
 };
 }
 #endif // PNMLPARSER_H

@@ -34,8 +34,8 @@ namespace unfoldtacpn {
 
     void ColoredPetriNetBuilder::addPlace(const std::string &name,
                                           unfoldtacpn::Colored::Multiset &&tokens,
-                                          Colored::ColorType* type,
-                                          std::vector<unfoldtacpn::Colored::TimeInvariant> &invariant, double x,
+                                          const Colored::ColorType* type,
+                                          const std::vector<unfoldtacpn::Colored::TimeInvariant> &invariant, double x,
                                           double y) {
         if(_placenames.count(name) == 0){
             uint32_t next = _placenames.size();
@@ -133,7 +133,7 @@ namespace unfoldtacpn {
                                                  const std::string &destination, int weight,
                                                  const unfoldtacpn::Colored::ArcExpression_ptr &in_expr,
                                                  const unfoldtacpn::Colored::ArcExpression_ptr &out_expr,
-                                                 std::vector<unfoldtacpn::Colored::TimeInterval> &interval) {
+                                                 const std::vector<unfoldtacpn::Colored::TimeInterval> &interval) {
         if(_transitionnames.count(transition) == 0)
         {
             std::cout << "Transition '" << transition << "' not found." << std::endl;
@@ -181,7 +181,7 @@ namespace unfoldtacpn {
         _transitions[t].transport.emplace_back(std::move(transportArc));
     }
 
-    void ColoredPetriNetBuilder::addColorType(const std::string& id, Colored::ColorType* type) {
+    void ColoredPetriNetBuilder::addColorType(const std::string& id, const Colored::ColorType* type) {
         _colors[id] = type;
     }
 
@@ -200,7 +200,7 @@ namespace unfoldtacpn {
         _time = (std::chrono::duration_cast<std::chrono::microseconds>(end - start).count())*0.000001;
     }
 
-    void ColoredPetriNetBuilder::unfoldPlace(TAPNBuilderInterface& builder, Colored::Place& place) {
+    void ColoredPetriNetBuilder::unfoldPlace(TAPNBuilderInterface& builder, const Colored::Place& place) {
         double xBuffer = 0;
         double yBuffer = 0;
         uint32_t index = _placenames[place.name];
@@ -242,7 +242,7 @@ namespace unfoldtacpn {
         }
     }
 
-    Colored::TimeInvariant ColoredPetriNetBuilder::getTimeInvariantForPlace(const std::vector< Colored::TimeInvariant>& time_invariants, const Colored::Color* color) {
+    const Colored::TimeInvariant& ColoredPetriNetBuilder::getTimeInvariantForPlace(const std::vector< Colored::TimeInvariant>& time_invariants, const Colored::Color* color) const {
         if(color != nullptr)
         {
             for (const Colored::TimeInvariant& element : time_invariants) {
@@ -275,7 +275,7 @@ namespace unfoldtacpn {
         exit(ErrorCode);
     }
 
-    void ColoredPetriNetBuilder::unfoldTransition(TAPNBuilderInterface& builder, Colored::Transition& transition) {
+    void ColoredPetriNetBuilder::unfoldTransition(TAPNBuilderInterface& builder, const Colored::Transition& transition) {
         BindingGenerator gen(transition, _colors);
         double buffer = 0;
         uint32_t transitionId = _transitionnames[transition.name];
@@ -309,7 +309,7 @@ namespace unfoldtacpn {
         }
     }
 
-    void ColoredPetriNetBuilder::unfoldTransport(TAPNBuilderInterface& builder, Colored::TransportArc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {
+    void ColoredPetriNetBuilder::unfoldTransport(TAPNBuilderInterface& builder, const Colored::TransportArc& arc, const Colored::ExpressionContext::BindingMap& binding, const std::string& tName) {
         Colored::ExpressionContext context {binding, _colors};
         auto in_ms = arc.in_expr->eval(context);
         auto out_ms = arc.out_expr->eval(context);
@@ -336,7 +336,7 @@ namespace unfoldtacpn {
         const std::string& outName = findPlaceName(arc.destination, out_color.first);
         {
             // add actual transport
-            Colored::TimeInterval timeInterval = getTimeIntervalForArc(arc.interval, in_color.first);
+            auto& timeInterval = getTimeIntervalForArc(arc.interval, in_color.first);
             builder.addTransportArc(inName, tName, outName, in_color.second,
                     timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
@@ -359,7 +359,7 @@ namespace unfoldtacpn {
     }
 
     const std::string empty_sum;
-    const std::string& ColoredPetriNetBuilder::findsumName(const std::string& id)
+    const std::string& ColoredPetriNetBuilder::findsumName(const std::string& id) const
     {
         auto it = _sumPlacesNames.find(id);
         if(it == std::end(_sumPlacesNames))
@@ -368,20 +368,28 @@ namespace unfoldtacpn {
             return it->second;
     }
 
-    const std::string& ColoredPetriNetBuilder::findPlaceName(const std::string& place, const Colored::Color* color)
+    const std::string& ColoredPetriNetBuilder::findPlaceName(const std::string& place, const Colored::Color* color) const
     {
         auto it = _ptplacenames.find(place);
         if(it == std::end(_ptplacenames))
             return place;
         else
-            return it->second[color->getId()];
+        {
+            auto pit = it->second.find(color->getId());
+            if(pit == std::end(it->second))
+            {
+                std::cerr << "ERROR: No match on id of color for place " << place << std::endl;
+                std::exit(ErrorCode);
+            }
+            return pit->second;
+        }
     }
 
-    void ColoredPetriNetBuilder::unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {
+    void ColoredPetriNetBuilder::unfoldArc(TAPNBuilderInterface& builder, const Colored::Arc& arc, const Colored::ExpressionContext::BindingMap& binding, const std::string& tName) {
         Colored::ExpressionContext context {binding, _colors};
         auto ms = arc.expr->eval(context);
         int sumWeight = 0;
-        std::vector<Colored::TimeInterval>& timeIntervals = arc.interval;
+        auto& timeIntervals = arc.interval;
         bool is_singular = true;
         for (const auto& color : ms) {
             if (color.second == 0) {
@@ -393,7 +401,7 @@ namespace unfoldtacpn {
             if (!arc.input) {
                 builder.addOutputArc(tName, pName, color.second);
             } else {
-                Colored::TimeInterval timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
+                auto& timeInterval = getTimeIntervalForArc(timeIntervals, color.first);
                 builder.addInputArc(pName, tName, arc.inhibitor, color.second,
                     timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
@@ -417,8 +425,8 @@ namespace unfoldtacpn {
         }
     }
 
-    Colored::TimeInterval ColoredPetriNetBuilder::getTimeIntervalForArc(const std::vector< Colored::TimeInterval>& timeIntervals,
-        const Colored::Color* color) {
+    const Colored::TimeInterval& ColoredPetriNetBuilder::getTimeIntervalForArc(const std::vector< Colored::TimeInterval>& timeIntervals,
+        const Colored::Color* color) const {
         for (const auto& element : timeIntervals) {
             if (!element.getColor().isTuple()) {
                 if (element.getColor().getId() == color->getId()) {
@@ -447,7 +455,7 @@ namespace unfoldtacpn {
         exit(ErrorCode);
     }
 
-    std::string ColoredPetriNetBuilder::arcToString(Colored::Arc& arc) const {
+    std::string ColoredPetriNetBuilder::arcToString(const Colored::Arc& arc) const {
         return !arc.input ? "(" + _transitions[arc.transition].name + ", " + _places[arc.place].name + ")" :
                "(" + _places[arc.place].name + ", " + _transitions[arc.transition].name + ")";
     }
@@ -481,12 +489,12 @@ namespace unfoldtacpn {
         return _generator->currentBinding();
     }
 
-    BindingGenerator::BindingGenerator(Colored::Transition& transition,
-            ColoredPetriNetBuilder::ColorTypeMap& colorTypes)
+    BindingGenerator::BindingGenerator(const Colored::Transition& transition,
+            const ColoredPetriNetBuilder::ColorTypeMap& colorTypes)
         : _colorTypes(colorTypes)
     {
         _expr = transition.guard;
-        std::set<Colored::Variable*> variables;
+        std::set<const Colored::Variable*> variables;
         if (_expr != nullptr) {
             _expr->getVariables(variables);
         }

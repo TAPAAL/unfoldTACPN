@@ -7,7 +7,7 @@ namespace unfoldtacpn {
 namespace Colored {
     const Color* ExpressionContext::findColor(const std::string& color) const {
         if (color.compare("dot") == 0)
-           return DotConstant::dotConstant(nullptr);
+           return Color::dotConstant();
        for (auto& elem : colorTypes) {
            return &(*elem.second)[color];
        }
@@ -15,9 +15,9 @@ namespace Colored {
        exit(ErrorCode);
     }
 
-    ProductType* ExpressionContext::findProductColorType(const std::vector<const ColorType*>& types) const {
+    const ProductType* ExpressionContext::findProductColorType(const std::vector<const ColorType*>& types) const {
         for (auto& elem : colorTypes) {
-            auto* pt = dynamic_cast<ProductType*>(elem.second);
+            auto* pt = dynamic_cast<const ProductType*>(elem.second);
             if (pt && pt->containsTypes(types)) {
                 return pt;
             }

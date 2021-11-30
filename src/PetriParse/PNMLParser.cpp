@@ -71,8 +71,7 @@ void PNMLParser::parse(std::istream& xml,
     }
 
     {   // add the default color-type
-        auto ct = new unfoldtacpn::Colored::ColorType("dot");
-        ct->addDot();
+        auto ct = unfoldtacpn::Colored::Color::dotConstant()->getColorType();
         colorTypes["dot"] = ct;
         builder->addColorType("dot", ct);
     }
@@ -266,7 +265,7 @@ unfoldtacpn::Colored::AllExpression_ptr PNMLParser::parseAllExpression(rapidxml:
     return nullptr;
 }
 
-unfoldtacpn::Colored::ColorType* PNMLParser::parseUserSort(rapidxml::xml_node<>* element) {
+const unfoldtacpn::Colored::ColorType* PNMLParser::parseUserSort(rapidxml::xml_node<>* element) {
     if (element) {
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
             if (strcmp(it->name(), "usersort") == 0) {
@@ -486,7 +485,7 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     auto initial = element->first_attribute("initialMarking");
     long long initialMarking = 0;
     unfoldtacpn::Colored::Multiset hlinitialMarking;
-    unfoldtacpn::Colored::ColorType* type = nullptr;
+    const unfoldtacpn::Colored::ColorType* type = nullptr;
     std::vector<unfoldtacpn::Colored::TimeInvariant> timeInvariants;
     if(initial)
          initialMarking = atoll(initial->value());

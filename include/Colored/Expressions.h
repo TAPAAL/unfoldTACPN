@@ -33,12 +33,12 @@ namespace unfoldtacpn {
         struct ExpressionContext {
             typedef std::unordered_map<std::string, const Color*> BindingMap;
 
-            BindingMap& binding;
-            std::unordered_map<std::string, ColorType*>& colorTypes;
+            const BindingMap& binding;
+            const std::unordered_map<std::string, const ColorType*>& colorTypes;
 
             const Color* findColor(const std::string& color) const;
 
-            ProductType* findProductColorType(const std::vector<const ColorType*>& types) const;
+            const ProductType* findProductColorType(const std::vector<const ColorType*>& types) const;
         };
 
         class WeightException : public std::exception {
@@ -56,7 +56,7 @@ namespace unfoldtacpn {
         public:
             Expression() {}
 
-            virtual void getVariables(std::set<Variable*>& variables) const {
+            virtual void getVariables(std::set<const Variable*>& variables) const {
             }
 
             virtual void expressionType() {
@@ -75,7 +75,7 @@ namespace unfoldtacpn {
 
             virtual const Color* eval(ExpressionContext& context) const = 0;
 
-            virtual const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const = 0;
+            virtual const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const = 0;
 
             virtual void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const = 0;
         };
@@ -83,15 +83,15 @@ namespace unfoldtacpn {
         class DotConstantExpression : public ColorExpression {
         public:
             const Color* eval(ExpressionContext& context) const override {
-                return DotConstant::dotConstant(nullptr);
+                return Color::dotConstant();
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override {
-                return DotConstant::dotConstant(nullptr)->getColorType();
+            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override {
+                return Color::dotConstant()->getColorType();
             }
 
             void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const override {
-                const Color *dotColor = DotConstant::dotConstant(nullptr);
+                const Color *dotColor = Color::dotConstant();
                 constantMap[index] = dotColor;
             }
         };
@@ -100,7 +100,7 @@ namespace unfoldtacpn {
 
         class VariableExpression : public ColorExpression {
         private:
-            Variable* _variable;
+            const Variable* _variable;
 
         public:
             const Color* eval(ExpressionContext& context) const override {
@@ -112,11 +112,11 @@ namespace unfoldtacpn {
                 return it->second;
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 variables.insert(_variable);
             }
 
-            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override{
                 return _variable->colorType;
             }
 
@@ -127,7 +127,7 @@ namespace unfoldtacpn {
             void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const override {
             }
 
-            VariableExpression(Variable* variable)
+            VariableExpression(const Variable* variable)
                     : _variable(variable) {}
         };
 
@@ -148,7 +148,7 @@ namespace unfoldtacpn {
                 constantMap[index] = _userOperator;
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override{
                 return _userOperator->getColorType();
             }
 
@@ -199,7 +199,7 @@ namespace unfoldtacpn {
                 return &++(*_color->eval(context));
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _color->getVariables(variables);
             }
 
@@ -207,7 +207,7 @@ namespace unfoldtacpn {
                 return _color->toString() + "++";
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override {
+            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override {
                 return _color->getColorType(colorTypes);
             }
 
@@ -231,7 +231,7 @@ namespace unfoldtacpn {
                 return &--(*_color->eval(context));
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _color->getVariables(variables);
             }
 
@@ -239,7 +239,7 @@ namespace unfoldtacpn {
                 return _color->toString() + "--";
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override{
                 return _color->getColorType(colorTypes);
             }
 
@@ -257,35 +257,35 @@ namespace unfoldtacpn {
         class TupleExpression : public ColorExpression {
         private:
             std::vector<ColorExpression_ptr> _colors;
-            ColorType* _colorType;
+            const ColorType* _colorType;
 
         public:
             const Color* eval(ExpressionContext& context) const override {
                 std::vector<const Color*> colors;
                 std::vector<const ColorType*> types;
-                for (auto color : _colors) {
+                for (auto& color : _colors) {
                     colors.push_back(color->eval(context));
                     types.push_back(colors.back()->getColorType());
                 }
 
-                ProductType* pt = context.findProductColorType(types);
+                const ProductType* pt = context.findProductColorType(types);
 
                 const Color* col = pt->getColor(colors);
                 assert(col != nullptr);
                 return col;
             }
 
-            void setColorType(ColorType* ct){
+            void setColorType(const ColorType* ct){
                 _colorType = ct;
             }
 
-            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override {
+            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override {
                 std::vector<const ColorType*> types;
-                for (auto color : _colors) {
+                for (auto& color : _colors) {
                     types.push_back(color->getColorType(colorTypes));
                 }
                 for (auto& elem : colorTypes) {
-                    auto* pt = dynamic_cast<ProductType*>(elem.second);
+                    auto* pt = dynamic_cast<const ProductType*>(elem.second);
                     if (pt && pt->containsTypes(types)) {
                         return pt;
                     }
@@ -295,14 +295,14 @@ namespace unfoldtacpn {
             }
 
             void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const override {
-                for (auto elem : _colors) {
+                for (auto& elem : _colors) {
                     elem->getConstants(constantMap, index);
                     index++;
                 }
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
-                for (auto elem : _colors) {
+            void getVariables(std::set<const Variable*>& variables) const override {
+                for (auto& elem : _colors) {
                     elem->getVariables(variables);
                 }
             }
@@ -340,7 +340,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) < _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -359,7 +359,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) > _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -378,7 +378,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) <= _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -397,7 +397,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) >= _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -416,7 +416,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) == _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -435,7 +435,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) != _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -453,7 +453,7 @@ namespace unfoldtacpn {
                 return !_expr->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _expr->getVariables(variables);
             }
 
@@ -470,7 +470,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) && _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -489,7 +489,7 @@ namespace unfoldtacpn {
                 return _left->eval(context) || _right->eval(context);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -518,7 +518,7 @@ namespace unfoldtacpn {
 
         class AllExpression : public Expression {
         private:
-            ColorType* _sort;
+            const ColorType* _sort;
 
         public:
             virtual ~AllExpression() {};
@@ -545,7 +545,7 @@ namespace unfoldtacpn {
                 return _sort->getName() + ".all";
             }
 
-            AllExpression(ColorType* sort) : _sort(sort)
+            AllExpression(const ColorType* sort) : _sort(sort)
             {
                 assert(sort != nullptr);
             }
@@ -589,7 +589,7 @@ namespace unfoldtacpn {
                 }
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 if (_all != nullptr)
                     return;
                 for (auto elem : _color) {
@@ -656,7 +656,7 @@ namespace unfoldtacpn {
                 }
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 for (auto elem : _constituents) {
                     elem->getVariables(variables);
                 }
@@ -698,7 +698,7 @@ namespace unfoldtacpn {
                 _right->getConstants(constantMap, rIndex);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _left->getVariables(variables);
                 _right->getVariables(variables);
             }
@@ -739,7 +739,7 @@ namespace unfoldtacpn {
                 _expr->getConstants(constantMap, index);
             }
 
-            void getVariables(std::set<Variable*>& variables) const override {
+            void getVariables(std::set<const Variable*>& variables) const override {
                 _expr->getVariables(variables);
             }
 
