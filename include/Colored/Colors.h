@@ -33,21 +33,21 @@ namespace unfoldtacpn {
 
         protected:
             const std::vector<const Color*> _tuple;
-            ColorType* _colorType;
+            const ColorType* _colorType;
             std::string _colorName;
             uint32_t _id;
 
         public:
             Color();
-            Color(ColorType* colorType, uint32_t id, const std::vector<const Color*>& colors);
-            Color(ColorType* colorType, uint32_t id, const char* color);
+            Color(const ColorType* colorType, uint32_t id, const std::vector<const Color*>& colors);
+            Color(const ColorType* colorType, uint32_t id, const char* color);
             ~Color() {}
 
             bool isTuple() const {
                 return _tuple.size() > 1;
             }
 
-            const std::vector<const Color*> getTuple() const {
+            const std::vector<const Color*>& getTuple() const {
                 return _tuple;
             }
 
@@ -58,7 +58,7 @@ namespace unfoldtacpn {
                 return _colorName;
             }
 
-            ColorType* getColorType() const {
+            const ColorType* getColorType() const {
                 return _colorType;
             }
 
@@ -116,11 +116,11 @@ namespace unfoldtacpn {
         public:
             class iterator {
             private:
-                ColorType& type;
+                const ColorType& type;
                 size_t index;
 
             public:
-                iterator(ColorType& type, size_t index) : type(type), index(index) {}
+                iterator(const ColorType& type, size_t index) : type(type), index(index) {}
 
                 const Color& operator++() {
                     return type[++index];
@@ -145,11 +145,11 @@ namespace unfoldtacpn {
                     return &type[index];
                 }
 
-                bool operator==(iterator& other) {
+                bool operator==(const iterator& other) {
                     return type == other.type && index == other.index;
                 }
 
-                bool operator!=(iterator& other) {
+                bool operator!=(const iterator& other) {
                     return !(type == other.type) || index != other.index;
                 }
             };
@@ -160,7 +160,6 @@ namespace unfoldtacpn {
             std::string _name;
 
         public:
-            ColorType(std::vector<ColorType*> elements);
             ColorType(std::string name = "Undefined") : _colors(), _name(std::move(name)) {
                 _id = (uintptr_t)this;
             }
@@ -175,21 +174,21 @@ namespace unfoldtacpn {
                 return _colors.size();
             }
 
-            virtual const Color& operator[] (size_t index) {
+            virtual const Color& operator[] (size_t index) const {
                 return _colors[index];
             }
 
-            virtual const Color& operator[] (int index) {
+            virtual const Color& operator[] (int index) const {
                 return _colors[index];
             }
 
-            virtual const Color& operator[] (uint32_t index) {
+            virtual const Color& operator[] (uint32_t index) const {
                 return _colors[index];
             }
 
-            virtual const Color& operator[] (const char* index);
+            virtual const Color& operator[] (const char* index) const;
 
-            virtual const Color& operator[] (const std::string& index) {
+            virtual const Color& operator[] (const std::string& index) const {
                 return (*this)[index.c_str()];
             }
 
@@ -197,7 +196,7 @@ namespace unfoldtacpn {
                 return _id == other._id;
             }
 
-            uintptr_t getId() {
+            uintptr_t getId() const {
                 return _id;
             }
 
@@ -205,11 +204,11 @@ namespace unfoldtacpn {
                 return _name;
             }
 
-            iterator begin() {
+            iterator begin() const {
                 return {*this, 0};
             }
 
-            iterator end() {
+            iterator end() const {
                 return {*this, size()};
             }
         };
@@ -236,12 +235,11 @@ namespace unfoldtacpn {
         class ProductType : public ColorType {
         private:
             std::vector<ColorType*> constituents;
-            std::unordered_map<size_t,Color> cache;
+            mutable std::unordered_map<size_t,Color> cache;
 
         public:
             ProductType(const std::string& name = "Undefined") : ColorType(name) {}
             ~ProductType() {
-                cache.clear();
             }
 
             void addType(ColorType* type) {
@@ -254,7 +252,7 @@ namespace unfoldtacpn {
 
             size_t size() const override {
                 size_t product = 1;
-                for (auto ct : constituents) {
+                for (auto* ct : constituents) {
                     product *= ct->size();
                 }
                 return product;
@@ -274,16 +272,16 @@ namespace unfoldtacpn {
 
             const Color* getColor(const std::vector<const Color*>& colors);
 
-            const Color& operator[](size_t index) override;
-            const Color& operator[](int index) override {
+            const Color& operator[](size_t index) const override;
+            const Color& operator[](int index) const override {
                 return operator[]((size_t)index);
             }
-            const Color& operator[](uint32_t index) override {
+            const Color& operator[](uint32_t index) const override {
                 return operator[]((size_t)index);
             }
 
-            const Color& operator[](const char* index) override;
-            const Color& operator[](const std::string& index) override;
+            const Color& operator[](const char* index) const override;
+            const Color& operator[](const std::string& index) const override;
         };
 
         struct Variable {

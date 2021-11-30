@@ -75,7 +75,7 @@ namespace unfoldtacpn {
 
             virtual const Color* eval(ExpressionContext& context) const = 0;
 
-            virtual ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const = 0;
+            virtual const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const = 0;
 
             virtual void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const = 0;
         };
@@ -86,7 +86,7 @@ namespace unfoldtacpn {
                 return DotConstant::dotConstant(nullptr);
             }
 
-            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override {
                 return DotConstant::dotConstant(nullptr)->getColorType();
             }
 
@@ -148,7 +148,7 @@ namespace unfoldtacpn {
                 constantMap[index] = _userOperator;
             }
 
-            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
                 return _userOperator->getColorType();
             }
 
@@ -207,7 +207,7 @@ namespace unfoldtacpn {
                 return _color->toString() + "++";
             }
 
-            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override {
                 return _color->getColorType(colorTypes);
             }
 
@@ -239,7 +239,7 @@ namespace unfoldtacpn {
                 return _color->toString() + "--";
             }
 
-            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
                 return _color->getColorType(colorTypes);
             }
 
@@ -279,7 +279,7 @@ namespace unfoldtacpn {
                 _colorType = ct;
             }
 
-            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override{
+            ColorType* getColorType(std::unordered_map<std::string, Colored::ColorType*>& colorTypes) const override {
                 std::vector<const ColorType*> types;
                 for (auto color : _colors) {
                     types.push_back(color->getColorType(colorTypes));

@@ -14,8 +14,8 @@
 #include "Colors.h"
 
 namespace unfoldtacpn {
-    namespace Colored{
-        class TimeInvariant{
+    namespace Colored {
+        class TimeInvariant {
 
         public:
             TimeInvariant(Colored::Color&& color) : strictComparison(true), bound(std::numeric_limits<int>::max()), color(std::move(color)) {};
@@ -32,10 +32,10 @@ namespace unfoldtacpn {
 
         public: // inspectors
             void print(std::ostream& out) const;
-            std::string toString();
+            std::string toString() const;
             inline const int getBound() const { return bound; }
             inline const bool isBoundStrict() const { return strictComparison; }
-            inline const Colored::Color getColor() {return color;}
+            inline const Colored::Color& getColor() const { return color;}
 
         public: // statics
             static TimeInvariant createFor(const std::string& invariant, const std::vector<const Colored::Color*>& colors, const std::unordered_map<std::string, uint32_t>& constants);

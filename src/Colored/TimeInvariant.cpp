@@ -49,7 +49,7 @@ namespace unfoldtacpn {
             out << (strictComparison ? "<" : "<=") << " " << strBound;
         }
 
-        std::string TimeInvariant::toString() {
+        std::string TimeInvariant::toString() const {
             std::stringstream ss;
             print(ss);
             return ss.str();

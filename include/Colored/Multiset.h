@@ -75,7 +75,7 @@ namespace unfoldtacpn {
 
         private:
             Internal _set;
-            ColorType* type;
+            const ColorType* type;
         };
     }
 }

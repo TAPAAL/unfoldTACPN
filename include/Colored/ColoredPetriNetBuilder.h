@@ -106,9 +106,9 @@ namespace unfoldtacpn {
             return findPlaceName(_places[id].name, color);
         }
         const std::string& findPlaceName(const std::string& place, const Colored::Color* color);
-        Colored::TimeInterval getTimeIntervalForArc(std::vector< Colored::TimeInterval> timeIntervals,const Colored::Color* color);
+        Colored::TimeInterval getTimeIntervalForArc(const std::vector< Colored::TimeInterval>& timeIntervals,const Colored::Color* color);
         void unfoldPlace(TAPNBuilderInterface& builder, Colored::Place& place);
-        Colored::TimeInvariant getTimeInvariantForPlace(std::vector< Colored::TimeInvariant> TimeInvariants, const Colored::Color* color);
+        Colored::TimeInvariant getTimeInvariantForPlace(const std::vector< Colored::TimeInvariant>& TimeInvariants, const Colored::Color* color);
         void unfoldTransition(TAPNBuilderInterface& builder, Colored::Transition& transition);
         void unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);
         void unfoldTransport(TAPNBuilderInterface& builder, Colored::TransportArc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);

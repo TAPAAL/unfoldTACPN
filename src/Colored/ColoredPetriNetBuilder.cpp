@@ -242,10 +242,10 @@ namespace unfoldtacpn {
         }
     }
 
-    Colored::TimeInvariant ColoredPetriNetBuilder::getTimeInvariantForPlace(std::vector< Colored::TimeInvariant> TimeInvariants, const Colored::Color* color) {
+    Colored::TimeInvariant ColoredPetriNetBuilder::getTimeInvariantForPlace(const std::vector< Colored::TimeInvariant>& time_invariants, const Colored::Color* color) {
         if(color != nullptr)
         {
-            for (Colored::TimeInvariant& element : TimeInvariants) {
+            for (const Colored::TimeInvariant& element : time_invariants) {
                 if (!element.getColor().isTuple()) {
                     if (element.getColor().getId() == color->getId()) {
                         return element;
@@ -267,9 +267,9 @@ namespace unfoldtacpn {
                 }
             }
         }
-        for (uint32_t j = 0; j < TimeInvariants.size(); ++j) {
-            if (TimeInvariants[j].getColor().getColorName() == "*") {
-                return TimeInvariants[j];
+        for (uint32_t j = 0; j < time_invariants.size(); ++j) {
+            if (time_invariants[j].getColor().getColorName() == "*") {
+                return time_invariants[j];
             }
         }
         exit(ErrorCode);
@@ -417,8 +417,9 @@ namespace unfoldtacpn {
         }
     }
 
-    Colored::TimeInterval ColoredPetriNetBuilder::getTimeIntervalForArc(std::vector< Colored::TimeInterval> timeIntervals,const Colored::Color* color) {
-        for (Colored::TimeInterval element : timeIntervals) {
+    Colored::TimeInterval ColoredPetriNetBuilder::getTimeIntervalForArc(const std::vector< Colored::TimeInterval>& timeIntervals,
+        const Colored::Color* color) {
+        for (const auto& element : timeIntervals) {
             if (!element.getColor().isTuple()) {
                 if (element.getColor().getId() == color->getId()) {
                     return element;

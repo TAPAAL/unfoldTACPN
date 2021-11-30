@@ -44,14 +44,14 @@ namespace unfoldtacpn {
             _colorType = new ColorType("*");
         }
 
-        Color::Color(ColorType* colorType, uint32_t id, const std::vector<const Color*>& colors)
+        Color::Color(const ColorType* colorType, uint32_t id, const std::vector<const Color*>& colors)
                 : _tuple(colors), _colorType(colorType), _colorName(""), _id(id)
         {
             if (colorType != nullptr)
                 assert(id <= colorType->size());
         }
 
-        Color::Color(ColorType* colorType, uint32_t id, const char* color)
+        Color::Color(const ColorType* colorType, uint32_t id, const char* color)
                 : _tuple(), _colorType(colorType), _colorName(color), _id(id)
         {
             if (colorType != nullptr)
@@ -166,7 +166,7 @@ namespace unfoldtacpn {
                 assert(i == _colors[i].getId());
         }
 
-        const Color& ColorType::operator[] (const char* index) {
+        const Color& ColorType::operator[] (const char* index) const {
             for (size_t i = 0; i < _colors.size(); i++) {
                 if (strcmp(operator[](i).toString().c_str(), index) == 0)
                     return operator[](i);
@@ -175,7 +175,7 @@ namespace unfoldtacpn {
             std::exit(ErrorCode);
         }
 
-        const Color& ProductType::operator[](size_t index) {
+        const Color& ProductType::operator[](size_t index) const {
             if (cache.count(index) < 1) {
                 size_t mod = 1;
                 size_t div = 1;
@@ -209,11 +209,11 @@ namespace unfoldtacpn {
             return &operator[](sum);
         }
 
-        const Color& ProductType::operator[](const char* index) {
+        const Color& ProductType::operator[](const char* index) const {
             return operator[](std::string(index));
         }
 
-        const Color& ProductType::operator[](const std::string& index) {
+        const Color& ProductType::operator[](const std::string& index) const {
             std::string str(index.substr(1, index.size() - 2));
             std::vector<std::string> parts = split(str, ',');
 

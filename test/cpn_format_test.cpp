@@ -165,6 +165,75 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
     b.unfold(p);
 }
 
+BOOST_AUTO_TEST_CASE(RegularArcGuard) {
+
+    class PBuilder : public DummyBuilder {
+
+
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+        }
+
+        bool seen_transition = false;
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        bool first = true;
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(transition.find("T0") == 0);
+            BOOST_REQUIRE(place.find("P0") == 0);
+            BOOST_REQUIRE_EQUAL(weight, 1);
+            BOOST_REQUIRE_EQUAL(lstrict, false);
+            BOOST_REQUIRE_EQUAL(ustrict, false);
+            if(first)
+            {
+                BOOST_REQUIRE_EQUAL(lower, 1);
+                BOOST_REQUIRE_EQUAL(upper, 2);
+                first = false;
+            }
+            else
+            {
+                BOOST_REQUIRE_EQUAL(lower, 2);
+                BOOST_REQUIRE_EQUAL(upper, 3);
+            }
+        };
+
+        /** Add output arc with given weight */
+        bool seen_output = false;
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+            BOOST_REQUIRE(false);
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("color_guard_map.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+}
+
+
 BOOST_AUTO_TEST_CASE(ColoredRegularArc) {
 
     class PBuilder : public DummyBuilder {

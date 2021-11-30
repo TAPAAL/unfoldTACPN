@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <net active="true" id="TAPN1" type="P/T net">
+    <place displayName="true" id="P0" initialMarking="0" invariant="&lt; inf" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="195" positionY="120">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+    </place>
+    <transition angle="0" displayName="true" id="T0" infiniteServer="false" name="T0" nameOffsetX="0" nameOffsetY="0" player="0" positionX="360" positionY="120" priority="0" urgent="false"/>
+    <arc id="A0" inscription="[0,0]" nameOffsetX="0" nameOffsetY="0" source="P0" target="T0" type="timed" weight="1">
+      <colorinterval>
+        <inscription inscription="[1,2]"/>
+        <colortype name="T">
+          <color value="0"/>
+        </colortype>
+      </colorinterval>
+      <colorinterval>
+        <inscription inscription="[2,3]"/>
+        <colortype name="T">
+          <color value="1"/>
+        </colortype>
+      </colorinterval>
+      <hlinscription>
+        <text>1'0</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <useroperator declaration="0"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="224" yCoord="135"/>
+      <arcpath arcPointType="false" id="1" xCoord="369" yCoord="140"/>
+    </arc>
+  </net>
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="T" name="T">
+          <cyclicenumeration>
+            <feconstant id="0" name="T"/>
+            <feconstant id="1" name="T"/>
+          </cyclicenumeration>
+        </namedsort>
+      </declarations>
+    </structure>
+  </declaration>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>
