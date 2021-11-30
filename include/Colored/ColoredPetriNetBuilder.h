@@ -94,7 +94,7 @@ namespace unfoldtacpn {
 
         std::vector<Colored::Transition> _transitions;
         std::vector<Colored::Place> _places;
-        std::vector<Colored::Arc> _inhibitorArcs;
+        std::map<uint32_t, std::vector<Colored::Arc>> _inhibitorArcs;
         ColorTypeMap _colors;
         double _time;
 
@@ -112,7 +112,7 @@ namespace unfoldtacpn {
         void unfoldTransition(TAPNBuilderInterface& builder, Colored::Transition& transition);
         void unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);
         void unfoldTransport(TAPNBuilderInterface& builder, Colored::TransportArc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& name);
-        void unfoldInhibitorArc(TAPNBuilderInterface& builder, std::string &oldname, std::string &newname);
+        void unfoldInhibitorArc(TAPNBuilderInterface& builder, uint32_t transition, const std::string &newname);
     };
 
     class BindingGenerator {

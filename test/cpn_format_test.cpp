@@ -336,3 +336,87 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
     b.unfold(p);
     BOOST_REQUIRE_EQUAL(p.n_places, 4);
 }
+
+BOOST_AUTO_TEST_CASE(TransportArc) {
+
+    class PBuilder : public DummyBuilder {
+    public:
+        size_t n_places = 0;
+        std::set<std::string> place_names{"P0Sub0","P0Sub1", "P0Sub2"};
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+            ++n_places;
+            if(name.find("P0") == 0)
+            {
+                if(name.compare("P0Sum") != 0)
+                {
+                    BOOST_REQUIRE(place_names.count(name) == 1);
+                    place_names.erase(name);
+                    BOOST_REQUIRE_EQUAL(strict, false);
+                    BOOST_REQUIRE_EQUAL(bound, 10);
+                    BOOST_REQUIRE_EQUAL(tokens, 3);
+                }
+                else
+                {
+                    BOOST_REQUIRE_EQUAL(tokens, 9);
+                }
+            }
+            else {
+                BOOST_REQUIRE(name.find("P1") == 0);
+                BOOST_REQUIRE_EQUAL(tokens, 0);
+                BOOST_REQUIRE_EQUAL(strict, true);
+                BOOST_REQUIRE_EQUAL(bound, std::numeric_limits<int>::max());
+            }
+            BOOST_REQUIRE_LE(n_places, 8);
+        }
+
+        size_t n_trans = 0;
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+            ++n_trans;
+            BOOST_REQUIRE(name.find("T0") == 0);
+            BOOST_REQUIRE(!urgent);
+            BOOST_REQUIRE_LE(n_trans, 3);
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+            BOOST_REQUIRE(false);
+        };
+
+        size_t n_transport = 0;
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            ++n_transport;
+
+
+        }
+    };
+
+    auto f = loadFile("transport_arc.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+    BOOST_REQUIRE_EQUAL(p.n_places, 8);
+    BOOST_REQUIRE_EQUAL(p.n_trans, 3);
+    BOOST_REQUIRE_EQUAL(p.n_transport, 3);
+}

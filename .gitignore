@@ -3,6 +3,7 @@
 *.files
 *.includes
 *.user
+*.swp
 nbproject/
 cmake-build-*
 .idea/
@@ -10,4 +11,7 @@ src/PetriEngine/PQL/PQLQueryParser.parser.cpp
 src/PetriEngine/PQL/PQLQueryParser.parser.hpp
 src/PetriEngine/PQL/PQLQueryTokens.lexer.cpp
 build/
+*.parser.cpp
+*.parser.hpp
+*.lexer.cpp
 

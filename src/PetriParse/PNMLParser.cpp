@@ -117,9 +117,10 @@ void PNMLParser::parseDeclarations(rapidxml::xml_node<>* element) {
         if (strcmp(it->name(), "namedsort") == 0) {
             parseNamedSort(it);
         } else if (strcmp(it->name(), "variabledecl") == 0) {
+            auto sort = parseUserSort(it);
             auto var = new unfoldtacpn::Colored::Variable {
                 it->first_attribute("id")->value(),
-                parseUserSort(it)
+                    sort
             };
             variables[it->first_attribute("id")->value()] = var;
         } else {
@@ -632,7 +633,7 @@ void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
     }
     std::string source	= element->first_attribute("source")->value();
     std::string target	= element->first_attribute("target")->value();
-    std::string& trans = transitions.count(source) == 1 ? source : target;
+    std::string trans = transitions.count(source) == 1 ? source : target;
     if(transitions.count(trans) != 1)
     {
         std::cerr << "ERROR: Could not find transition '" << trans << "' for transport arc" << std::endl;
@@ -647,7 +648,7 @@ void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
     {
         transportArcs.erase({trans,tid});
         rapidxml::xml_node<>* in = element, *out = other;
-        if(&target != &trans)
+        if(target != trans)
         {
             std::swap(in, out);
         }
@@ -655,6 +656,8 @@ void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
         auto intervals = parseTimeGuard(in);
         auto in_expr = parseHLInscriptions(in);
         auto out_expr = parseHLInscriptions(out);
+        source = in->first_attribute("source")->value();
+        target = out->first_attribute("target")->value();
         builder->addTransportArc(source, trans, target, weight, in_expr, out_expr, intervals);
     }
 }

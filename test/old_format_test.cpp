@@ -229,3 +229,88 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
     BOOST_REQUIRE_EQUAL(p.n_trans, 1);
     BOOST_REQUIRE_EQUAL(p.n_places, 1);
 }
+
+BOOST_AUTO_TEST_CASE(TransportArc) {
+
+    class PBuilder : public DummyBuilder {
+    public:
+        size_t n_places = 0;
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+            ++n_places;
+            if(name == "TAPN1_P0")
+            {
+                BOOST_REQUIRE_EQUAL(strict, false);
+                BOOST_REQUIRE_EQUAL(bound, 10);
+                BOOST_REQUIRE_EQUAL(tokens, 3);
+            }
+            else if(name == "TAPN1_P1")
+            {
+                BOOST_REQUIRE_EQUAL(strict, true);
+                BOOST_REQUIRE_EQUAL(bound, std::numeric_limits<int>::max());
+                BOOST_REQUIRE_EQUAL(tokens, 0);
+            }
+            else
+            {
+                BOOST_REQUIRE(false);
+            }
+            BOOST_REQUIRE_LE(n_places, 2);
+
+        }
+
+        size_t n_trans = 0;
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+
+            ++n_trans;
+            BOOST_REQUIRE_EQUAL("TAPN1_T0", name);
+            BOOST_REQUIRE(!urgent);
+            BOOST_REQUIRE_EQUAL(n_trans, 1);
+        };
+
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+            BOOST_REQUIRE(false);
+        };
+
+        size_t n_transport = 0;
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            ++n_transport;
+            BOOST_REQUIRE_EQUAL(transition, "TAPN1_T0");
+            BOOST_REQUIRE_EQUAL(source, "TAPN1_P0");
+            BOOST_REQUIRE_EQUAL(target, "TAPN1_P1");
+            BOOST_REQUIRE_EQUAL(lstrict, false);
+            BOOST_REQUIRE_EQUAL(ustrict, false);
+            BOOST_REQUIRE_EQUAL(lower, 4);
+            BOOST_REQUIRE_EQUAL(upper, 8);
+            BOOST_REQUIRE_EQUAL(weight, 7);
+        }
+    };
+
+    auto f = loadFile("transport_arc.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+    BOOST_REQUIRE_EQUAL(p.n_transport, 1);
+    BOOST_REQUIRE_EQUAL(p.n_trans, 1);
+    BOOST_REQUIRE_EQUAL(p.n_places, 2);
+}

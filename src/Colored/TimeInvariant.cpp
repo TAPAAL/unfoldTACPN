@@ -5,29 +5,21 @@
 #include "Colored/TimeInvariant.h"
 #include "Colored/TimeInterval.h"
 
+#include <sstream>
+
 namespace unfoldtacpn {
     namespace Colored {
 
         TimeInvariant TimeInvariant::createFor(const std::string& invariant, const std::vector<const Colored::Color*>& colors, const std::unordered_map<std::string, uint32_t>& constants){
-            bool strict = false;
 
-            std::string leq = "<=";
-            bool found = invariant.find(leq) != std::string::npos;
-            if(!found) {
-                strict = true;
-            }
+            bool strict = invariant.find("<=") == std::string::npos;
             int bound = std::numeric_limits<int>().max();
 
             int pos = strict ? 1 : 2;
             std::string number = invariant.substr(pos);
             TimeInterval::trim(number);
 
-            bool foundInf = false;
-            std::string inf = "inf";
-            std::size_t findInf = invariant.find(inf);
-            if(findInf != std::string::npos) {
-                foundInf = true;
-            }
+            bool foundInf = invariant.find("inf") != std::string::npos;
 
             if(foundInf == false) {
                 if (constants.find(number) == constants.end())
@@ -53,17 +45,14 @@ namespace unfoldtacpn {
 
         void TimeInvariant::print(std::ostream& out) const
         {
-            std::string comparison = strictComparison ? "<" : "<=";
             std::string strBound = bound == std::numeric_limits<int>().max() ? "inf" : std::to_string(bound);
-            strBound = " " + strBound;
-            out << comparison << strBound;
+            out << (strictComparison ? "<" : "<=") << " " << strBound;
         }
+
         std::string TimeInvariant::toString() {
-            std::string comparison = strictComparison ? "<" : "<=";
-            std::string strBound = bound == std::numeric_limits<int>().max() ? "inf" : std::to_string(bound);
-            strBound = " " + strBound;
-            comparison = comparison + strBound;
-            return comparison;
+            std::stringstream ss;
+            print(ss);
+            return ss.str();
         }
     }
 }

@@ -104,7 +104,12 @@ namespace unfoldtacpn {
 
         public:
             const Color* eval(ExpressionContext& context) const override {
-                return context.binding[_variable->name];
+                auto it = context.binding.find(_variable->name);
+                if(it == std::end(context.binding))
+                {
+                    std::cerr << "ERROR: Could not find varible " << _variable->name << std::endl;
+                }
+                return it->second;
             }
 
             void getVariables(std::set<Variable*>& variables) const override {
