@@ -91,6 +91,72 @@ BOOST_AUTO_TEST_CASE(Places) {
     b.unfold(p);
 }
 
+BOOST_AUTO_TEST_CASE(ProductPlaces) {
+
+    class PBuilder : public DummyBuilder {
+    public:
+        std::map<std::string, int> placemap;
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+            if(name.find("DOT") == 0)
+            {
+                placemap["DOT"] += 1;
+            }
+            else if(name.find("SIMPLE") == 0)
+            {
+                placemap["SIMPLE"] += 1;
+            }
+            else if(name.find("PRODUCT") == 0)
+            {
+                placemap["PRODUCT"] += 1;
+            }
+        }
+
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+            BOOST_REQUIRE(false);
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+            BOOST_REQUIRE(false);
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("product.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+    BOOST_REQUIRE_EQUAL(p.placemap["DOT"], 1);
+    BOOST_REQUIRE_EQUAL(p.placemap["SIMPLE"], 2);
+    BOOST_REQUIRE_EQUAL(p.placemap["PRODUCT"], 4);
+}
+
 BOOST_AUTO_TEST_CASE(PlacesBoundsMap) {
 
     class PBuilder : public DummyBuilder {

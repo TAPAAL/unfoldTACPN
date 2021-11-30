@@ -43,6 +43,8 @@ namespace unfoldtacpn {
             NaryExpr(std::vector<Expr_ptr>&& exprs) : _exprs(std::move(exprs)) {
             }
             virtual void analyze(NamingContext& context) override;
+            auto begin() const { return _exprs.begin(); }
+            auto end() const { return _exprs.end(); }
         protected:
             std::vector<Expr_ptr> _exprs;
         };
@@ -151,7 +153,7 @@ namespace unfoldtacpn {
             void analyze(NamingContext& context) override;
             void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
 
-            const std::string& name()
+            const std::string& name() const
             {
                 return _name;
             }

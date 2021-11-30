@@ -70,7 +70,7 @@ namespace unfoldtacpn {
         }
     }
 
-    std::vector<Condition_ptr> readStringQueries(ColoredPetriNetBuilder& builder, ifstream& qfile) {
+    std::vector<Condition_ptr> readStringQueries(ColoredPetriNetBuilder& builder, istream& qfile) {
         stringstream buffer;
         buffer << qfile.rdbuf();
         string querystring = buffer.str(); // including EF and AG
@@ -80,7 +80,7 @@ namespace unfoldtacpn {
         return r;
     }
 
-    std::vector<Condition_ptr> readXMLQueries(ColoredPetriNetBuilder& builder, ifstream& qfile, const std::set<size_t>& to_parse) {
+    std::vector<Condition_ptr> readXMLQueries(ColoredPetriNetBuilder& builder, istream& qfile, const std::set<size_t>& to_parse) {
         std::vector<Condition_ptr> conditions;
 
         QueryXMLParser parser;
