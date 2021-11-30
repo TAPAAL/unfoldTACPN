@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <net active="true" id="TAPN1" type="P/T net">
+    <place displayName="true" id="P0" initialMarking="9" invariant="&lt;= 10" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="210" positionY="195">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+      <hlinitialMarking>
+        <text>(3'T.all)</text>
+        <structure>
+          <add>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="3">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <all>
+                    <usersort declaration="T"/>
+                  </all>
+                </subterm>
+              </numberof>
+            </subterm>
+          </add>
+        </structure>
+      </hlinitialMarking>
+    </place>
+    <place displayName="true" id="P1" initialMarking="0" invariant="&lt; inf" name="P1" nameOffsetX="0" nameOffsetY="0" positionX="345" positionY="195">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+    </place>
+    <transition angle="0" displayName="true" id="T0" infiniteServer="false" name="T0" nameOffsetX="0" nameOffsetY="0" player="0" positionX="210" positionY="330" priority="0" urgent="false"/>
+    <arc id="A0" inscription="[1,3]" nameOffsetX="0" nameOffsetY="0" source="P0" target="T0" type="timed" weight="1">
+      <colorinterval>
+        <inscription inscription="[2,4]"/>
+        <colortype name="T">
+          <color value="2"/>
+        </colortype>
+      </colorinterval>
+      <hlinscription>
+        <text>(1'V + 1'0)</text>
+        <structure>
+          <add>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="1">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <variable refvariable="VarV"/>
+                </subterm>
+              </numberof>
+            </subterm>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="1">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="0"/>
+                </subterm>
+              </numberof>
+            </subterm>
+          </add>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="217" yCoord="222"/>
+      <arcpath arcPointType="false" id="1" xCoord="148" yCoord="337"/>
+      <arcpath arcPointType="false" id="2" xCoord="220" yCoord="339"/>
+    </arc>
+    <arc id="A1" inscription="1" nameOffsetX="0" nameOffsetY="0" source="T0" target="P1" type="normal" weight="1">
+      <hlinscription>
+        <text>(1'2 + 1'V)</text>
+        <structure>
+          <add>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="1">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="2"/>
+                </subterm>
+              </numberof>
+            </subterm>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="1">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <variable refvariable="VarV"/>
+                </subterm>
+              </numberof>
+            </subterm>
+          </add>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="229" yCoord="345"/>
+      <arcpath arcPointType="false" id="1" xCoord="352" yCoord="340"/>
+      <arcpath arcPointType="false" id="2" xCoord="359" yCoord="224"/>
+    </arc>
+  </net>
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="T" name="T">
+          <cyclicenumeration>
+            <feconstant id="0" name="T"/>
+            <feconstant id="1" name="T"/>
+            <feconstant id="2" name="T"/>
+          </cyclicenumeration>
+        </namedsort>
+        <variabledecl id="VarV" name="V">
+          <usersort declaration="T"/>
+        </variabledecl>
+      </declarations>
+    </structure>
+  </declaration>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>

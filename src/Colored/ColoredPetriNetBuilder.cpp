@@ -399,17 +399,20 @@ namespace unfoldtacpn {
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
         }
-        if(sumWeight > 0 && !is_singular) { // we only add sum-places if we have a non-singleton color
+        // we only add sum-places if we have a non-singleton color and we are modifying an inhibiting place
+        if(sumWeight > 0 && !is_singular && _places[arc.place].inhibiting) {
             const std::string& pName = findsumName(arc.place);
-            assert(pName.size() > 0);
-            if (!arc.input) {
-                builder.addOutputArc(tName, pName, sumWeight);
-            } else {
-                Colored::Color color;
-                Colored::TimeInterval timeInterval(color);
-                builder.addInputArc(pName, tName, arc.inhibitor, sumWeight,
-                timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
-                timeInterval.getLowerBound(), timeInterval.getUpperBound());
+            if(pName.size() > 0)
+            {
+                if (!arc.input) {
+                    builder.addOutputArc(tName, pName, sumWeight);
+                } else {
+                    Colored::Color color;
+                    Colored::TimeInterval timeInterval(color);
+                    builder.addInputArc(pName, tName, arc.inhibitor, sumWeight,
+                    timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
+                    timeInterval.getLowerBound(), timeInterval.getUpperBound());
+                }
             }
         }
     }
