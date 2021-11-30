@@ -123,7 +123,7 @@ namespace unfoldtacpn {
         arc.inhibitor = inhibitor;
         if(inhibitor){
             _inhibitorArcs[arc.transition].emplace_back(std::move(arc));
-            _places[p].inhibitor = true;
+            _places[p].inhibiting = true;
         } else {
             _transitions[t].arcs.emplace_back(std::move(arc));
         }
@@ -212,7 +212,7 @@ namespace unfoldtacpn {
             for (; i < place.type->size(); ++i) {
                 double x = xBuffer + std::get<0>(placePos);
                 double y = yBuffer + std::get<1>(placePos);
-                std::string name = place.name + "Sub" + std::to_string(i);
+                std::string name = place.name + "¤" + std::to_string(i);
                 const Colored::Color* color = &place.type->operator[](i);
                 Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
                 auto r = place.marking[color];
@@ -223,11 +223,14 @@ namespace unfoldtacpn {
                 yBuffer += 0;
 
             }
-            double x = xBuffer + std::get<0>(placePos);
-            double y = yBuffer + std::get<1>(placePos);
-            std::string placeName = place.name + "Sum";
-            builder.addPlace(placeName, place.marking.size(), true, std::numeric_limits<int>::max(), x, y);
-            _shadowPlacesNames[place.name] = std::move(placeName);
+            if(place.inhibiting)
+            {
+                double x = xBuffer + std::get<0>(placePos);
+                double y = yBuffer + std::get<1>(placePos);
+                std::string placeName = "#" + place.name;
+                builder.addPlace(placeName, place.marking.size(), true, std::numeric_limits<int>::max(), x, y);
+                _sumPlacesNames[place.name] = std::move(placeName);
+            }
         }
         else
         {
@@ -281,7 +284,7 @@ namespace unfoldtacpn {
         for (auto& b : gen) {
             std::string name = transition.name;
             if(!gen.isInitial())
-                name += "Sub" + std::to_string(i++);
+                name += "¤" + std::to_string(i++);
             builder.addTransition(name, transition.urgent, std::get<0>(transitionPos) + buffer, std::get<1>(transitionPos));
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
@@ -298,7 +301,7 @@ namespace unfoldtacpn {
 
     void ColoredPetriNetBuilder::unfoldInhibitorArc(TAPNBuilderInterface& builder, uint32_t transition, const std::string &newname) {
         for (auto& inhibitor : _inhibitorArcs[transition]) {
-            auto& place = findShadowName(inhibitor.place);
+            auto& place = findsumName(inhibitor.place);
             if(place.size() != 0)
                 builder.addInputArc(place, newname, true, inhibitor.weight, false, true, 0, std::numeric_limits<int>::max());
             else
@@ -339,28 +342,28 @@ namespace unfoldtacpn {
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
         }
         {
-            // add shadow
-            auto& in_shadow = findShadowName(arc.source);
-            if(in_shadow.size() != 0)
+            // add sum
+            auto& in_sum = findsumName(arc.source);
+            if(in_sum.size() != 0)
             {
                 Colored::Color color;
                 Colored::TimeInterval timeInterval(color);
-                builder.addInputArc(in_shadow, tName, false, in_color.second,
+                builder.addInputArc(in_sum, tName, false, in_color.second,
                     timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
-            auto& out_shadow = findShadowName(arc.destination);
-            if(out_shadow.size() > 0)
-                builder.addOutputArc(out_shadow, findShadowName(arc.destination), out_color.second);
+            auto& out_sum = findsumName(arc.destination);
+            if(out_sum.size() > 0)
+                builder.addOutputArc(out_sum, findsumName(arc.destination), out_color.second);
         }
     }
 
-    const std::string empty_shadow;
-    const std::string& ColoredPetriNetBuilder::findShadowName(const std::string& id)
+    const std::string empty_sum;
+    const std::string& ColoredPetriNetBuilder::findsumName(const std::string& id)
     {
-        auto it = _shadowPlacesNames.find(id);
-        if(it == std::end(_shadowPlacesNames))
-            return empty_shadow;
+        auto it = _sumPlacesNames.find(id);
+        if(it == std::end(_sumPlacesNames))
+            return empty_sum;
         else
             return it->second;
     }
@@ -377,14 +380,14 @@ namespace unfoldtacpn {
     void ColoredPetriNetBuilder::unfoldArc(TAPNBuilderInterface& builder, Colored::Arc& arc, Colored::ExpressionContext::BindingMap& binding, std::string& tName) {
         Colored::ExpressionContext context {binding, _colors};
         auto ms = arc.expr->eval(context);
-        int shadowWeight = 0;
+        int sumWeight = 0;
         std::vector<Colored::TimeInterval>& timeIntervals = arc.interval;
         bool is_singular = true;
         for (const auto& color : ms) {
             if (color.second == 0) {
                 continue;
             }
-            shadowWeight += color.second;
+            sumWeight += color.second;
             is_singular &= color.first->getColorType()->size() == 1;
             auto& pName = findPlaceName(arc.place, color.first);
             if (!arc.input) {
@@ -396,15 +399,15 @@ namespace unfoldtacpn {
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
         }
-        if(shadowWeight > 0 && !is_singular) { // we only add shadow-places if we have a non-singleton color
-            const std::string& pName = findShadowName(arc.place);
+        if(sumWeight > 0 && !is_singular) { // we only add sum-places if we have a non-singleton color
+            const std::string& pName = findsumName(arc.place);
             assert(pName.size() > 0);
             if (!arc.input) {
-                builder.addOutputArc(tName, pName, shadowWeight);
+                builder.addOutputArc(tName, pName, sumWeight);
             } else {
                 Colored::Color color;
                 Colored::TimeInterval timeInterval(color);
-                builder.addInputArc(pName, tName, arc.inhibitor, shadowWeight,
+                builder.addInputArc(pName, tName, arc.inhibitor, sumWeight,
                 timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
                 timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }

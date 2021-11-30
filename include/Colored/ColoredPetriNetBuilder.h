@@ -82,12 +82,12 @@ namespace unfoldtacpn {
         }
 
         void unfold(TAPNBuilderInterface& builder);
-        void clear() { _shadowPlacesNames.clear(); _pttransitionnames.clear(); _ptplacenames.clear(); }
+        void clear() { _sumPlacesNames.clear(); _pttransitionnames.clear(); _ptplacenames.clear(); }
     private:
         std::unordered_map<std::string,uint32_t> _placenames;
         std::unordered_map<std::string,uint32_t> _transitionnames;
         PTPlaceMap _ptplacenames;
-        std::unordered_map<std::string, std::string> _shadowPlacesNames;
+        std::unordered_map<std::string, std::string> _sumPlacesNames;
         PTTransitionMap _pttransitionnames;
         std::vector< std::tuple<double, double> > _placelocations;
         std::vector< std::tuple<double, double> > _transitionlocations;
@@ -99,8 +99,8 @@ namespace unfoldtacpn {
         double _time;
 
         std::string arcToString(Colored::Arc& arc) const;
-        const std::string& findShadowName(const std::string& id);
-        const std::string& findShadowName(uint32_t id) { return findShadowName(_places[id].name); }
+        const std::string& findsumName(const std::string& id);
+        const std::string& findsumName(uint32_t id) { return findsumName(_places[id].name); }
         const std::string& findPlaceName(uint32_t id, const Colored::Color* color)
         {
             return findPlaceName(_places[id].name, color);

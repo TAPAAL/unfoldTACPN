@@ -58,7 +58,7 @@ namespace unfoldtacpn {
             ColorType* type;
             Multiset marking;
             std::vector<Colored::TimeInvariant> invariants;
-            bool inhibitor = false;
+            bool inhibiting = false;
         };
     }
 }

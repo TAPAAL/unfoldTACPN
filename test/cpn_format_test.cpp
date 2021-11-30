@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
     class PBuilder : public DummyBuilder {
     public:
         size_t n_places = 0;
-        std::set<std::string> place_names{"P0Sub0","P0Sub1", "P0Sub2"};
+        std::set<std::string> place_names{"P0¤0","P0¤1", "P0¤2"};
         void addPlace(const std::string& name,
             int tokens,
             bool strict,
@@ -178,17 +178,17 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
             double x,
             double y) {
             ++n_places;
-            if(name.compare("P0Sum") != 0)
+            if(name.compare("#P0") != 0)
             {
                 BOOST_REQUIRE(place_names.count(name) == 1);
                 place_names.erase(name);
                 BOOST_REQUIRE_EQUAL(strict, false);
                 BOOST_REQUIRE_EQUAL(bound, 5);
-                if(name == "P0Sub0")
+                if(name == "P0¤0")
                     BOOST_REQUIRE_EQUAL(tokens, 2);
-                else if(name == "P0Sub1")
+                else if(name == "P0¤1")
                     BOOST_REQUIRE_EQUAL(tokens, 1);
-                else if(name == "P0Sub2")
+                else if(name == "P0¤2")
                     BOOST_REQUIRE_EQUAL(tokens, 5);
             }
             else
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
             bool lstrict, bool ustrict, int lower, int upper) {
             ++n_input;
             BOOST_REQUIRE_EQUAL("T0", transition);
-            BOOST_REQUIRE_EQUAL("P0Sum", place);
+            BOOST_REQUIRE_EQUAL("#P0", place);
             BOOST_REQUIRE_EQUAL(weight, 3);
             BOOST_REQUIRE_EQUAL(lstrict, false);
             BOOST_REQUIRE_EQUAL(ustrict, true);
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
     class PBuilder : public DummyBuilder {
     public:
         size_t n_places = 0;
-        std::set<std::string> place_names{"P0Sub0","P0Sub1", "P0Sub2"};
+        std::set<std::string> place_names{"P0¤0","P0¤1", "P0¤2"};
         void addPlace(const std::string& name,
             int tokens,
             bool strict,
@@ -267,22 +267,22 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
             double x,
             double y) {
             ++n_places;
-            if(name.compare("P0Sum") != 0)
+            if(name.compare("#P0") != 0)
             {
                 BOOST_REQUIRE(place_names.count(name) == 1);
                 place_names.erase(name);
                 BOOST_REQUIRE_EQUAL(strict, false);
-                if(name == "P0Sub0")
+                if(name == "P0¤0")
                 {
                     BOOST_REQUIRE_EQUAL(tokens, 1);
                     BOOST_REQUIRE_EQUAL(bound, 10);
                 }
-                else if(name == "P0Sub1")
+                else if(name == "P0¤1")
                 {
                     BOOST_REQUIRE_EQUAL(tokens, 3);
                     BOOST_REQUIRE_EQUAL(bound, 1);
                 }
-                else if(name == "P0Sub2")
+                else if(name == "P0¤2")
                 {
                     BOOST_REQUIRE_EQUAL(tokens, 5);
                     BOOST_REQUIRE_EQUAL(bound, 15);
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
     b.parseNet(f);
     PBuilder p;
     b.unfold(p);
-    BOOST_REQUIRE_EQUAL(p.n_places, 4);
+    BOOST_REQUIRE_EQUAL(p.n_places, 3);
 }
 
 BOOST_AUTO_TEST_CASE(TransportArc) {
@@ -342,7 +342,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
     class PBuilder : public DummyBuilder {
     public:
         size_t n_places = 0;
-        std::set<std::string> place_names{"P0Sub0","P0Sub1", "P0Sub2"};
+        std::set<std::string> place_names{"P0¤0","P0¤1", "P0¤2"};
         void addPlace(const std::string& name,
             int tokens,
             bool strict,
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
             ++n_places;
             if(name.find("P0") == 0)
             {
-                if(name.compare("P0Sum") != 0)
+                if(name.compare("#P0") != 0)
                 {
                     BOOST_REQUIRE(place_names.count(name) == 1);
                     place_names.erase(name);
