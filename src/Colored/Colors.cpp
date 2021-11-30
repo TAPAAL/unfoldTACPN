@@ -41,7 +41,7 @@ namespace unfoldtacpn {
         Color::Color() {
             _id = 0;
             _colorName = "*";
-            _colorType = new ColorType("*");
+            _colorType = StarColorType::starColorType();
         }
 
         Color::Color(const ColorType* colorType, uint32_t id, const std::vector<const Color*>& colors)

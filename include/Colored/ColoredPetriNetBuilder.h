@@ -99,8 +99,8 @@ namespace unfoldtacpn {
         double _time;
 
         std::string arcToString(const Colored::Arc& arc) const;
-        const std::string& findsumName(const std::string& id) const;
-        const std::string& findsumName(uint32_t id) const { return findsumName(_places[id].name); }
+        const std::string& findSumName(const std::string& id) const;
+        const std::string& findSumName(uint32_t id) const { return findSumName(_places[id].name); }
         const std::string& findPlaceName(uint32_t id, const Colored::Color* color) const
         {
             return findPlaceName(_places[id].name, color);

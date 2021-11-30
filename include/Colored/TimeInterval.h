@@ -34,14 +34,14 @@ namespace unfoldtacpn {
 
             virtual ~TimeInterval() { /* empty */ }
             void divideBoundsBy(int divider);
-            const Colored::Color& getColor()  const{
+            const Colored::Color& getColor() const {
                 return color;
             }
 
 
         public: // inspectors
             void print(std::ostream& out) const;
-            std::string toString();
+            std::string toString() const;
 
             inline const uint32_t getLowerBound() const { return lowerBound; }
             inline const uint32_t getUpperBound() const { return upperBound; }

@@ -246,6 +246,10 @@ namespace unfoldtacpn {
         if(color != nullptr)
         {
             for (const Colored::TimeInvariant& element : time_invariants) {
+                if(element.getColor().getColorType() == Colored::StarColorType::starColorType())
+                {
+                    continue;
+                }
                 if (!element.getColor().isTuple()) {
                     if (element.getColor().getId() == color->getId()) {
                         return element;
@@ -268,7 +272,7 @@ namespace unfoldtacpn {
             }
         }
         for (uint32_t j = 0; j < time_invariants.size(); ++j) {
-            if (time_invariants[j].getColor().getColorName() == "*") {
+            if (time_invariants[j].getColor().getColorType() == Colored::StarColorType::starColorType()) {
                 return time_invariants[j];
             }
         }
@@ -301,7 +305,7 @@ namespace unfoldtacpn {
 
     void ColoredPetriNetBuilder::unfoldInhibitorArc(TAPNBuilderInterface& builder, uint32_t transition, const std::string &newname) {
         for (auto& inhibitor : _inhibitorArcs[transition]) {
-            auto& place = findsumName(inhibitor.place);
+            auto& place = findSumName(inhibitor.place);
             if(place.size() != 0)
                 builder.addInputArc(place, newname, true, inhibitor.weight, false, true, 0, std::numeric_limits<int>::max());
             else
@@ -343,7 +347,7 @@ namespace unfoldtacpn {
         }
         {
             // add sum
-            auto& in_sum = findsumName(arc.source);
+            auto& in_sum = findSumName(arc.source);
             if(in_sum.size() != 0)
             {
                 Colored::Color color;
@@ -352,14 +356,14 @@ namespace unfoldtacpn {
                     timeInterval.isLowerBoundStrict(), timeInterval.isUpperBoundStrict(),
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
-            auto& out_sum = findsumName(arc.destination);
+            auto& out_sum = findSumName(arc.destination);
             if(out_sum.size() > 0)
-                builder.addOutputArc(out_sum, findsumName(arc.destination), out_color.second);
+                builder.addOutputArc(out_sum, findSumName(arc.destination), out_color.second);
         }
     }
 
     const std::string empty_sum;
-    const std::string& ColoredPetriNetBuilder::findsumName(const std::string& id) const
+    const std::string& ColoredPetriNetBuilder::findSumName(const std::string& id) const
     {
         auto it = _sumPlacesNames.find(id);
         if(it == std::end(_sumPlacesNames))
@@ -409,7 +413,7 @@ namespace unfoldtacpn {
         }
         // we only add sum-places if we have a non-singleton color and we are modifying an inhibiting place
         if(sumWeight > 0 && !is_singular && _places[arc.place].inhibiting) {
-            const std::string& pName = findsumName(arc.place);
+            const std::string& pName = findSumName(arc.place);
             if(pName.size() > 0)
             {
                 if (!arc.input) {
@@ -428,6 +432,8 @@ namespace unfoldtacpn {
     const Colored::TimeInterval& ColoredPetriNetBuilder::getTimeIntervalForArc(const std::vector< Colored::TimeInterval>& timeIntervals,
         const Colored::Color* color) const {
         for (const auto& element : timeIntervals) {
+            if(element.getColor().getColorType() == Colored::StarColorType::starColorType())
+                continue;
             if (!element.getColor().isTuple()) {
                 if (element.getColor().getId() == color->getId()) {
                     return element;
@@ -447,7 +453,7 @@ namespace unfoldtacpn {
             }
         }
         for (uint32_t j = 0; j < timeIntervals.size(); ++j) { // If there is no timeinterval for the specific color, we use the default * interval
-            if (timeIntervals[j].getColor().getColorName() == "*") {
+            if (timeIntervals[j].getColor().getColorType() == Colored::StarColorType::starColorType()) {
                 return timeIntervals[j];
             }
         }

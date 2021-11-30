@@ -55,11 +55,13 @@ namespace unfoldtacpn {
         void TimeInterval::print(std::ostream &out) const
         {
             std::string strUpperBound = upperBound == std::numeric_limits<int>().max() ? "inf" : std::to_string(upperBound);
+            out << color.toString() << " |-> ";
             out << (leftStrict ? "(" : "[") << lowerBound << ","
                 << strUpperBound << (rightStrict ? ")" : "]");
+
         }
 
-        std::string TimeInterval::toString() {
+        std::string TimeInterval::toString() const {
             std::stringstream ss;
             print(ss);
             return ss.str();
