@@ -33,12 +33,12 @@ namespace unfoldtacpn {
             (*this)[color] = count;
         }
 
-        Multiset::Multiset(std::pair<const Color*,uint32_t> el)
+        Multiset::Multiset(const std::pair<const Color*,uint32_t> el)
         : _set(), type(nullptr) {
             (*this)[el.first] = el.second;
         }
 
-        Multiset::Multiset(std::vector<std::pair<const Color*,uint32_t>>& colors)
+        Multiset::Multiset(const std::vector<std::pair<const Color*,uint32_t>>& colors)
                 : _set(), type(nullptr)
         {
             for (auto& c : colors) {
@@ -152,11 +152,11 @@ namespace unfoldtacpn {
 
 
         /** Multiset iterator implementation */
-        bool Multiset::Iterator::operator==(Multiset::Iterator &other) {
+        bool Multiset::Iterator::operator==(const Multiset::Iterator &other) const {
             return ms == other.ms && index == other.index;
         }
 
-        bool Multiset::Iterator::operator!=(Multiset::Iterator &other) {
+        bool Multiset::Iterator::operator!=(const Multiset::Iterator &other) const {
             return !(*this == other);
         }
 
@@ -165,18 +165,18 @@ namespace unfoldtacpn {
             return *this;
         }
 
-        std::pair<const Color *, uint32_t &> Multiset::Iterator::operator++(int) {
-            std::pair<const Color*, uint32_t&> old = **this;
+        std::pair<const Color *, uint32_t> Multiset::Iterator::operator++(int) {
+            auto old = **this;
             ++index;
             return old;
         }
 
-        std::pair<const Color *, uint32_t &> Multiset::Iterator::operator*() {
+        std::pair<const Color *, uint32_t> Multiset::Iterator::operator*() {
             auto& item = ms->_set[index];
-            auto color = DotConstant::dotConstant(nullptr);
+            const Color* color = DotConstant::dotConstant(nullptr);
             if (ms->type != nullptr)
                 color = &(*ms->type)[item.first];
-            return { color, item.second };
+            return {color, uint32_t{item.second}};
         }
 
         std::string Multiset::toString() const {

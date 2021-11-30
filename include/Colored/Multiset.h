@@ -26,18 +26,18 @@ namespace unfoldtacpn {
         private:
             class Iterator {
             private:
-                Multiset* ms;
+                const Multiset* ms;
                 size_t index;
 
             public:
-                Iterator(Multiset* ms, size_t index)
+                Iterator(const Multiset* ms, size_t index)
                         : ms(ms), index(index) {}
 
-                bool operator==(Iterator& other);
-                bool operator!=(Iterator& other);
+                bool operator==(const Iterator& other) const;
+                bool operator!=(const Iterator& other) const;
                 Iterator& operator++();
-                std::pair<const Color*,uint32_t&> operator++(int);
-                std::pair<const Color*,uint32_t&> operator*();
+                std::pair<const Color*,uint32_t> operator++(int);
+                std::pair<const Color*,uint32_t> operator*();
             };
 
             typedef std::vector<std::pair<uint32_t,uint32_t>> Internal;
@@ -47,7 +47,7 @@ namespace unfoldtacpn {
             Multiset(const Multiset& orig);
             Multiset(const Color* color, uint32_t count);
             Multiset(std::pair<const Color*,uint32_t> color);
-            Multiset(std::vector<std::pair<const Color*,uint32_t>>& colors);
+            Multiset(const std::vector<std::pair<const Color*,uint32_t>>& colors);
             virtual ~Multiset();
 
             Multiset operator+ (const Multiset& other) const;
