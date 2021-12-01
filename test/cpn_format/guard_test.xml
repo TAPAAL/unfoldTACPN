@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <net active="true" id="TAPN1" type="P/T net">
+    <place displayName="true" id="P0" initialMarking="0" invariant="&lt; inf" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="240" positionY="90">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="P1" initialMarking="0" invariant="&lt; inf" name="P1" nameOffsetX="0" nameOffsetY="0" positionX="420" positionY="90">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="P2" initialMarking="0" invariant="&lt; inf" name="P2" nameOffsetX="0" nameOffsetY="0" positionX="165" positionY="345">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+    </place>
+    <transition angle="0" displayName="true" id="T0" infiniteServer="false" name="T0" nameOffsetX="0" nameOffsetY="0" player="0" positionX="315" positionY="210" priority="0" urgent="false">
+      <condition>
+        <text>a !eq b</text>
+        <structure>
+          <inequality>
+            <subterm>
+              <variable refvariable="Vara"/>
+            </subterm>
+            <subterm>
+              <variable refvariable="Varb"/>
+            </subterm>
+          </inequality>
+        </structure>
+      </condition>
+    </transition>
+    <arc id="A0" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="P0" target="T0" type="timed" weight="1">
+      <hlinscription>
+        <text>1'a</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <variable refvariable="Vara"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="263" yCoord="117"/>
+      <arcpath arcPointType="false" id="1" xCoord="325" yCoord="216"/>
+    </arc>
+    <arc id="A1" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="P1" target="T0" type="timed" weight="1">
+      <hlinscription>
+        <text>1'b</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <variable refvariable="Varb"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="425" yCoord="116"/>
+      <arcpath arcPointType="false" id="1" xCoord="334" yCoord="230"/>
+    </arc>
+    <arc id="I2" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="P2" target="T0" type="tapnInhibitor" weight="1">
+      <hlinscription>
+        <text>1'dot.all</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <all>
+                <usersort declaration="dot"/>
+              </all>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="191" yCoord="349"/>
+      <arcpath arcPointType="false" id="1" xCoord="324" yCoord="228"/>
+    </arc>
+  </net>
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="T" name="T">
+          <cyclicenumeration>
+            <feconstant id="0" name="T"/>
+            <feconstant id="1" name="T"/>
+          </cyclicenumeration>
+        </namedsort>
+        <variabledecl id="Vara" name="a">
+          <usersort declaration="T"/>
+        </variabledecl>
+        <variabledecl id="Varb" name="b">
+          <usersort declaration="T"/>
+        </variabledecl>
+      </declarations>
+    </structure>
+  </declaration>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>
