@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(SimpleQuery) {
 
     for (std::string s :{"EF true", "EG true", "AG true", "AF true"}) {
         std::stringstream ss(s);
-        auto res = unfoldtacpn::readStringQueries(b, ss);
+        auto res = unfoldtacpn::parse_string_queries(b, ss);
         BOOST_REQUIRE_EQUAL(res.size(), 1);
         if (s.find("EF") == 0)
             BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::EFCondition>(res[0]) != nullptr);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(UnfoldTest) {
 
     for (std::string s :{"EF DOT = 1", "EF SIMPLE = 1", "EF PRODUCT = 1"}) {
         std::stringstream ss(s);
-        auto res = unfoldtacpn::readStringQueries(b, ss);
+        auto res = unfoldtacpn::parse_string_queries(b, ss);
         BOOST_REQUIRE_EQUAL(res.size(), 1);
         PVisitor v;
         res[0]->visit(v);

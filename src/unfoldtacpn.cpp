@@ -61,7 +61,7 @@ using namespace unfoldtacpn::PQL;
 
 namespace unfoldtacpn {
 
-    void contextAnalysis(ColoredPetriNetBuilder& cpnBuilder, std::vector<std::shared_ptr<Condition> >& queries) {
+    void context_analysis(const ColoredPetriNetBuilder& cpnBuilder, std::vector<std::shared_ptr<Condition> >& queries) {
         //Context analysis
         NamingContext context(cpnBuilder.getUnfoldedPlaceNames(),
             cpnBuilder.getUnfoldedTransitionNames());
@@ -70,17 +70,17 @@ namespace unfoldtacpn {
         }
     }
 
-    std::vector<Condition_ptr> readStringQueries(ColoredPetriNetBuilder& builder, istream& qfile) {
+    std::vector<Condition_ptr> parse_string_queries(const ColoredPetriNetBuilder& builder, istream& qfile) {
         stringstream buffer;
         buffer << qfile.rdbuf();
         string querystring = buffer.str(); // including EF and AG
         std::vector<Condition_ptr> r;
         r.emplace_back(parseQuery(querystring));
-        contextAnalysis(builder, r);
+        context_analysis(builder, r);
         return r;
     }
 
-    std::vector<Condition_ptr> readXMLQueries(ColoredPetriNetBuilder& builder, istream& qfile, const std::set<size_t>& to_parse) {
+    std::vector<Condition_ptr> parse_xml_queries(const ColoredPetriNetBuilder& builder, istream& qfile, const std::set<size_t>& to_parse) {
         std::vector<Condition_ptr> conditions;
 
         QueryXMLParser parser;
@@ -110,7 +110,7 @@ namespace unfoldtacpn {
             }
 
         }
-        contextAnalysis(builder, conditions);
+        context_analysis(builder, conditions);
         return conditions;
     }
 }
