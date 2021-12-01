@@ -22,9 +22,9 @@ namespace unfoldtacpn {
                 rightStrict = true;
             }
 
-            std::string strLoverBound = interval.substr(0, interval.find(","));
-            trim(strLoverBound);
-            strLoverBound = strLoverBound.substr(1, strLoverBound.size());
+            std::string strLowerBound = interval.substr(0, interval.find(","));
+            trim(strLowerBound);
+            strLowerBound = strLowerBound.substr(1, strLowerBound.size());
             std::string strUpperBound = interval.substr(interval.find(","), interval.size()-1);
             trim(strUpperBound);
             if(rightStrict == true){
@@ -35,10 +35,10 @@ namespace unfoldtacpn {
 
             int lowerBound;
             int upperBound;
-            if (constantValues.find(strLoverBound) == constantValues.end())
-                lowerBound = std::stoi(strLoverBound);
+            if (constantValues.find(strLowerBound) == constantValues.end())
+                lowerBound = std::stoi(strLowerBound);
             else
-                lowerBound = constantValues[strLoverBound];
+                lowerBound = constantValues[strLowerBound];
 
             if(strUpperBound.compare("inf") == 0 )
                 upperBound = std::numeric_limits<int>().max();
