@@ -19,6 +19,7 @@
 #include "PQL/PQL.h"
 #include "PQL/Contexts.h"
 #include "PQL/Expressions.h"
+#include "PQL/XMLPrinter.h"
 
 namespace unfoldtacpn {
     namespace PQL {
@@ -27,6 +28,11 @@ namespace unfoldtacpn {
 
         Condition::~Condition() = default;
 
+        void to_xml(std::ostream& stream, const Condition& c, uint32_t init_tabs, uint32_t tab_size, bool print_newlines)
+        {
+            XMLPrinter printer(stream, init_tabs, tab_size, print_newlines);
+            c.visit(printer);
+        }
 
     } // PQL
 } // PetriEngine

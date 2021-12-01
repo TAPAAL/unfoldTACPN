@@ -75,8 +75,6 @@ protected:
     virtual void _accept(const OrCondition* element) { for(auto& e : *element) e->visit(*this); };
     virtual void _accept(const LessThanCondition* element) { for(auto i : {0,1}) (*element)[i]->visit(*this); };
     virtual void _accept(const LessThanOrEqualCondition* element) { for(auto i : {0,1}) (*element)[i]->visit(*this); };
-    virtual void _accept(const GreaterThanCondition* element) { for(auto i : {0,1}) (*element)[i]->visit(*this); };
-    virtual void _accept(const GreaterThanOrEqualCondition* element) { for(auto i : {0,1}) (*element)[i]->visit(*this); };
     virtual void _accept(const EqualCondition* element) { for(auto i : {0,1}) (*element)[i]->visit(*this); };
     virtual void _accept(const NotEqualCondition* element) { for(auto i : {0,1}) (*element)[i]->visit(*this); };
     virtual void _accept(const DeadlockCondition* element) { };

@@ -16,6 +16,7 @@
 
 #include <type_traits>
 #include <cassert>
+#include <iostream>
 
 namespace unfoldtacpn
 {
@@ -38,8 +39,6 @@ namespace unfoldtacpn
             virtual void _accept(const OrCondition* element) = 0;
             virtual void _accept(const LessThanCondition* element) = 0;
             virtual void _accept(const LessThanOrEqualCondition* element) = 0;
-            virtual void _accept(const GreaterThanCondition* element) = 0;
-            virtual void _accept(const GreaterThanOrEqualCondition* element) = 0;
             virtual void _accept(const EqualCondition* element) = 0;
             virtual void _accept(const NotEqualCondition* element) = 0;
 
@@ -69,6 +68,12 @@ namespace unfoldtacpn
             {   assert(false); std::cerr << "No accept for KSafeCondition" << std::endl; exit(0);};
             virtual void _accept(const BooleanCondition* element)
             {   assert(false); std::cerr << "No accept for BooleanCondition" << std::endl; exit(0);};
+            virtual void _accept(const ShallowCondition *element) {
+                assert(false);
+                std::cerr << "No accept for ShallowCondition" << std::endl;
+                exit(0);
+            }
+
 
             // Expression
             virtual void _accept(const UnfoldedIdentifierExpr* element) = 0;

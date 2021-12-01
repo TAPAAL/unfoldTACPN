@@ -21,10 +21,7 @@
 
 
 #include <string>
-#include <list>
 #include <vector>
-#include <algorithm>
-#include <unordered_map>
 #include <memory>
 
 namespace unfoldtacpn {
@@ -33,34 +30,16 @@ namespace unfoldtacpn {
         class NamingContext;
 
         /** Representation of a PQL error */
-        class ExprError {
+        class ExprError : public std::exception {
             std::string _text;
-            int _length;
         public:
 
-            ExprError(std::string text = "", int length = 0) {
+            const char* what() {
+                return _text.c_str();
+            }
+
+            ExprError(std::string text = "") {
                 _text = text;
-                _length = length;
-            }
-
-            /** Human readable explaination of the error */
-            const std::string& text() const {
-                return _text;
-            }
-
-            /** length in the source, 0 if not applicable */
-            int length() const {
-                return _length;
-            }
-
-            /** Convert error to string */
-            std::string toString() const {
-                return "Parsing error \"" + text() + "\"";
-            }
-
-            /** True, if this is a default created ExprError without any information */
-            bool isEmpty() const {
-                return _text.empty() && _length == 0;
             }
         };
 
@@ -70,7 +49,6 @@ namespace unfoldtacpn {
             virtual ~Expr();
             virtual void analyze(NamingContext& context) = 0;
             virtual void visit(Visitor& visitor) const = 0;
-            virtual void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const = 0;
         };
 
         /** Base condition */
@@ -80,14 +58,11 @@ namespace unfoldtacpn {
             virtual ~Condition();
             virtual void analyze(NamingContext& context) = 0;
             virtual void visit(Visitor& visitor) const = 0;
-            virtual void toXML(std::ostream&, uint32_t tabs) const = 0;
-        protected:
-            //Value for checking if condition is trivially true or false.
-            //0 is undecided (default), 1 is true, 2 is false.
-            uint32_t trivial = 0;
         };
         typedef std::shared_ptr<Condition> Condition_ptr;
         typedef std::shared_ptr<Expr> Expr_ptr;
+
+        void to_xml(std::ostream&, const Condition&, uint32_t init_tabs = 0, uint32_t tab_size = 2, bool print_newlines = true);
     } // PQL
 }
 

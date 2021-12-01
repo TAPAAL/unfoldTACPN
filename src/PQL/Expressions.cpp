@@ -22,25 +22,8 @@
 #include "errorcodes.h"
 #include "PQL/Visitor.h"
 
-#include <sstream>
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>
-#include <iostream>
-#include <set>
-#include <cmath>
-#include <numeric>
-
 namespace unfoldtacpn {
     namespace PQL {
-
-        std::ostream& generateTabs(std::ostream& out, uint32_t tabs) {
-
-            for(uint32_t i = 0; i < tabs; i++) {
-                out << "  ";
-            }
-            return out;
-        }
 
         // CONSTANTS
         Condition_ptr BooleanCondition::FALSE_CONSTANT = std::make_shared<BooleanCondition>(false);
@@ -88,7 +71,8 @@ namespace unfoldtacpn {
 
             std::unordered_map<uint32_t,std::string> names;
             if (!context.resolvePlace(_name, names)) {
-                ExprError error("Unable to resolve colored identifier \"" + _name + "\"", _name.length());
+                ExprError error("Unable to resolve colored identifier \"" + _name + "\"");
+                throw error;
             }
 
             if (names.size() == 1) {
@@ -209,17 +193,7 @@ namespace unfoldtacpn {
             ctx.accept<decltype(this)>(this);
         }
 
-        void GreaterThanOrEqualCondition::visit(Visitor& ctx) const
-        {
-            ctx.accept<decltype(this)>(this);
-        }
-
         void LessThanOrEqualCondition::visit(Visitor& ctx) const
-        {
-            ctx.accept<decltype(this)>(this);
-        }
-
-        void GreaterThanCondition::visit(Visitor& ctx) const
         {
             ctx.accept<decltype(this)>(this);
         }
@@ -283,234 +257,6 @@ namespace unfoldtacpn {
         void MultiplyExpr::visit(Visitor& ctx) const
         {
             ctx.accept<decltype(this)>(this);
-        }
-
-
-        /******************** XML Output ********************/
-
-        void LiteralExpr::toXML(std::ostream& out,uint32_t tabs, bool tokencount) const {
-            generateTabs(out,tabs) << "<integer-constant>" + std::to_string(_value) + "</integer-constant>\n";
-        }
-
-        void UnfoldedIdentifierExpr::toXML(std::ostream& out,uint32_t tabs, bool tokencount) const {
-            if (tokencount) {
-                generateTabs(out,tabs) << "<place>" << _name << "</place>\n";
-            }
-            else
-            {
-                generateTabs(out,tabs) << "<tokens-count>\n";
-                generateTabs(out,tabs+1) << "<place>" << _name << "</place>\n";
-                generateTabs(out,tabs) << "</tokens-count>\n";
-            }
-        }
-
-        void PlusExpr::toXML(std::ostream& ss,uint32_t tabs, bool tokencount) const {
-            if (tokencount) {
-                for(auto& e : _exprs) e->toXML(ss,tabs, tokencount);
-                return;
-            }
-
-            generateTabs(ss,tabs) << "<integer-sum>\n";
-            for(auto& e : _exprs) e->toXML(ss,tabs+1, tokencount);
-            generateTabs(ss,tabs) << "</integer-sum>\n";
-        }
-
-        void SubtractExpr::toXML(std::ostream& ss,uint32_t tabs, bool tokencount) const {
-            generateTabs(ss,tabs) << "<integer-difference>\n";
-            for(auto& e : _exprs) e->toXML(ss,tabs+1);
-            generateTabs(ss,tabs) << "</integer-difference>\n";
-        }
-
-        void MultiplyExpr::toXML(std::ostream& ss,uint32_t tabs, bool tokencount) const {
-            generateTabs(ss,tabs) << "<integer-product>\n";
-            for(auto& e : _exprs) e->toXML(ss,tabs+1);
-            generateTabs(ss,tabs) << "</integer-product>\n";
-        }
-
-        void MinusExpr::toXML(std::ostream& out,uint32_t tabs, bool tokencount) const {
-
-            generateTabs(out,tabs) << "<integer-product>\n";
-            _expr->toXML(out,tabs+1);
-            generateTabs(out,tabs+1) << "<integer-difference>\n" ; generateTabs(out,tabs+2) <<
-                    "<integer-constant>0</integer-constant>\n" ; generateTabs(out,tabs+2) <<
-                    "<integer-constant>1</integer-constant>\n" ; generateTabs(out,tabs+1) <<
-                    "</integer-difference>\n" ; generateTabs(out,tabs) << "</integer-product>\n";
-        }
-
-        void EXCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<exists-path>\n" ; generateTabs(out,tabs+1) << "<next>\n";
-            _cond->toXML(out,tabs+2);
-            generateTabs(out,tabs+1) << "</next>\n" ; generateTabs(out,tabs) << "</exists-path>\n";
-        }
-
-        void AXCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<all-paths>\n"; generateTabs(out,tabs+1) << "<next>\n";
-            _cond->toXML(out,tabs+2);
-            generateTabs(out,tabs+1) << "</next>\n"; generateTabs(out,tabs) << "</all-paths>\n";
-        }
-
-        void EFCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<exists-path>\n" ; generateTabs(out,tabs+1) << "<finally>\n";
-            _cond->toXML(out,tabs+2);
-            generateTabs(out,tabs+1) << "</finally>\n" ; generateTabs(out,tabs) << "</exists-path>\n";
-        }
-
-        void AFCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<all-paths>\n" ; generateTabs(out,tabs+1) << "<finally>\n";
-            _cond->toXML(out,tabs+2);
-            generateTabs(out,tabs+1) << "</finally>\n" ; generateTabs(out,tabs) << "</all-paths>\n";
-        }
-
-        void EGCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<exists-path>\n" ; generateTabs(out,tabs+1) << "<globally>\n";
-            _cond->toXML(out,tabs+2);
-            generateTabs(out,tabs+1) <<  "</globally>\n" ; generateTabs(out,tabs) << "</exists-path>\n";
-        }
-
-        void AGCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<all-paths>\n" ; generateTabs(out,tabs+1) << "<globally>\n";
-            _cond->toXML(out,tabs+2);
-            generateTabs(out,tabs+1) << "</globally>\n" ; generateTabs(out,tabs) << "</all-paths>\n";
-        }
-
-        void EUCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<exists-path>\n" ; generateTabs(out,tabs+1) << "<until>\n" ; generateTabs(out,tabs+2) << "<before>\n";
-            _cond1->toXML(out,tabs+3);
-            generateTabs(out,tabs+2) << "</before>\n" ; generateTabs(out,tabs+2) << "<reach>\n";
-            _cond2->toXML(out,tabs+3);
-            generateTabs(out,tabs+2) << "</reach>\n" ; generateTabs(out,tabs+1) << "</until>\n" ; generateTabs(out,tabs) << "</exists-path>\n";
-        }
-
-        void AUCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<all-paths>\n" ; generateTabs(out,tabs+1) << "<until>\n" ; generateTabs(out,tabs+2) << "<before>\n";
-            _cond1->toXML(out,tabs+3);
-            generateTabs(out,tabs+2) << "</before>\n" ; generateTabs(out,tabs+2) << "<reach>\n";
-            _cond2->toXML(out,tabs+3);
-            generateTabs(out,tabs+2) << "</reach>\n" ; generateTabs(out,tabs+1) << "</until>\n" ; generateTabs(out,tabs) << "</all-paths>\n";
-        }
-
-        void AndCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            if(_conds.size() == 0)
-            {
-                BooleanCondition::TRUE_CONSTANT->toXML(out, tabs);
-                return;
-            }
-            if(_conds.size() == 1)
-            {
-                _conds[0]->toXML(out, tabs);
-                return;
-            }
-            generateTabs(out,tabs) << "<conjunction>\n";
-            _conds[0]->toXML(out, tabs + 1);
-            for(size_t i = 1; i < _conds.size(); ++i)
-            {
-                if(i + 1 == _conds.size())
-                {
-                    _conds[i]->toXML(out, tabs + i + 1);
-                }
-                else
-                {
-                    generateTabs(out,tabs + i) << "<conjunction>\n";
-                    _conds[i]->toXML(out, tabs + i + 1);
-                }
-            }
-            for(size_t i = _conds.size() - 1; i > 1; --i)
-            {
-                generateTabs(out,tabs + i) << "</conjunction>\n";
-            }
-            generateTabs(out,tabs) << "</conjunction>\n";
-        }
-
-        void OrCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            if(_conds.size() == 0)
-            {
-                BooleanCondition::FALSE_CONSTANT->toXML(out, tabs);
-                return;
-            }
-            if(_conds.size() == 1)
-            {
-                _conds[0]->toXML(out, tabs);
-                return;
-            }
-            generateTabs(out,tabs) << "<disjunction>\n";
-            _conds[0]->toXML(out, tabs + 1);
-            for(size_t i = 1; i < _conds.size(); ++i)
-            {
-                if(i + 1 == _conds.size())
-                {
-                    _conds[i]->toXML(out, tabs + i + 1);
-                }
-                else
-                {
-                    generateTabs(out,tabs + i) << "<disjunction>\n";
-                    _conds[i]->toXML(out, tabs + i + 1);
-                }
-            }
-            for(size_t i = _conds.size() - 1; i > 1; --i)
-            {
-                generateTabs(out,tabs + i) << "</disjunction>\n";
-            }
-            generateTabs(out,tabs) << "</disjunction>\n";
-        }
-
-        void EqualCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<integer-eq>\n";
-            _expr1->toXML(out,tabs+1);
-            _expr2->toXML(out,tabs+1);
-            generateTabs(out,tabs) << "</integer-eq>\n";
-        }
-
-        void NotEqualCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<integer-ne>\n";
-            _expr1->toXML(out,tabs+1);
-            _expr2->toXML(out,tabs+1);
-            generateTabs(out,tabs) << "</integer-ne>\n";
-        }
-
-        void LessThanCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<integer-lt>\n";
-            _expr1->toXML(out,tabs+1);
-            _expr2->toXML(out,tabs+1);
-            generateTabs(out,tabs) << "</integer-lt>\n";
-        }
-
-        void LessThanOrEqualCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<integer-le>\n";
-            _expr1->toXML(out,tabs+1);
-            _expr2->toXML(out,tabs+1);
-            generateTabs(out,tabs) << "</integer-le>\n";
-        }
-
-        void GreaterThanCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<integer-gt>\n";
-            _expr1->toXML(out,tabs+1);
-            _expr2->toXML(out,tabs+1);
-            generateTabs(out,tabs) << "</integer-gt>\n";
-        }
-
-        void GreaterThanOrEqualCondition::toXML(std::ostream& out,uint32_t tabs) const {
-
-            generateTabs(out,tabs) << "<integer-ge>\n";
-            _expr1->toXML(out,tabs+1);
-            _expr2->toXML(out,tabs+1);
-            generateTabs(out,tabs) << "</integer-ge>\n";
-        }
-
-        void NotCondition::toXML(std::ostream& out,uint32_t tabs) const {
-
-            generateTabs(out,tabs) << "<negation>\n";
-            _cond->toXML(out,tabs+1);
-            generateTabs(out,tabs) << "</negation>\n";
-        }
-
-        void BooleanCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<" <<
-                    (_value ? "true" : "false")
-                    << "/>\n";
-        }
-
-        void DeadlockCondition::toXML(std::ostream& out,uint32_t tabs) const {
-            generateTabs(out,tabs) << "<deadlock/>\n";
         }
 
 /********************** CONSTRUCTORS *********************************/

@@ -21,15 +21,11 @@
 #define EXPRESSIONS_H
 
 
-#include <iostream>
-#include <fstream>
-#include <algorithm>
 #include "PQL.h"
 
 namespace unfoldtacpn {
     namespace PQL {
 
-        std::string generateTabs(uint32_t tabs);
         class CompareCondition;
         class NotCondition;
         /******************** EXPRESSIONS ********************/
@@ -67,7 +63,6 @@ namespace unfoldtacpn {
         public:
 
             PlusExpr(std::vector<Expr_ptr>&& exprs);
-            void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
             void visit(Visitor& visitor) const override;
         protected:
         };
@@ -79,7 +74,6 @@ namespace unfoldtacpn {
             SubtractExpr(std::vector<Expr_ptr>&& exprs) : NaryExpr(std::move(exprs))
             {
             }
-            void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
             void visit(Visitor& visitor) const override;
         protected:
         };
@@ -89,7 +83,6 @@ namespace unfoldtacpn {
         public:
 
             MultiplyExpr(std::vector<Expr_ptr>&& exprs);
-            void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
             void visit(Visitor& visitor) const override;
         };
 
@@ -101,7 +94,6 @@ namespace unfoldtacpn {
                 _expr = expr;
             }
             void analyze(NamingContext& context) override;
-            void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
             void visit(Visitor& visitor) const override;
 
             const Expr_ptr& operator[](size_t i) const { return _expr; };
@@ -116,7 +108,6 @@ namespace unfoldtacpn {
             LiteralExpr(int value) : _value(value) {
             }
             void analyze(NamingContext& context) override;
-            void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
             void visit(Visitor& visitor) const override;
             int value() const {
                 return _value;
@@ -131,10 +122,9 @@ namespace unfoldtacpn {
         public:
             IdentifierExpr(const std::string& name) : _name(name) {}
             void analyze(NamingContext& context) override;
-            void toXML(std::ostream& os, uint32_t tabs, bool tokencount = false) const override {
-                _compiled->toXML(os, tabs, tokencount);
-            }
             void visit(Visitor& visitor) const override;
+            const Expr_ptr& compiled() const { return _compiled; }
+            const std::string& name() const { return _name; }
         private:
             std::string _name;
             Expr_ptr _compiled;
@@ -151,7 +141,6 @@ namespace unfoldtacpn {
             }
 
             void analyze(NamingContext& context) override;
-            void toXML(std::ostream&, uint32_t tabs, bool tokencount = false) const override;
 
             const std::string& name() const
             {
@@ -166,13 +155,13 @@ namespace unfoldtacpn {
 
         class ShallowCondition : public Condition
         {
-            void toXML(std::ostream& out, uint32_t tabs) const override
-            { _compiled->toXML(out, tabs); }
+        public:
             void analyze(NamingContext& context) override
             {
                 if (_compiled) _compiled->analyze(context);
                 else _analyze(context);
             }
+            const Condition_ptr& compiled() const { return _compiled; }
         protected:
             virtual void _analyze(NamingContext& context) = 0;
             Condition_ptr _compiled = nullptr;
@@ -187,7 +176,6 @@ namespace unfoldtacpn {
             }
             void analyze(NamingContext& context) override;
             void visit(Visitor&) const override;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             const Condition_ptr& operator[](size_t i) const { return _cond; };
         private:
             Condition_ptr _cond;
@@ -216,42 +204,36 @@ namespace unfoldtacpn {
         class EXCondition : public SimpleQuantifierCondition {
         public:
             using SimpleQuantifierCondition::SimpleQuantifierCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
         class EGCondition : public SimpleQuantifierCondition {
         public:
             using SimpleQuantifierCondition::SimpleQuantifierCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
         class EFCondition : public SimpleQuantifierCondition {
         public:
             using SimpleQuantifierCondition::SimpleQuantifierCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
         class AXCondition : public SimpleQuantifierCondition {
         public:
             using SimpleQuantifierCondition::SimpleQuantifierCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
         class AGCondition : public SimpleQuantifierCondition {
         public:
             using SimpleQuantifierCondition::SimpleQuantifierCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
         class AFCondition : public SimpleQuantifierCondition {
         public:
             using SimpleQuantifierCondition::SimpleQuantifierCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
@@ -274,14 +256,12 @@ namespace unfoldtacpn {
         public:
             using UntilCondition::UntilCondition;
             void visit(Visitor&) const override;
-            void toXML(std::ostream&, uint32_t tabs) const override;
         };
 
         class AUCondition : public UntilCondition {
         public:
             using UntilCondition::UntilCondition;
             void visit(Visitor&) const override;
-            void toXML(std::ostream&, uint32_t tabs) const override;
         };
 
         /******************** CONDITIONS ********************/
@@ -313,7 +293,6 @@ namespace unfoldtacpn {
             AndCondition(Condition_ptr left, Condition_ptr right);
 
             void visit(Visitor&) const override;
-            void toXML(std::ostream&, uint32_t tabs) const override;
         };
 
         /* Disjunctive or conditon */
@@ -323,7 +302,6 @@ namespace unfoldtacpn {
             OrCondition(const std::vector<Condition_ptr>& conds);
             OrCondition(Condition_ptr left, Condition_ptr right);
             void visit(Visitor&) const override;
-            void toXML(std::ostream&, uint32_t tabs) const override;
         };
 
         /* Comparison conditon */
@@ -348,7 +326,6 @@ namespace unfoldtacpn {
         public:
 
             using CompareCondition::CompareCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
@@ -357,7 +334,6 @@ namespace unfoldtacpn {
         public:
 
             using CompareCondition::CompareCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
@@ -365,7 +341,6 @@ namespace unfoldtacpn {
         class LessThanCondition : public CompareCondition {
         public:
             using CompareCondition::CompareCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
@@ -374,23 +349,6 @@ namespace unfoldtacpn {
         public:
 
             using CompareCondition::CompareCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
-            void visit(Visitor&) const override;
-        };
-
-        /* Greater-than conditon */
-        class GreaterThanCondition : public CompareCondition {
-        public:
-            using CompareCondition::CompareCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
-            void visit(Visitor&) const override;
-        };
-
-        /* Greater-than-or-equal conditon */
-        class GreaterThanOrEqualCondition : public CompareCondition {
-        public:
-            using CompareCondition::CompareCondition;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             void visit(Visitor&) const override;
         };
 
@@ -399,18 +357,13 @@ namespace unfoldtacpn {
         public:
 
             BooleanCondition(bool value) : _value(value) {
-                if (value) {
-                    trivial = 1;
-                } else {
-                    trivial = 2;
-                }
             }
             void analyze(NamingContext& context) override;
             void visit(Visitor&) const override;
             static Condition_ptr TRUE_CONSTANT;
             static Condition_ptr FALSE_CONSTANT;
             static Condition_ptr getShared(bool val);
-            void toXML(std::ostream&, uint32_t tabs) const override;
+            bool value() const { return _value; }
         private:
             const bool _value;
         };
@@ -423,7 +376,6 @@ namespace unfoldtacpn {
             }
             void analyze(NamingContext& context) override;
             void visit(Visitor&) const override;
-            void toXML(std::ostream&, uint32_t tabs) const override;
             static Condition_ptr DEADLOCK;
         };
 

@@ -27,6 +27,7 @@
 #include <list>
 #include <map>
 #include <chrono>
+#include <unordered_map>
 
 namespace unfoldtacpn {
 
