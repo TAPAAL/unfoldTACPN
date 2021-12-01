@@ -21,14 +21,14 @@ jobs:
 
       - name: Install Packages
         run: |
-          brew install flex bison boost
+          brew install flex bison
         
       - name: Build 
         uses: lukka/run-cmake@v2.5
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeAppendedArgs: >-
-            -DUNFOLDTACPN_TEST=ON
+            -DUNFOLDTACPN_TEST=OFF
             -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison 
             -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex
           cmakeBuildType: Release
