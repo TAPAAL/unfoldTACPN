@@ -37,7 +37,7 @@ jobs:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeAppendedArgs: >-
             -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/verifypn/toolchain-x86_64-w64-mingw32.cmake
-            -DUNFOLDTACPN_TEST=ON
+            -DUNFOLDTACPN_TEST=OFF # Requires boost
           cmakeBuildType: Release
           cmakeGenerator: UnixMakefiles
           buildDirectory: '${{runner.workspace}}/build'
