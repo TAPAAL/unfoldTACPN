@@ -156,6 +156,79 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
     b.unfold(p);
 }
 
+BOOST_AUTO_TEST_CASE(RegularArcGuard) {
+
+    class PBuilder : public DummyBuilder {
+
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+        }
+
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+            BOOST_REQUIRE_EQUAL("T", name);
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+
+            if(place == "P1")
+            {
+                BOOST_REQUIRE_EQUAL(weight, 1);
+                BOOST_REQUIRE_EQUAL(lstrict, false);
+                BOOST_REQUIRE_EQUAL(ustrict, false);
+                BOOST_REQUIRE_EQUAL(lower, 1);
+                BOOST_REQUIRE_EQUAL(upper, 1);
+                BOOST_REQUIRE(!inhibitor);
+            }
+            else if(place == "P2")
+            {
+                BOOST_REQUIRE_EQUAL(weight, 2);
+                BOOST_REQUIRE_EQUAL(lstrict, false);
+                BOOST_REQUIRE_EQUAL(ustrict, true);
+                BOOST_REQUIRE_EQUAL(lower, 0);
+                BOOST_REQUIRE_EQUAL(upper, std::numeric_limits<int>::max());
+                BOOST_REQUIRE(!inhibitor);
+            }
+            else
+            {
+                BOOST_REQUIRE(false);
+            }
+            BOOST_REQUIRE_EQUAL("T", transition);
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+            BOOST_REQUIRE(false);
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("arc_guard.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+}
+
 BOOST_AUTO_TEST_CASE(InhibitorArc) {
 
     class PBuilder : public DummyBuilder {
