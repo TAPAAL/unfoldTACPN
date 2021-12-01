@@ -24,14 +24,26 @@
 namespace unfoldtacpn {
     namespace PQL {
 
-        Expr::~Expr()= default;
+        Expr::~Expr() = default;
 
         Condition::~Condition() = default;
 
-        void to_xml(std::ostream& stream, const Condition& c, uint32_t init_tabs, uint32_t tab_size, bool print_newlines)
-        {
+        void to_xml(std::ostream& stream, const Condition& c, uint32_t init_tabs, uint32_t tab_size, bool print_newlines) {
             XMLPrinter printer(stream, init_tabs, tab_size, print_newlines);
             c.visit(printer);
+        }
+
+        void to_xml(std::ostream& out, const std::vector<std::pair<Condition_ptr,std::string>>& queries, uint32_t tab_size, bool print_newlines) {
+            out << "<?xml version=\"1.0\"?>\n<property-set xmlns=\"http://mcc.lip6.fr/\">\n";
+
+            for (uint32_t j = 0; j < queries.size(); j++) {
+                out << "  <property>\n    <id>" << queries[j].second
+                    << "</id>\n    <description>Simplified</description>\n    <formula>\n";
+                to_xml(out, *queries[j].first, 0, tab_size, print_newlines);
+            }
+
+            out << "</property-set>\n";
+
         }
 
     } // PQL

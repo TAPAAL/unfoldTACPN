@@ -61,27 +61,28 @@ using namespace unfoldtacpn::PQL;
 
 namespace unfoldtacpn {
 
-    void context_analysis(const ColoredPetriNetBuilder& cpnBuilder, std::vector<std::shared_ptr<Condition> >& queries) {
+    void context_analysis(const ColoredPetriNetBuilder& cpnBuilder, const std::vector<std::pair<Condition_ptr, std::string> >& queries) {
         //Context analysis
         NamingContext context(cpnBuilder.getUnfoldedPlaceNames(),
             cpnBuilder.getUnfoldedTransitionNames());
         for (auto& q : queries) {
-            q->analyze(context);
+            q.first->analyze(context);
         }
     }
 
-    std::vector<Condition_ptr> parse_string_queries(const ColoredPetriNetBuilder& builder, istream& qfile) {
+    std::vector<std::pair<Condition_ptr, std::string>> parse_string_queries(const ColoredPetriNetBuilder& builder, istream& qfile) {
         stringstream buffer;
         buffer << qfile.rdbuf();
         string querystring = buffer.str(); // including EF and AG
-        std::vector<Condition_ptr> r;
-        r.emplace_back(parseQuery(querystring));
+        std::vector<std::pair<Condition_ptr,std::string>> r;
+        auto q = parseQuery(querystring);
+        r.emplace_back(q, std::string("unknown"));
         context_analysis(builder, r);
         return r;
     }
 
-    std::vector<Condition_ptr> parse_xml_queries(const ColoredPetriNetBuilder& builder, istream& qfile, const std::set<size_t>& to_parse) {
-        std::vector<Condition_ptr> conditions;
+    std::vector<std::pair<Condition_ptr, std::string>> parse_xml_queries(const ColoredPetriNetBuilder& builder, istream& qfile, const std::set<size_t>& to_parse) {
+        std::vector<std::pair<Condition_ptr, std::string>> conditions;
 
         QueryXMLParser parser;
         if (!parser.parse(qfile, to_parse)) {
@@ -102,8 +103,8 @@ namespace unfoldtacpn {
                 continue;
             }
 
-            conditions.push_back(q.query);
-            if (conditions.back() == nullptr) {
+            conditions.emplace_back(q.query, q.id);
+            if (conditions.back().first == nullptr) {
                 fprintf(stderr, "Error: Failed to parse query \"%s\"\n", q.id.c_str()); //querystr.substr(2).c_str());
                 fprintf(stdout, "FORMULA %s CANNOT_COMPUTE\n", q.id.c_str());
                 conditions.pop_back();

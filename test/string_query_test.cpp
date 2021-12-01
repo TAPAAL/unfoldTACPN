@@ -53,13 +53,13 @@ BOOST_AUTO_TEST_CASE(SimpleQuery) {
         auto res = unfoldtacpn::parse_string_queries(b, ss);
         BOOST_REQUIRE_EQUAL(res.size(), 1);
         if (s.find("EF") == 0)
-            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::EFCondition>(res[0]) != nullptr);
+            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::EFCondition>(res[0].first) != nullptr);
         if (s.find("EG") == 0)
-            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::EGCondition>(res[0]) != nullptr);
+            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::EGCondition>(res[0].first) != nullptr);
         if (s.find("AF") == 0)
-            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::AFCondition>(res[0]) != nullptr);
+            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::AFCondition>(res[0].first) != nullptr);
         if (s.find("AG") == 0)
-            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::AGCondition>(res[0]) != nullptr);
+            BOOST_REQUIRE(std::dynamic_pointer_cast<PQL::AGCondition>(res[0].first) != nullptr);
     }
 }
 using namespace PQL;
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(UnfoldTest) {
         auto res = unfoldtacpn::parse_string_queries(b, ss);
         BOOST_REQUIRE_EQUAL(res.size(), 1);
         PVisitor v;
-        res[0]->visit(v);
+        res[0].first->visit(v);
         if(s.find("DOT") != std::string::npos)
         {
             BOOST_REQUIRE_EQUAL(v._seen.size(), 1);

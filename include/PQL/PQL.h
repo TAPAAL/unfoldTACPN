@@ -62,6 +62,7 @@ namespace unfoldtacpn {
         typedef std::shared_ptr<Condition> Condition_ptr;
         typedef std::shared_ptr<Expr> Expr_ptr;
 
+        void to_xml(std::ostream&, const std::vector<std::pair<Condition_ptr,std::string>>&, uint32_t tab_size = 2, bool print_newlines = true);
         void to_xml(std::ostream&, const Condition&, uint32_t init_tabs = 0, uint32_t tab_size = 2, bool print_newlines = true);
     } // PQL
 }
