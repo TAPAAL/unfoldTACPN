@@ -748,9 +748,11 @@ void PNMLParser::parsePosition(rapidxml::xml_node<>* element, double& x, double&
 
 const unfoldtacpn::Colored::Color* PNMLParser::findColor(const char* name) const {
     for (const auto& elem : colorTypes) {
-        auto* col = &(*elem.second)[name];
-        if (col)
-            return col;
+        for(auto& color : *elem.second)
+        {
+            if(color.getColorName() == name)
+                return &color;
+        }
     }
     printf("Could not find color: %s\nCANNOT_COMPUTE\n", name);
     exit(ErrorCode);

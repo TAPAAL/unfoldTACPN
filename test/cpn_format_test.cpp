@@ -823,3 +823,55 @@ BOOST_AUTO_TEST_CASE(ColoredGuardTest) {
     BOOST_REQUIRE_EQUAL(p.n_input, 4);
     BOOST_REQUIRE_EQUAL(p.n_inhib, 2);
 }
+
+BOOST_AUTO_TEST_CASE(Referendum) {
+
+    class PBuilder : public DummyBuilder {
+    public:
+        std::map<std::string, int> n_places;
+        bool seen_sum = false;
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+        }
+
+        size_t n_trans = 0;
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        size_t n_input = 0;
+        size_t n_inhib = 0;
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+        }
+    };
+
+    auto f = loadFile("referendum.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+
+}
