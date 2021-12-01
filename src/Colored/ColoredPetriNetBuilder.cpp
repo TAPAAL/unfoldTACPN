@@ -212,7 +212,7 @@ namespace unfoldtacpn {
             for (; i < place.type->size(); ++i) {
                 double x = xBuffer + std::get<0>(placePos);
                 double y = yBuffer + std::get<1>(placePos);
-                std::string name = place.name + "¤" + std::to_string(i);
+                std::string name = place.name + "__" + std::to_string(i);
                 const Colored::Color* color = &place.type->operator[](i);
                 Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
                 auto r = place.marking[color];
@@ -227,7 +227,7 @@ namespace unfoldtacpn {
             {
                 double x = xBuffer + std::get<0>(placePos);
                 double y = yBuffer + std::get<1>(placePos);
-                std::string placeName = "#" + place.name;
+                std::string placeName = "__" + place.name + "__SUM";
                 builder.addPlace(placeName, place.marking.size(), true, std::numeric_limits<int>::max(), x, y);
                 _sumPlacesNames[place.name] = std::move(placeName);
             }
@@ -288,7 +288,7 @@ namespace unfoldtacpn {
         for (auto& b : gen) {
             std::string name = transition.name;
             if(!gen.isInitial())
-                name += "¤" + std::to_string(i++);
+                name += "__" + std::to_string(i++);
             builder.addTransition(name, transition.urgent, std::get<0>(transitionPos) + buffer, std::get<1>(transitionPos));
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {

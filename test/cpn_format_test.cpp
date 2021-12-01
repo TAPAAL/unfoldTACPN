@@ -456,7 +456,7 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
     class PBuilder : public DummyBuilder {
     public:
         size_t n_places = 0;
-        std::set<std::string> place_names{"P0¤0","P0¤1", "P0¤2"};
+        std::set<std::string> place_names{"P0__0","P0__1", "P0__2"};
         void addPlace(const std::string& name,
             int tokens,
             bool strict,
@@ -464,17 +464,17 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
             double x,
             double y) {
             ++n_places;
-            if(name.compare("#P0") != 0)
+            if(name.find("P0") == 0)
             {
                 BOOST_REQUIRE(place_names.count(name) == 1);
                 place_names.erase(name);
                 BOOST_REQUIRE_EQUAL(strict, false);
                 BOOST_REQUIRE_EQUAL(bound, 5);
-                if(name == "P0¤0")
+                if(name == "P0__0")
                     BOOST_REQUIRE_EQUAL(tokens, 2);
-                else if(name == "P0¤1")
+                else if(name == "P0__1")
                     BOOST_REQUIRE_EQUAL(tokens, 1);
-                else if(name == "P0¤2")
+                else if(name == "P0__2")
                     BOOST_REQUIRE_EQUAL(tokens, 5);
             }
             else
@@ -502,7 +502,7 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
             bool lstrict, bool ustrict, int lower, int upper) {
             ++n_input;
             BOOST_REQUIRE_EQUAL("T0", transition);
-            BOOST_REQUIRE_EQUAL("#P0", place);
+            BOOST_REQUIRE_EQUAL("__P0__SUM", place);
             BOOST_REQUIRE_EQUAL(weight, 3);
             BOOST_REQUIRE_EQUAL(lstrict, false);
             BOOST_REQUIRE_EQUAL(ustrict, true);
@@ -545,7 +545,7 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
     class PBuilder : public DummyBuilder {
     public:
         size_t n_places = 0;
-        std::set<std::string> place_names{"P0¤0","P0¤1", "P0¤2"};
+        std::set<std::string> place_names{"P0__0","P0__1", "P0__2"};
         void addPlace(const std::string& name,
             int tokens,
             bool strict,
@@ -553,22 +553,22 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
             double x,
             double y) {
             ++n_places;
-            if(name.compare("#P0") != 0)
+            if(name.compare("__P0__SUM") != 0)
             {
                 BOOST_REQUIRE(place_names.count(name) == 1);
                 place_names.erase(name);
                 BOOST_REQUIRE_EQUAL(strict, false);
-                if(name == "P0¤0")
+                if(name == "P0__0")
                 {
                     BOOST_REQUIRE_EQUAL(tokens, 1);
                     BOOST_REQUIRE_EQUAL(bound, 10);
                 }
-                else if(name == "P0¤1")
+                else if(name == "P0__1")
                 {
                     BOOST_REQUIRE_EQUAL(tokens, 3);
                     BOOST_REQUIRE_EQUAL(bound, 1);
                 }
-                else if(name == "P0¤2")
+                else if(name == "P0__2")
                 {
                     BOOST_REQUIRE_EQUAL(tokens, 5);
                     BOOST_REQUIRE_EQUAL(bound, 15);
@@ -628,7 +628,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
     class PBuilder : public DummyBuilder {
     public:
         size_t n_places = 0;
-        std::set<std::string> place_names{"P0¤0","P0¤1", "P0¤2"};
+        std::set<std::string> place_names{"P0__0","P0__1", "P0__2"};
         void addPlace(const std::string& name,
             int tokens,
             bool strict,
@@ -638,7 +638,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
             ++n_places;
             if(name.find("P0") == 0)
             {
-                if(name.compare("#P0") != 0)
+                if(name.compare("__P0__SUM") != 0)
                 {
                     BOOST_REQUIRE(place_names.count(name) == 1);
                     place_names.erase(name);
@@ -733,13 +733,22 @@ BOOST_AUTO_TEST_CASE(ColoredGuardTest) {
                 BOOST_REQUIRE_EQUAL(bound, std::numeric_limits<int>::max());
                 BOOST_REQUIRE_EQUAL(tokens, 0);
             }
-            else if(name.find("P2") <= 1)
+            else if(name.find("P2") == 0)
             {
-                if(name[0] == '#')
+                if(name[0] == '_')
                 {
                     BOOST_REQUIRE(!seen_sum);
                     seen_sum = true;
                 }
+                n_places["P2"] += 1;
+                BOOST_REQUIRE_EQUAL(strict, true);
+                BOOST_REQUIRE_EQUAL(bound, std::numeric_limits<int>::max());
+                BOOST_REQUIRE_EQUAL(tokens, 0);
+            }
+            else if(name == "__P2__SUM")
+            {
+                BOOST_REQUIRE(!seen_sum);
+                seen_sum = true;
                 n_places["P2"] += 1;
                 BOOST_REQUIRE_EQUAL(strict, true);
                 BOOST_REQUIRE_EQUAL(bound, std::numeric_limits<int>::max());
@@ -771,7 +780,7 @@ BOOST_AUTO_TEST_CASE(ColoredGuardTest) {
             if(inhibitor)
             {
                 ++n_inhib;
-                BOOST_REQUIRE(place == "#P2");
+                BOOST_REQUIRE(place == "__P2__SUM");
                 BOOST_REQUIRE(transition.find("T0") == 0);
                 BOOST_REQUIRE_EQUAL(weight, 1);
             }

@@ -33,6 +33,8 @@ if (UNFOLDTACPN_Static)
     else () 
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
     endif()
+else()
+    set(BUILD_SHARED_LIBS ON)
 endif ()
 
 ## Configure Traget Platform 
