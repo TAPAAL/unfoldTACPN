@@ -47,9 +47,11 @@ BOOST_AUTO_TEST_CASE(ReferendumQuery) {
     QueryXMLParser parser;
     std::set<size_t> to_read{0};
     parser.parse(f, to_read);
-    BOOST_REQUIRE_EQUAL(!parser.queries.size(), 1);
+    BOOST_REQUIRE_EQUAL(parser.queries.size(), 2);
     BOOST_REQUIRE_EQUAL(parser.queries[0].parsingResult, QueryItem::PARSING_OK);
     BOOST_REQUIRE(parser.queries[0].query != nullptr);
+    BOOST_REQUIRE_EQUAL(parser.queries[1].parsingResult, QueryItem::PARSING_OK);
+    BOOST_REQUIRE(parser.queries[1].query == nullptr); // not parsed,
 }
 
 
