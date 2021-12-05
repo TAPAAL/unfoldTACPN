@@ -37,9 +37,12 @@ namespace unfoldtacpn {
             out << "<?xml version=\"1.0\"?>\n<property-set xmlns=\"http://mcc.lip6.fr/\">\n";
 
             for (uint32_t j = 0; j < queries.size(); j++) {
-                out << "  <property>\n    <id>" << queries[j].second
-                    << "</id>\n    <description>Simplified</description>\n    <formula>\n";
-                to_xml(out, *queries[j].first, 0, tab_size, print_newlines);
+                if(queries[j].first)
+                {
+                    out << "  <property>\n    <id>" << queries[j].second
+                        << "</id>\n    <description>Simplified</description>\n    <formula>\n";
+                    to_xml(out, *queries[j].first, 0, tab_size, print_newlines);
+                }
             }
 
             out << "</property-set>\n";
