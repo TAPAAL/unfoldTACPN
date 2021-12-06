@@ -202,6 +202,24 @@ namespace unfoldtacpn {
                 return 0;
             }
 
+            virtual const Color& operator[] (size_t index) const {
+                throw "Not supported";
+            }
+
+            virtual const Color& operator[] (int index) const {
+                throw "Not supported";
+            }
+
+            virtual const Color& operator[] (uint32_t index) const {
+                throw "Not supported";
+            }
+
+            virtual const Color& operator[] (const char* index) const;
+
+            virtual const Color& operator[] (const std::string& index) const {
+                return (*this)[index.c_str()];
+            }
+
         };
 
 

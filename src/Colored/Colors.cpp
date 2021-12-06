@@ -180,6 +180,21 @@ namespace unfoldtacpn {
             std::exit(ErrorCode);
         }
 
+        const Color& ScopeType::operator[] (const char* index) const
+        {
+            for(auto& type : _constituents)
+            {
+                for(auto& c: *type)
+                {
+                    if(c.isTuple()) continue;
+                    if(c.getColorName() == index)
+                        return c;
+                }
+            }
+            std::cerr << "ERROR: Couldn't find color '" << index << "'";
+            std::exit(ErrorCode);
+        }
+
         const Color& ProductType::operator[](size_t index) const {
             if (cache.count(index) < 1) {
                 size_t mod = 1;
