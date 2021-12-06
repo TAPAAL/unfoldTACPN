@@ -42,6 +42,7 @@ namespace unfoldtacpn {
                     out << "  <property>\n    <id>" << queries[j].second
                         << "</id>\n    <description>Simplified</description>\n    <formula>\n";
                     to_xml(out, *queries[j].first, 4, tab_size, print_newlines);
+                    out << "  </property>\n";
                 }
             }
 
