@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace unfoldtacpn {
     namespace Colored {
@@ -187,6 +188,23 @@ namespace unfoldtacpn {
             }
         };
 
+        // just here to give transitions a scope
+        class ScopeType : public ColorType {
+            std::unordered_set<const ColorType*> _constituents;
+
+        public:
+            void addType(const ColorType* type) {
+                _constituents.insert(type);
+            }
+
+            size_t size() const override {
+                throw "size is undefined for ScopeType";
+                return 0;
+            }
+
+        };
+
+
         class StarColorType : public ColorType {
         private:
             StarColorType();
@@ -218,6 +236,10 @@ namespace unfoldtacpn {
 
             void addType(const ColorType* type) {
                 constituents.push_back(type);
+            }
+
+            const ColorType* getType(size_t id) const {
+                return constituents[id];
             }
 
             void addColor(const char* colorName) override {}

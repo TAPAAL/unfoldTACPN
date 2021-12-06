@@ -41,10 +41,10 @@ namespace unfoldtacpn {
 void PNMLParser::parse(std::istream& xml,
         ColoredPetriNetBuilder* builder) {
     //Clear any left overs
-    colorTypes.clear();
+    _colorTypes.clear();
 
     //Set the builder
-    this->builder = builder;
+    this->_builder = builder;
 
     //Parser the xml
     rapidxml::xml_document<> doc;
@@ -61,7 +61,7 @@ void PNMLParser::parse(std::istream& xml,
 
     if(strcmp(root->name(), "pnml") != 0)
     {
-        std::cerr << "expecting <pnml> tag as root-node in xml tree." << std::endl;
+        std::cerr << "ERROR: expecting <pnml> tag as root-node in xml tree." << std::endl;
         exit(ErrorCode);
     }
 
@@ -72,8 +72,9 @@ void PNMLParser::parse(std::istream& xml,
 
     {   // add the default color-type
         auto ct = unfoldtacpn::Colored::Color::dotConstant()->getColorType();
-        colorTypes["dot"] = ct;
+        _colorTypes["dot"] = ct;
         builder->addColorType("dot", ct);
+        _global_scope.addType(ct);
     }
 
     if (declarations) {
@@ -94,21 +95,37 @@ void PNMLParser::parse(std::istream& xml,
          else
             break;
     }
-    parseElement(root);
+
+    // we need to parse things in order, so first find the nodes
+    node_vector_t regular_arcs, colored_arc, places,
+                  inhib_arcs, trans_arcs, transitions;
+    findNodes(root, colored_arc, regular_arcs, inhib_arcs, trans_arcs, transitions, places);
+    for(auto* p : places)
+        parsePlace(p);
+    for(auto* trans : transitions)
+        parseTransition(trans);
+    for(auto* a : regular_arcs)
+        parseArc(a, false);
+    for(auto* ia : inhib_arcs)
+        parseArc(ia, true);
+    for(auto* ta : trans_arcs)
+        parseTransportArc(ta);
+    for(auto* ca : colored_arc)
+        handleArc(ca);
 
     //Cleanup
-    if(!transportArcs.empty())
+    if(!_transportArcs.empty())
     {
         std::cerr << "ERROR: Could not match the following transport-arcs";
-        for(auto& kv : transportArcs)
+        for(auto& kv : _transportArcs)
         {
             std::cerr << "\tgoing through transition " << kv.first.first << " with id " << kv.first.second << std::endl;
         }
         std::exit(ErrorCode);
     }
-    transportArcs.clear();
+    _transportArcs.clear();
     transitions.clear();
-    colorTypes.clear();
+    _colorTypes.clear();
 }
 
 void PNMLParser::parseDeclarations(rapidxml::xml_node<>* element) {
@@ -117,11 +134,10 @@ void PNMLParser::parseDeclarations(rapidxml::xml_node<>* element) {
             parseNamedSort(it);
         } else if (strcmp(it->name(), "variabledecl") == 0) {
             auto sort = parseUserSort(it);
-            auto var = new unfoldtacpn::Colored::Variable {
-                it->first_attribute("id")->value(),
-                    sort
-            };
-            variables[it->first_attribute("id")->value()] = var;
+            auto id = it->first_attribute("id")->value();
+            auto var = new unfoldtacpn::Colored::Variable {id,sort};
+            checkKeyword(id);
+            _variables[id] = var;
         } else {
             parseDeclarations(element->first_node());
         }
@@ -139,91 +155,94 @@ void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
     } else if (strcmp(type->name(), "productsort") == 0) {
         for (auto it = type->first_node(); it; it = it->next_sibling()) {
             if (strcmp(it->name(), "usersort") == 0) {
-                ((unfoldtacpn::Colored::ProductType*)ct)->addType(colorTypes[it->first_attribute("declaration")->value()]);
+                ((unfoldtacpn::Colored::ProductType*)ct)->addType(_colorTypes[it->first_attribute("declaration")->value()]);
             }
         }
     } else {
         for (auto it = type->first_node(); it; it = it->next_sibling()) {
-            auto id = it->first_attribute("id");
+            auto id = it->first_attribute("id")->value();
             assert(id != nullptr);
-            ct->addColor(id->value());
+            checkKeyword(id);
+            ct->addColor(id);
         }
     }
 
     std::string id = element->first_attribute("id")->value();
-    colorTypes[id] = ct;
-    builder->addColorType(id, ct);
+    _colorTypes[id] = ct;
+    _builder->addColorType(id, ct);
+    _global_scope.addType(ct);
 }
 
-unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseArcExpression(rapidxml::xml_node<>* element) {
+unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseArcExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type) {
     if (strcmp(element->name(), "numberof") == 0) {
-        return parseNumberOfExpression(element);
+        return parseNumberOfExpression(element, type);
     } else if (strcmp(element->name(), "add") == 0) {
         std::vector<unfoldtacpn::Colored::ArcExpression_ptr> constituents;
+        size_t i = 0;
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
-            constituents.push_back(parseArcExpression(it));
+            constituents.push_back(parseArcExpression(it, type));
         }
         return std::make_shared<unfoldtacpn::Colored::AddExpression>(std::move(constituents));
     } else if (strcmp(element->name(), "subtract") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        auto res = std::make_shared<unfoldtacpn::Colored::SubtractExpression>(parseArcExpression(left), parseArcExpression(right));
+        auto res = std::make_shared<unfoldtacpn::Colored::SubtractExpression>(parseArcExpression(left, type), parseArcExpression(right, type));
         auto next = right;
         while ((next = next->next_sibling())) {
-            res = std::make_shared<unfoldtacpn::Colored::SubtractExpression>(res, parseArcExpression(next));
+            res = std::make_shared<unfoldtacpn::Colored::SubtractExpression>(res, parseArcExpression(next, type));
         }
         return res;
     } else if (strcmp(element->name(), "scalarproduct") == 0) {
         auto scalar = element->first_node();
         auto ms = scalar->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::ScalarProductExpression>(parseArcExpression(ms), parseNumberConstant(scalar));
+        return std::make_shared<unfoldtacpn::Colored::ScalarProductExpression>(parseArcExpression(ms, type), parseNumberConstant(scalar));
     } else if (strcmp(element->name(), "all") == 0) {
-        return parseNumberOfExpression(element->parent());
+        return parseNumberOfExpression(element->parent(), type);
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {
-        return parseArcExpression(element->first_node());
+        return parseArcExpression(element->first_node(), type);
     }
     printf("Could not parse '%s' as an arc expression\n", element->name());
     assert(false);
     return nullptr;
 }
 
-unfoldtacpn::Colored::GuardExpression_ptr PNMLParser::parseGuardExpression(rapidxml::xml_node<>* element) {
+unfoldtacpn::Colored::GuardExpression_ptr PNMLParser::parseGuardExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type) {
     if (strcmp(element->name(), "lt") == 0 || strcmp(element->name(), "lessthan") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::LessThanExpression>(parseColorExpression(left), parseColorExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::LessThanExpression>(parseColorExpression(left, type), parseColorExpression(right, type));
     } else if (strcmp(element->name(), "gt") == 0 || strcmp(element->name(), "greaterthan") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::GreaterThanExpression>(parseColorExpression(left), parseColorExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::GreaterThanExpression>(parseColorExpression(left, type), parseColorExpression(right, type));
     } else if (strcmp(element->name(), "leq") == 0 || strcmp(element->name(), "lessthanorequal") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::LessThanEqExpression>(parseColorExpression(left), parseColorExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::LessThanEqExpression>(parseColorExpression(left, type), parseColorExpression(right, type));
     } else if (strcmp(element->name(), "geq") == 0 || strcmp(element->name(), "greaterthanorequal") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::GreaterThanEqExpression>(parseColorExpression(left), parseColorExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::GreaterThanEqExpression>(parseColorExpression(left, type), parseColorExpression(right, type));
     } else if (strcmp(element->name(), "eq") == 0 || strcmp(element->name(), "equality") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::EqualityExpression>(parseColorExpression(left), parseColorExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::EqualityExpression>(parseColorExpression(left, type), parseColorExpression(right, type));
     } else if (strcmp(element->name(), "neq") == 0 || strcmp(element->name(), "inequality") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::InequalityExpression>(parseColorExpression(left), parseColorExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::InequalityExpression>(parseColorExpression(left, type), parseColorExpression(right, type));
     } else if (strcmp(element->name(), "not") == 0) {
-        return std::make_shared<unfoldtacpn::Colored::NotExpression>(parseGuardExpression(element->first_node()));
+        return std::make_shared<unfoldtacpn::Colored::NotExpression>(parseGuardExpression(element->first_node(), type));
     } else if (strcmp(element->name(), "and") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::AndExpression>(parseGuardExpression(left), parseGuardExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::AndExpression>(parseGuardExpression(left, type), parseGuardExpression(right, type));
     } else if (strcmp(element->name(), "or") == 0) {
         auto left = element->first_node();
         auto right = left->next_sibling();
-        return std::make_shared<unfoldtacpn::Colored::OrExpression>(parseGuardExpression(left), parseGuardExpression(right));
+        return std::make_shared<unfoldtacpn::Colored::OrExpression>(parseGuardExpression(left, type), parseGuardExpression(right, type));
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {
-        return parseGuardExpression(element->first_node());
+        return parseGuardExpression(element->first_node(), type);
     }
 
     printf("Could not parse '%s' as a guard expression\n", element->name());
@@ -231,25 +250,29 @@ unfoldtacpn::Colored::GuardExpression_ptr PNMLParser::parseGuardExpression(rapid
     return nullptr;
 }
 
-unfoldtacpn::Colored::ColorExpression_ptr PNMLParser::parseColorExpression(rapidxml::xml_node<>* element) {
+unfoldtacpn::Colored::ColorExpression_ptr PNMLParser::parseColorExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type) {
     if (strcmp(element->name(), "dotconstant") == 0) {
         return std::make_shared<unfoldtacpn::Colored::DotConstantExpression>();
     } else if (strcmp(element->name(), "variable") == 0) {
-        return std::make_shared<unfoldtacpn::Colored::VariableExpression>(variables[element->first_attribute("refvariable")->value()]);
+        return std::make_shared<unfoldtacpn::Colored::VariableExpression>(_variables[element->first_attribute("refvariable")->value()]);
     } else if (strcmp(element->name(), "useroperator") == 0) {
-        return std::make_shared<unfoldtacpn::Colored::UserOperatorExpression>(findColor(element->first_attribute("declaration")->value()));
+        return std::make_shared<unfoldtacpn::Colored::UserOperatorExpression>(
+            &(*type)[element->first_attribute("declaration")->value()]);
     } else if (strcmp(element->name(), "successor") == 0) {
-        return std::make_shared<unfoldtacpn::Colored::SuccessorExpression>(parseColorExpression(element->first_node()));
+        return std::make_shared<unfoldtacpn::Colored::SuccessorExpression>(parseColorExpression(element->first_node(), type));
     } else if (strcmp(element->name(), "predecessor") == 0) {
-        return std::make_shared<unfoldtacpn::Colored::PredecessorExpression>(parseColorExpression(element->first_node()));
+        return std::make_shared<unfoldtacpn::Colored::PredecessorExpression>(parseColorExpression(element->first_node(), type));
     } else if (strcmp(element->name(), "tuple") == 0) {
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> colors;
+        auto* pt = static_cast<const Colored::ProductType*>(type);
+        size_t i = 0;
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
-            colors.push_back(parseColorExpression(it));
+            colors.push_back(parseColorExpression(it, pt->getType(i)));
+            ++i;
         }
-        return std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors));
+        return std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors), type);
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {
-        return parseColorExpression(element->first_node());
+        return parseColorExpression(element->first_node(), type);
     }
     assert(false);
     return nullptr;
@@ -269,7 +292,7 @@ const unfoldtacpn::Colored::ColorType* PNMLParser::parseUserSort(rapidxml::xml_n
     if (element) {
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
             if (strcmp(it->name(), "usersort") == 0) {
-                return colorTypes[it->first_attribute("declaration")->value()];
+                return _colorTypes[it->first_attribute("declaration")->value()];
             } else if (strcmp(it->name(), "structure") == 0
                     || strcmp(it->name(), "type") == 0
                     || strcmp(it->name(), "subterm") == 0) {
@@ -281,7 +304,7 @@ const unfoldtacpn::Colored::ColorType* PNMLParser::parseUserSort(rapidxml::xml_n
     return nullptr;
 }
 
-unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseNumberOfExpression(rapidxml::xml_node<>* element) {
+unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseNumberOfExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type) {
     auto num = element->first_node();
     uint32_t number = parseNumberConstant(num);
     rapidxml::xml_node<>* first;
@@ -294,8 +317,8 @@ unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseNumberOfExpression(rapi
 
     if(strcmp(first->first_node()->name(), "tuple") == 0){
         std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> collectedColors;
-        collectColorsInTuple(first->first_node(), collectedColors);
-        return constructAddExpressionFromTupleExpression(first->first_node(), collectedColors, number);
+        collectColorsInTuple(first->first_node(), collectedColors, type);
+        return constructAddExpressionFromTupleExpression(first->first_node(), collectedColors, number, type);
     }
 
     auto allExpr = parseAllExpression(first);
@@ -304,16 +327,18 @@ unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseNumberOfExpression(rapi
     } else {
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> colors;
         for (auto it = first; it; it = it->next_sibling()) {
-            colors.push_back(parseColorExpression(it));
+            colors.push_back(parseColorExpression(it, type));
         }
         return std::make_shared<unfoldtacpn::Colored::NumberOfExpression>(std::move(colors), number);
     }
 }
 
-void PNMLParser::collectColorsInTuple(rapidxml::xml_node<>* element, std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors){
+void PNMLParser::collectColorsInTuple(rapidxml::xml_node<>* element,
+    std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors,
+    const Colored::ColorType* type){
     if (strcmp(element->name(), "tuple") == 0) {
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
-            collectColorsInTuple(it->first_node(), collectedColors);
+            collectColorsInTuple(it->first_node(), collectedColors, type);
         }
     } else if (strcmp(element->name(), "all") == 0) {
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> expressionsToAdd;
@@ -321,19 +346,19 @@ void PNMLParser::collectColorsInTuple(rapidxml::xml_node<>* element, std::vector
         std::unordered_map<uint32_t, std::vector<const unfoldtacpn::Colored::Color *>> constantMap;
         uint32_t index = 0;
         expr->getConstants(constantMap, index);
-        for(auto positionColors : constantMap){
-            for(auto color : positionColors.second){
+        for(auto& positionColors : constantMap){
+            for(auto& color : positionColors.second){
                 expressionsToAdd.push_back(std::make_shared<unfoldtacpn::Colored::UserOperatorExpression>(color));
             }
         }
         collectedColors.push_back(expressionsToAdd);
         return;
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {
-        collectColorsInTuple(element->first_node(), collectedColors);
+        collectColorsInTuple(element->first_node(), collectedColors, type);
     } else if (strcmp(element->name(), "useroperator") == 0 || strcmp(element->name(), "dotconstant") == 0 || strcmp(element->name(), "variable") == 0
                     || strcmp(element->name(), "successor") == 0 || strcmp(element->name(), "predecessor") == 0) {
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> expressionsToAdd;
-        auto color = parseColorExpression(element);
+        auto color = parseColorExpression(element, type);
         expressionsToAdd.push_back(color);
         collectedColors.push_back(expressionsToAdd);
         return;
@@ -343,34 +368,31 @@ void PNMLParser::collectColorsInTuple(rapidxml::xml_node<>* element, std::vector
     }
 }
 
-unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::constructAddExpressionFromTupleExpression(rapidxml::xml_node<>* element,std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> collectedColors, uint32_t numberof){
+unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::constructAddExpressionFromTupleExpression(rapidxml::xml_node<>* element, const std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors, uint32_t numberof, const Colored::ColorType* type){
     auto initCartesianSet = cartesianProduct(collectedColors[0], collectedColors[1]);
     for(uint32_t i = 2; i < collectedColors.size(); i++){
         initCartesianSet = cartesianProduct(initCartesianSet, collectedColors[i]);
     }
-    std::vector<unfoldtacpn::Colored::NumberOfExpression_ptr> numberOfExpressions;
-    for(auto set : initCartesianSet){
+    std::vector<unfoldtacpn::Colored::ArcExpression_ptr> constituents;
+    for(const auto& set : initCartesianSet){
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> colors;
-        for (auto color : set) {
+        for (const auto& color : set) {
             colors.push_back(color);
         }
-        std::shared_ptr<unfoldtacpn::Colored::TupleExpression> tupleExpr = std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors));
-        tupleExpr->setColorType(tupleExpr->getColorType(colorTypes));
+        std::shared_ptr<unfoldtacpn::Colored::TupleExpression> tupleExpr = std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors), type);
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> placeholderVector;
         placeholderVector.push_back(tupleExpr);
-        numberOfExpressions.push_back(std::make_shared<unfoldtacpn::Colored::NumberOfExpression>(std::move(placeholderVector),numberof));
-    }
-    std::vector<unfoldtacpn::Colored::ArcExpression_ptr> constituents;
-    for (auto expr : numberOfExpressions) {
-        constituents.push_back(expr);
+        constituents.emplace_back(std::make_shared<unfoldtacpn::Colored::NumberOfExpression>(std::move(placeholderVector),numberof));
     }
     return std::make_shared<unfoldtacpn::Colored::AddExpression>(std::move(constituents));
 }
 
-std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> PNMLParser::cartesianProduct(std::vector<unfoldtacpn::Colored::ColorExpression_ptr> rightSet, std::vector<unfoldtacpn::Colored::ColorExpression_ptr> leftSet){
+std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> PNMLParser::cartesianProduct
+    (const std::vector<unfoldtacpn::Colored::ColorExpression_ptr>& rightSet,
+    const std::vector<unfoldtacpn::Colored::ColorExpression_ptr>& leftSet){
     std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> returnSet;
-    for(auto expr : rightSet){
-        for(auto expr2 : leftSet){
+    for(auto& expr : rightSet){
+        for(auto& expr2 : leftSet){
             std::vector<unfoldtacpn::Colored::ColorExpression_ptr> toAdd;
             toAdd.push_back(expr);
             toAdd.push_back(expr2);
@@ -379,41 +401,44 @@ std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> PNMLParser::
     }
     return returnSet;
 }
-std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> PNMLParser::cartesianProduct(std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> rightSet, std::vector<unfoldtacpn::Colored::ColorExpression_ptr> leftSet){
+std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> PNMLParser::cartesianProduct
+    (const std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& rightSet,
+    const std::vector<unfoldtacpn::Colored::ColorExpression_ptr>& leftSet){
     std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> returnSet;
-    for(auto set : rightSet){
-        for(auto expr2 : leftSet){
-            set.push_back(expr2);
+    for(auto& set : rightSet){
+        for(auto& expr2 : leftSet){
             returnSet.push_back(set);
+            returnSet.back().emplace_back(expr2);
         }
     }
     return returnSet;
 }
 
-void PNMLParser::parseElement(rapidxml::xml_node<>* element) {
+void PNMLParser::findNodes(rapidxml::xml_node<>* element,
+    node_vector_t& colored_arc, node_vector_t& regular_arcs, node_vector_t& inhib_arcs, node_vector_t& trans_arcs, node_vector_t& transitions, node_vector_t& places) {
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "place") == 0) {
-            parsePlace(it);
+            places.emplace_back(it);
         } else if (strcmp(it->name(),"transition") == 0) {
-            parseTransition(it);
+            transitions.emplace_back(it);
         } else if ( strcmp(it->name(), "inputArc") == 0) {
-            parseArc(it, false);
+            regular_arcs.emplace_back(it);
         } else if ( strcmp(it->name(), "outputArc") == 0) {
-            parseArc(it, false);
+            regular_arcs.emplace_back(it);
         } else if (strcmp(it->name(),"transportArc") == 0) {
-            parseTransportArc(it);
+            trans_arcs.emplace_back(it);
         } else if (strcmp(it->name(),"inhibitorArc") == 0) {
-            parseArc(it, true);
+            inhib_arcs.emplace_back(it);
         } else if (strcmp(it->name(),"arc") == 0) {
-            handleArc(it);
+            colored_arc.emplace_back(it);
         } else if (strcmp(it->name(), "variable") == 0) {
-            std::cerr << "variable not supported" << std::endl;
+            std::cerr << "ERROR: variable not supported" << std::endl;
             exit(ErrorCode);
         }
         else
         {
-            parseElement(it);
+            findNodes(it, colored_arc, regular_arcs, inhib_arcs, trans_arcs, transitions, places);
         }
     }
 }
@@ -441,7 +466,7 @@ void PNMLParser::handleArc(rapidxml::xml_node<>* element)
     }
     else
     {
-        std::cerr << "Arc type '" << t << "' not supported";
+        std::cerr << "ERROR: Arc type '" << t << "' not supported";
         std::exit(ErrorCode);
     }
 }
@@ -454,18 +479,18 @@ std::pair<std::string, std::vector<const Colored::Color*>> PNMLParser::parseTime
         if (strcmp(i->name(), "colortype") == 0) {
             colorTypeName = i->first_attribute("name")->value();
 
-            if (colorTypes.find(colorTypeName) == colorTypes.end()) {
-                std::cerr << "The color type " << colorTypeName << " does not exist" << std::endl;
+            if (_colorTypes.find(colorTypeName) == _colorTypes.end()) {
+                std::cerr << "ERROR: The color type " << colorTypeName << " does not exist" << std::endl;
                 std::exit(ErrorCode);
             }
             else {
                 for (auto it = i->first_node(); it; it = it->next_sibling()) {
                     if (strcmp(it->name(), "color") == 0) {
-                        auto* type = colorTypes[colorTypeName];
+                        auto* type = _colorTypes[colorTypeName];
                         colors.emplace_back(&(*type)[it->first_attribute("value")->value()]);
                     }
                     else {
-                        std::cerr << "the colortype to the place element " << element->first_attribute("id")->value() << " does not have or should only have colors" << std::endl;
+                        std::cerr << "ERROR: The colortype to the place element " << element->first_attribute("id")->value() << " does not have or should only have colors" << std::endl;
                         exit(ErrorCode);
                     }
                 }
@@ -509,43 +534,47 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     timeInvariants.push_back(Colored::TimeInvariant::createFor(starInvariant, colors, constantValues));
 
     bool found_hl = false;
+    // we first need the type
+    if(auto* node = element->first_node("type"))
+    {
+        _place_types[id] = type = parseUserSort(node);
+    }
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         // name element is ignored
         if (strcmp(it->name(), "colorinvariant") == 0) {
             auto pair = parseTimeConstraint(it);
             timeInvariants.push_back(Colored::TimeInvariant::createFor(pair.first, pair.second, constantValues));
         } else if (strcmp(it->name(),"hlinitialMarking") == 0) {
-            std::unordered_map<std::string, const unfoldtacpn::Colored::Color*> binding;
-            unfoldtacpn::Colored::ExpressionContext context {binding, colorTypes};
-            hlinitialMarking = parseArcExpression(it->first_node("structure"))->eval(context);
+            unfoldtacpn::Colored::ExpressionContext::BindingMap binding;
+            unfoldtacpn::Colored::ExpressionContext::TypeMap typeMap{{type->getName(), type}};
+            unfoldtacpn::Colored::ExpressionContext context {binding, typeMap};
+            hlinitialMarking = parseArcExpression(it->first_node("structure"), type)->eval(context);
             found_hl = true;
-        } else if (strcmp(it->name(), "type") == 0) {
-            type = parseUserSort(it);
         }
     }
 
     if(initialMarking >= std::numeric_limits<int>::max())
     {
-        std::cerr << "Number of tokens in " << id << " exceeded " << std::numeric_limits<int>::max() << std::endl;
+        std::cerr << "ERROR: Number of tokens in " << id << " exceeded " << std::numeric_limits<int>::max() << std::endl;
         exit(ErrorCode);
     }
     //Create place
     if (type == nullptr) {
-        type = colorTypes["dot"];
+        type = _colorTypes["dot"];
     }
     if(!found_hl && type->size() == 1)
     {
         hlinitialMarking = unfoldtacpn::Colored::Multiset(&(*type)[0], initialMarking);
     }
-    builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, x, y);
+    _builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, x, y);
 }
 
-unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml::xml_node<>* element)
+unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml::xml_node<>* element, const Colored::ColorType* type)
 {
     unfoldtacpn::Colored::ArcExpression_ptr expr;
     bool first = true;
     for (auto it = element->first_node("hlinscription"); it; it = it->next_sibling("hlinscription")) {
-        expr = parseArcExpression(it->first_node("structure"));
+        expr = parseArcExpression(it->first_node("structure"), type);
         if(!first)
         {
             std::cerr << "ERROR: Multiple hlinscription tags in xml" << std::endl;
@@ -599,21 +628,27 @@ void PNMLParser::parseArc(rapidxml::xml_node<>* element, bool inhibitor) {
     std::string source = element->first_attribute("source")->value(),
            target = element->first_attribute("target")->value();
     auto weight = parseWeight(element);
-    auto expr = parseHLInscriptions(element);
-    if(transitions.count(source) + transitions.count(target) != 1)
+    auto target_is_trans = isTransition(target);
+    auto source_is_trans = isTransition(source);
+    if(source_is_trans == target_is_trans)
     {
         std::cerr << "ERROR: at least one of '" << source << "' or '" << target << "' of an arc must be a transition" << std::endl;
         std::exit(ErrorCode);
     }
+
+
+    auto type = _place_types[target_is_trans ? source : target];
+    auto expr = parseHLInscriptions(element, type);
+
     std::vector<Colored::TimeInterval> intervals;
-    if(transitions.count(target) == 1)
+    if(target_is_trans)
     {
         intervals = parseTimeGuard(element);
     }
 
     if(weight != 0)
     {
-        builder->addArc(source, target, weight, inhibitor, expr, intervals);
+        _builder->addArc(source, target, weight, inhibitor, expr, intervals);
     }
     else
     {
@@ -632,20 +667,22 @@ void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
     }
     std::string source	= element->first_attribute("source")->value();
     std::string target	= element->first_attribute("target")->value();
-    std::string trans = transitions.count(source) == 1 ? source : target;
-    if(transitions.count(trans) != 1)
+    auto target_is_trans = isTransition(target);
+    std::string trans = target_is_trans ? target : source;
+    // technically isTransition only checks if it is not a place. Due to parsing we know that places are defined
+    if(!isTransition(trans))
     {
         std::cerr << "ERROR: Could not find transition '" << trans << "' for transport arc" << std::endl;
         std::exit(ErrorCode);
     }
-    auto* other = transportArcs[{trans,tid}];
+    auto* other = _transportArcs[{trans,tid}];
     if(other == nullptr)
     {
-        transportArcs[{trans,tid}] = element;
+        _transportArcs[{trans,tid}] = element;
     }
     else
     {
-        transportArcs.erase({trans,tid});
+        _transportArcs.erase({trans,tid});
         rapidxml::xml_node<>* in = element, *out = other;
         if(target != trans)
         {
@@ -653,11 +690,11 @@ void PNMLParser::parseSingleTransportArc(rapidxml::xml_node<>* element)
         }
         auto weight = parseWeight(in);
         auto intervals = parseTimeGuard(in);
-        auto in_expr = parseHLInscriptions(in);
-        auto out_expr = parseHLInscriptions(out);
         source = in->first_attribute("source")->value();
         target = out->first_attribute("target")->value();
-        builder->addTransportArc(source, trans, target, weight, in_expr, out_expr, intervals);
+        auto in_expr = parseHLInscriptions(in, _place_types[source]);
+        auto out_expr = parseHLInscriptions(out, _place_types[target]);
+        _builder->addTransportArc(source, trans, target, weight, in_expr, out_expr, intervals);
     }
 }
 
@@ -669,7 +706,7 @@ void PNMLParser::parseTransportArc(rapidxml::xml_node<>* element){
     auto intervals = parseTimeGuard(element);
     if(weight != 0)
     {
-        builder->addTransportArc(source, transition, target, weight, nullptr, nullptr, intervals);
+        _builder->addTransportArc(source, transition, target, weight, nullptr, nullptr, intervals);
     }
     else
     {
@@ -682,6 +719,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     double x = 0, y = 0;
     bool urgent = false;
     unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
+    auto name = element->first_attribute("id")->value();
 
     auto posX = element->first_attribute("positionX");
     if (posX != nullptr){
@@ -696,23 +734,20 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
         urgent = stringToBool(urg_el->value());
     }
 
-
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "graphics") == 0) {
             parsePosition(it, x, y);
         } else if (strcmp(it->name(), "condition") == 0) {
-            expr = parseGuardExpression(it->first_node("structure"));
+            expr = parseGuardExpression(it->first_node("structure"), &_global_scope);
         } else if (strcmp(it->name(), "conditions") == 0) {
-            std::cerr << "conditions not supported" << std::endl;
+            std::cerr << "ERROR: Conditions not supported" << std::endl;
             exit(ErrorCode);
         } else if (strcmp(it->name(), "assignments") == 0) {
-            std::cerr << "assignments not supported" << std::endl;
+            std::cerr << "ERROR: Assignments not supported" << std::endl;
             exit(ErrorCode);
         }
     }
-    auto name = element->first_attribute("id")->value();
-    builder->addTransition(name, expr, urgent, x, y);
-    transitions.emplace(name);
+    _builder->addTransition(name, expr, urgent, x, y);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, std::string& text) {
@@ -746,16 +781,28 @@ void PNMLParser::parsePosition(rapidxml::xml_node<>* element, double& x, double&
     }
 }
 
-const unfoldtacpn::Colored::Color* PNMLParser::findColor(const char* name) const {
-    for (const auto& elem : colorTypes) {
-        for(auto& color : *elem.second)
-        {
-            if(color.getColorName() == name)
-                return &color;
-        }
+bool PNMLParser::isTransition(const std::string& trans)
+{
+    return (_place_types.count(trans) == 0);
+}
+
+void PNMLParser::checkKeyword(const char* id)
+{
+    auto tmp = id;
+    bool all_digit = true;
+    while(*tmp!= '\0')
+    {
+        all_digit &= std::isdigit(*tmp) || std::isspace(*tmp);
+        ++tmp;
     }
-    printf("Could not find color: %s\nCANNOT_COMPUTE\n", name);
-    exit(ErrorCode);
+    if(all_digit)
+        return;
+    auto res = _used_keywords.insert(id).second;
+    if(!res)
+    {
+        std::cerr << "ERROR: Duplicate use of name " << id << std::endl;
+        std::exit(ErrorCode);
+    }
 }
 
 }

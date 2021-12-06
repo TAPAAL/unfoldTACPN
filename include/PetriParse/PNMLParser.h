@@ -42,19 +42,21 @@ public:
 
     typedef std::unordered_map<std::string, const unfoldtacpn::Colored::ColorType*> ColorTypeMap;
     typedef std::unordered_map<std::string, const unfoldtacpn::Colored::Variable*> VariableMap;
+    typedef std::vector<rapidxml::xml_node<>*> node_vector_t;
 
 public:
     PNMLParser() {
-        builder = nullptr;
+        _builder = nullptr;
     }
+
     void parse(std::istream& xml,
         ColoredPetriNetBuilder* builder);
 
 private:
     int parseWeight(rapidxml::xml_node<>* element);
-    unfoldtacpn::Colored::ArcExpression_ptr parseHLInscriptions(rapidxml::xml_node<>* element);
+    unfoldtacpn::Colored::ArcExpression_ptr parseHLInscriptions(rapidxml::xml_node<>* element, const Colored::ColorType* type);
     std::vector<Colored::TimeInterval> parseTimeGuard(rapidxml::xml_node<>* element);
-    void parseElement(rapidxml::xml_node<>* element);
+    void findNodes(rapidxml::xml_node<>* element, node_vector_t& colored_arc, node_vector_t& regular_arcs, node_vector_t& inhib_arcs, node_vector_t& trans_arcs, node_vector_t& transitions, node_vector_t& places);
     void parsePlace(rapidxml::xml_node<>* element);
     std::pair<std::string, std::vector<const unfoldtacpn::Colored::Color*>> parseTimeConstraint(rapidxml::xml_node<> *element);
     void parseArc(rapidxml::xml_node<>* element, bool inhibitor = false);
@@ -62,28 +64,32 @@ private:
     void parseTransition(rapidxml::xml_node<>* element);
     void parseDeclarations(rapidxml::xml_node<>* element);
     void parseNamedSort(rapidxml::xml_node<>* element);
-    unfoldtacpn::Colored::ArcExpression_ptr parseArcExpression(rapidxml::xml_node<>* element);
-    unfoldtacpn::Colored::GuardExpression_ptr parseGuardExpression(rapidxml::xml_node<>* element);
-    unfoldtacpn::Colored::ColorExpression_ptr parseColorExpression(rapidxml::xml_node<>* element);
+    unfoldtacpn::Colored::ArcExpression_ptr parseArcExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type);
+    unfoldtacpn::Colored::GuardExpression_ptr parseGuardExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type);
+    unfoldtacpn::Colored::ColorExpression_ptr parseColorExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type);
     unfoldtacpn::Colored::AllExpression_ptr parseAllExpression(rapidxml::xml_node<>* element);
     const unfoldtacpn::Colored::ColorType* parseUserSort(rapidxml::xml_node<>* element);
-    unfoldtacpn::Colored::ArcExpression_ptr parseNumberOfExpression(rapidxml::xml_node<>* element);
-    void collectColorsInTuple(rapidxml::xml_node<>* element, std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors);
-    unfoldtacpn::Colored::ArcExpression_ptr constructAddExpressionFromTupleExpression(rapidxml::xml_node<>* element,std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> collectedColors, uint32_t numberof);
-    std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> cartesianProduct(std::vector<unfoldtacpn::Colored::ColorExpression_ptr> rightSet, std::vector<unfoldtacpn::Colored::ColorExpression_ptr> leftSet);
-    std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> cartesianProduct(std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> rightSet, std::vector<unfoldtacpn::Colored::ColorExpression_ptr> leftSet);
+    unfoldtacpn::Colored::ArcExpression_ptr parseNumberOfExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type);
+    void collectColorsInTuple(rapidxml::xml_node<>* element, std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors, const Colored::ColorType* type);
+    unfoldtacpn::Colored::ArcExpression_ptr constructAddExpressionFromTupleExpression(rapidxml::xml_node<>* element,
+    const std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors, uint32_t numberof, const Colored::ColorType* type);
+    std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> cartesianProduct(const std::vector<unfoldtacpn::Colored::ColorExpression_ptr>& rightSet, const std::vector<unfoldtacpn::Colored::ColorExpression_ptr>& leftSet);
+    std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> cartesianProduct(const std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& rightSet, const std::vector<unfoldtacpn::Colored::ColorExpression_ptr>& leftSet);
     void parseTransportArc(rapidxml::xml_node<>* element);
     void parseSingleTransportArc(rapidxml::xml_node<>* element);
     void parseValue(rapidxml::xml_node<>* element, std::string& text);
     uint32_t parseNumberConstant(rapidxml::xml_node<>* element);
     void parsePosition(rapidxml::xml_node<>* element, double& x, double& y);
-    const unfoldtacpn::Colored::Color* findColor(const char* name) const;
-    unfoldtacpn::ColoredPetriNetBuilder* builder;
-    ColorTypeMap colorTypes;
-    VariableMap variables;
+    bool isTransition(const std::string& s);
+    void checkKeyword(const char* id);
+    unfoldtacpn::ColoredPetriNetBuilder* _builder;
+    ColorTypeMap _colorTypes;
+    VariableMap _variables;
+    ColorTypeMap _place_types;
     std::unordered_map<std::string, uint32_t> constantValues;
-    std::map<std::pair<std::string,std::string>, rapidxml::xml_node<>*> transportArcs;
-    std::unordered_set<std::string> transitions;
+    std::map<std::pair<std::string,std::string>, rapidxml::xml_node<>*> _transportArcs;
+    std::unordered_set<std::string> _used_keywords;
+    Colored::ScopeType _global_scope;
 };
 }
 #endif // PNMLPARSER_H

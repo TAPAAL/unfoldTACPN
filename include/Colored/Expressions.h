@@ -32,9 +32,9 @@ namespace unfoldtacpn {
     namespace Colored {
         struct ExpressionContext {
             typedef std::unordered_map<std::string, const Color*> BindingMap;
-
+            typedef std::unordered_map<std::string, const ColorType*> TypeMap;
             const BindingMap& binding;
-            const std::unordered_map<std::string, const ColorType*>& colorTypes;
+            const TypeMap& colorTypes;
 
             const Color* findColor(const std::string& color) const;
 
@@ -75,7 +75,7 @@ namespace unfoldtacpn {
 
             virtual const Color* eval(ExpressionContext& context) const = 0;
 
-            virtual const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const = 0;
+            virtual const ColorType* getColorType() const = 0;
 
             virtual void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const = 0;
         };
@@ -86,7 +86,7 @@ namespace unfoldtacpn {
                 return Color::dotConstant();
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override {
+            const ColorType* getColorType() const override {
                 return Color::dotConstant()->getColorType();
             }
 
@@ -116,7 +116,7 @@ namespace unfoldtacpn {
                 variables.insert(_variable);
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType() const override{
                 return _variable->colorType;
             }
 
@@ -148,7 +148,7 @@ namespace unfoldtacpn {
                 constantMap[index] = _userOperator;
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override{
+            const ColorType* getColorType() const override{
                 return _userOperator->getColorType();
             }
 
@@ -207,8 +207,8 @@ namespace unfoldtacpn {
                 return _color->toString() + "++";
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override {
-                return _color->getColorType(colorTypes);
+            const ColorType* getColorType() const override {
+                return _color->getColorType();
             }
 
             void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const override {
@@ -239,8 +239,8 @@ namespace unfoldtacpn {
                 return _color->toString() + "--";
             }
 
-            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override{
-                return _color->getColorType(colorTypes);
+            const ColorType* getColorType() const override{
+                return _color->getColorType();
             }
 
             void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const override {
@@ -275,23 +275,8 @@ namespace unfoldtacpn {
                 return col;
             }
 
-            void setColorType(const ColorType* ct){
-                _colorType = ct;
-            }
-
-            const ColorType* getColorType(std::unordered_map<std::string, const Colored::ColorType*>& colorTypes) const override {
-                std::vector<const ColorType*> types;
-                for (auto& color : _colors) {
-                    types.push_back(color->getColorType(colorTypes));
-                }
-                for (auto& elem : colorTypes) {
-                    auto* pt = dynamic_cast<const ProductType*>(elem.second);
-                    if (pt && pt->containsTypes(types)) {
-                        return pt;
-                    }
-                }
-                std::cout << "COULD NOT FIND PRODUCT TYPE" << std::endl;
-                return nullptr;
+            const ColorType* getColorType() const override {
+                return _colorType;
             }
 
             void getConstants(std::unordered_map<uint32_t, const Color*> &constantMap, uint32_t &index) const override {
@@ -316,8 +301,10 @@ namespace unfoldtacpn {
                 return res;
             }
 
-            TupleExpression(std::vector<ColorExpression_ptr>&& colors)
-                    : _colors(std::move(colors)) {}
+            TupleExpression(std::vector<ColorExpression_ptr>&& colors, const ColorType* type)
+                    : _colors(std::move(colors)), _colorType(type) {
+                assert(dynamic_cast<const ProductType*>(_colorType));
+            }
         };
 
         class GuardExpression : public Expression {

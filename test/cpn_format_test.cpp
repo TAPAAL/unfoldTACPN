@@ -875,3 +875,47 @@ BOOST_AUTO_TEST_CASE(Referendum) {
     b.unfold(p);
 
 }
+
+BOOST_AUTO_TEST_CASE(TupleTest) {
+    class PBuilder : public DummyBuilder {
+    public:
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+        }
+
+        virtual void addTransition(const std::string &name, bool urgent,
+            double, double) {
+        };
+
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+        }
+    };
+
+    auto f = loadFile("tuple_test.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+}
