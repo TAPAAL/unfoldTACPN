@@ -48,6 +48,7 @@ namespace unfoldtacpn {
         struct Transition {
             std::string name;
             GuardExpression_ptr guard;
+            int player;
             bool urgent;
             std::vector<Arc> arcs;
             std::vector<TransportArc> transport;

@@ -54,12 +54,13 @@ namespace unfoldtacpn {
 
     void ColoredPetriNetBuilder::addTransition(const std::string& name,
             const Colored::GuardExpression_ptr& guard,
+            int player,
             bool urgent,
             double x,
             double y) {
         if (_transitionnames.count(name) == 0) {
             uint32_t next = _transitionnames.size();
-            _transitions.emplace_back(Colored::Transition {name, guard, urgent});
+            _transitions.emplace_back(Colored::Transition {name, guard, player, urgent});
             _transitionnames[name] = next;
             _transitionlocations.push_back(std::tuple<double, double>(x,y));
         }
@@ -289,7 +290,7 @@ namespace unfoldtacpn {
             std::string name = transition.name;
             if(!gen.isInitial())
                 name += "__" + std::to_string(i++);
-            builder.addTransition(name, transition.urgent, std::get<0>(transitionPos) + buffer, std::get<1>(transitionPos));
+            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos) + buffer, std::get<1>(transitionPos));
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
                 unfoldArc(builder, arc, b, name);

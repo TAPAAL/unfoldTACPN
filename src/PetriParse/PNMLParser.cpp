@@ -721,6 +721,7 @@ void PNMLParser::parseTransportArc(rapidxml::xml_node<>* element){
 void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     double x = 0, y = 0;
     bool urgent = false;
+    int player = 0;
     unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
     auto name = element->first_attribute("id")->value();
 
@@ -737,6 +738,12 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
         urgent = stringToBool(urg_el->value());
     }
 
+    auto pl_el = element->first_attribute("player");
+    if(pl_el != nullptr) {
+        player = atoi(pl_el->value());
+    }
+
+
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "graphics") == 0) {
             parsePosition(it, x, y);
@@ -750,7 +757,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    _builder->addTransition(name, expr, urgent, x, y);
+    _builder->addTransition(name, expr, player, urgent, x, y);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, std::string& text) {

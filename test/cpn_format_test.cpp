@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(Places) {
             BOOST_REQUIRE_EQUAL(tokens, 3);
         }
 
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             BOOST_REQUIRE(false);
         };
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(ProductPlaces) {
             }
         }
 
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             BOOST_REQUIRE(false);
         };
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(PlacesBoundsMap) {
             BOOST_REQUIRE_LE(n_places, 2);
         }
 
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             BOOST_REQUIRE(false);
         };
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
         }
 
         bool seen_transition = false;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             BOOST_REQUIRE_EQUAL("T2", name);
             BOOST_REQUIRE(!urgent);
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(RegularArcGuard) {
         }
 
         bool seen_transition = false;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
         };
 
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(ColoredRegularArc) {
         }
 
         size_t n_trans = 0;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             ++n_trans;
             BOOST_REQUIRE(name.find("T0") == 0);
@@ -485,7 +485,7 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
         }
 
         size_t n_trans = 0;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             ++n_trans;
             BOOST_REQUIRE_EQUAL("T0", name);
@@ -582,7 +582,7 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
         }
 
         size_t n_trans = 0;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             ++n_trans;
             BOOST_REQUIRE(false);
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
         }
 
         size_t n_trans = 0;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             ++n_trans;
             BOOST_REQUIRE(name.find("T0") == 0);
@@ -761,7 +761,7 @@ BOOST_AUTO_TEST_CASE(ColoredGuardTest) {
         }
 
         size_t n_trans = 0;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             ++n_trans;
             BOOST_REQUIRE(name.find("T0") == 0);
@@ -844,7 +844,7 @@ BOOST_AUTO_TEST_CASE(Referendum) {
         }
 
         size_t n_trans = 0;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
         };
 
@@ -912,7 +912,7 @@ BOOST_AUTO_TEST_CASE(TupleTest) {
             double y) {
         }
 
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
         };
 
@@ -957,7 +957,7 @@ BOOST_AUTO_TEST_CASE(ColorGuardTest2) {
         }
 
         size_t n_trans = 0;
-        virtual void addTransition(const std::string &name, bool urgent,
+        virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {
             ++n_trans;
         };
@@ -990,4 +990,62 @@ BOOST_AUTO_TEST_CASE(ColorGuardTest2) {
     PBuilder p;
     b.unfold(p);
     BOOST_REQUIRE_EQUAL(p.n_trans, 1);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(GameTest) {
+
+    class PBuilder : public DummyBuilder {
+
+
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+        }
+
+        virtual void addTransition(const std::string &name, int player, bool urgent,
+            double, double) {
+            if(name.find("CTRL") == 0)
+            {
+                BOOST_REQUIRE(player == 0);
+            }
+            else
+            {
+                BOOST_REQUIRE(player == 1);
+            }
+        };
+
+        /* Add timed colored input arc with given arc expression*/
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("game.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
 }

@@ -26,7 +26,7 @@ class DummyBuilder : public unfoldtacpn::TAPNBuilderInterface {
             double y = 0) {};
 
     // add a time transition with a unique name
-    virtual void addTransition(const std::string &name, bool urgent,
+    virtual void addTransition(const std::string &name, int player, bool urgent,
             double, double) {};
 
     /* Add timed colored input arc with given arc expression*/
