@@ -178,7 +178,6 @@ unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseArcExpression(rapidxml:
         return parseNumberOfExpression(element, type);
     } else if (strcmp(element->name(), "add") == 0) {
         std::vector<unfoldtacpn::Colored::ArcExpression_ptr> constituents;
-        size_t i = 0;
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
             constituents.push_back(parseArcExpression(it, type));
         }
