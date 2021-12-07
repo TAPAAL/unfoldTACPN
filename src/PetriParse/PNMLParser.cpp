@@ -539,6 +539,10 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     {
         _place_types[id] = type = parseUserSort(node);
     }
+    else
+    {
+        _place_types[id] = _colorTypes["dot"];
+    }
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         // name element is ignored
         if (strcmp(it->name(), "colorinvariant") == 0) {
