@@ -7,9 +7,9 @@
 
 using namespace unfoldtacpn::PQL;
 
-std::shared_ptr<unfoldtacpn::PQL::Condition> query;
+std::shared_ptr<unfoldtacpn::PQL::Condition> result_query;
 extern int pqlqlex();
-void pqlqerror(const char *s) {printf("ERROR: %s\n", s);}
+void pqlqerror(const char *s) { printf("ERROR: %s\n", s); std::exit(-1); }
 %}
 
 %name-prefix "pqlq"
@@ -30,7 +30,7 @@ void pqlqerror(const char *s) {printf("ERROR: %s\n", s);}
 %token <token> AND OR NOT
 %token <token> EQUAL NEQUAL LESS LESSEQUAL GREATER GREATEREQUAL
 %token <token> PLUS MINUS MULTIPLY
-%token <token> EF AG AF EG
+%token <token> EF AG AF EG CONTROL COLON
 
 /* Terminal associativity */
 %left AND OR
@@ -38,19 +38,24 @@ void pqlqerror(const char *s) {printf("ERROR: %s\n", s);}
 
 /* Nonterminal type definition */
 %type <expr> expr term factor
-%type <cond> logic compare
+%type <cond> logic compare query
 
 /* Operator precedence, more possibly coming */
 
-%start query
+%start control_query
 
 %%
 
-query	: EF logic					{ query = std::make_shared<EFCondition>(Condition_ptr($2)); }
-        | AG logic                  { query = std::make_shared<AGCondition>(Condition_ptr($2)); }
-        | EG logic                  { query = std::make_shared<EGCondition>(Condition_ptr($2)); }
-        | AF logic                  { query = std::make_shared<AFCondition>(Condition_ptr($2)); }
-		| error						{ yyerrok; }
+control_query
+        : CONTROL COLON query { result_query = std::make_shared<ControlCondition>(Condition_ptr($3)); }
+        | query { result_query = Condition_ptr($1); }
+		| error { yyerrok; }
+        ;
+
+query	: EF logic					{ $$ = new EFCondition(Condition_ptr($2)); }
+        | AG logic                  { $$ = new AGCondition(Condition_ptr($2)); }
+        | EG logic                  { $$ = new EGCondition(Condition_ptr($2)); }
+        | AF logic                  { $$ = new AFCondition(Condition_ptr($2)); }
 		;
 
 logic	: logic AND logic			{ $$ = new AndCondition(Condition_ptr($1), Condition_ptr($3)); }

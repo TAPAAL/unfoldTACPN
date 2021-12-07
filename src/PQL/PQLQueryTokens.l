@@ -16,7 +16,7 @@
 
 #define register      // Deprecated in C++11.
 extern "C" int pqlqwrap(){return 1;}
-extern std::shared_ptr<unfoldtacpn::PQL::Condition> query;
+extern std::shared_ptr<unfoldtacpn::PQL::Condition> result_query;
 extern int pqlqparse();
 %}
 %option prefix="pqlq"
@@ -40,6 +40,7 @@ letter        [a-zA-Z_]
 "EG"						{return TOKEN(EG);}
 "AF"						{return TOKEN(AF);}
 "EF"						{return TOKEN(EF);}
+"control"                   {return TOKEN(CONTROL);}
 {letter}({letter}|{digit})* {SAVE_TOKEN; return ID;}
 {digit}+          {SAVE_TOKEN; return INT;}
 (\"(\\.|[^"])*\") {SAVE_QUOTED_TOKEN; return ID;}
@@ -58,6 +59,7 @@ letter        [a-zA-Z_]
 "-"							{return TOKEN(MINUS);}
 "*"							{return TOKEN(MULTIPLY);}
 "="							{return TOKEN(EQUAL);}
+":"							{return TOKEN(COLON);}
 .							{printf("Unknown token %s!\n", pqlqtext); yyterminate();}
 
 %%
@@ -71,7 +73,7 @@ std::shared_ptr<Condition> parseQuery(const std::string& queryString) {
 
 	//Delete the buffer
 	pqlq_delete_buffer(buf);
-	return query;
+	return result_query;
 }
 }}
 #ifdef __clang__

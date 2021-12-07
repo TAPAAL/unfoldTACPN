@@ -63,6 +63,8 @@ namespace unfoldtacpn {
 
             void _accept(const ShallowCondition *element) override;
 
+            void _accept(const ControlCondition *condition) override;
+
             void _accept(const EFCondition *condition) override;
 
             void _accept(const EGCondition *condition) override;

@@ -183,6 +183,12 @@ namespace unfoldtacpn {
             closeXmlTag("all-paths");
         }
 
+        void XMLPrinter::_accept(const ControlCondition *element) {
+            openXmlTag("control");
+            (*element)[0]->visit(*this);
+            closeXmlTag("control");
+        }
+
         void XMLPrinter::_accept(const EXCondition *element) {
             openXmlTag("exists-path");
             openXmlTag("next");

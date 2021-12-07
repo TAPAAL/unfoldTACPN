@@ -201,6 +201,13 @@ namespace unfoldtacpn {
             Condition_ptr _cond;
         };
 
+        // technically quantifies over strategies
+        class ControlCondition : public SimpleQuantifierCondition
+        {
+            using SimpleQuantifierCondition::SimpleQuantifierCondition;
+            void visit(Visitor&) const override;
+        };
+
         class EXCondition : public SimpleQuantifierCondition {
         public:
             using SimpleQuantifierCondition::SimpleQuantifierCondition;

@@ -125,8 +125,10 @@ namespace unfoldtacpn {
             _compiled->analyze(context);
         }
 
-        /******************** Range Contexts ********************/
-
+        void ControlCondition::visit(Visitor& ctx) const
+        {
+            ctx.accept<decltype(this)>(this);
+        }
 
         void EGCondition::visit(Visitor& ctx) const
         {

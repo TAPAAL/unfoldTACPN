@@ -46,6 +46,8 @@ namespace unfoldtacpn
 
             // Quantifiers, most uses of the visitor will not use the quantifiers - so we give a default implementation.
             // default behaviour is error
+            virtual void _accept(const ControlCondition*)
+            {   assert(false); std::cerr << "No accept for ControlCondition" << std::endl; exit(0);};
             virtual void _accept(const EFCondition*)
             {   assert(false); std::cerr << "No accept for EFCondition" << std::endl; exit(0);};
             virtual void _accept(const EGCondition*)
