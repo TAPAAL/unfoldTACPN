@@ -836,6 +836,11 @@ BOOST_AUTO_TEST_CASE(Referendum) {
             int bound,
             double x,
             double y) {
+            if(name.find("ready") == 0)
+                BOOST_REQUIRE_EQUAL(tokens, 1);
+            else
+                BOOST_REQUIRE_EQUAL(tokens, 0);
+
         }
 
         size_t n_trans = 0;
@@ -851,12 +856,31 @@ BOOST_AUTO_TEST_CASE(Referendum) {
             bool inhibitor,
             int weight,
             bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE_EQUAL(inhibitor, false);
+            BOOST_REQUIRE_EQUAL(weight, 1);
+            if(place.find("ready") != 0)
+            {
+                if(place != "voting__0")
+                {
+                    BOOST_REQUIRE_EQUAL(upper, 2);
+                    BOOST_REQUIRE_LE(lower, 2);
+                    BOOST_REQUIRE_GE(lower, 1);
+                }
+                else
+                {
+                    BOOST_REQUIRE(
+                        (lower == 0 && upper == std::numeric_limits<int>::max()) ||
+                        (lower == 1 && upper == 4)
+                        );
+                }
+            }
         };
 
         /** Add output arc with given weight */
         virtual void addOutputArc(const std::string& transition,
             const std::string& place,
             int weight) {
+            BOOST_REQUIRE_EQUAL(weight, 1);
         };
 
         /* Add transport arc with given arc expression */
@@ -864,6 +888,7 @@ BOOST_AUTO_TEST_CASE(Referendum) {
             const std::string& transition,
             const std::string& target, int weight,
             bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
         }
     };
 
