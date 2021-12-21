@@ -94,9 +94,9 @@ namespace unfoldtacpn {
         auto queries = std::move(parser.queries);
 
 
-        size_t i = 0;
-        for (auto& q : queries) {
-            ++i;
+        for (size_t i = 0; i < queries.size(); ++i) {
+            if(to_parse.count(i) == 0) continue;
+            auto& q = queries[i];
             if (q.parsingResult == QueryItem::UNSUPPORTED_QUERY) {
                 fprintf(stdout, "The selected query in the XML query file is not supported\n");
                 fprintf(stdout, "FORMULA %s CANNOT_COMPUTE\n", q.id.c_str());
