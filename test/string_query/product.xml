@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <net active="true" id="TAPN1" type="P/T net">
+    <place displayName="true" id="DOT" initialMarking="0" invariant="&lt; inf" name="DOT" nameOffsetX="0" nameOffsetY="0" positionX="135" positionY="150">
+      <type>
+        <text>dot</text>
+        <structure>
+          <usersort declaration="dot"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="SIMPLE" initialMarking="0" invariant="&lt; inf" name="SIMPLE" nameOffsetX="0" nameOffsetY="0" positionX="255" positionY="150">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="PRODUCT" initialMarking="0" invariant="&lt; inf" name="PRODUCT" nameOffsetX="0" nameOffsetY="0" positionX="390" positionY="150">
+      <type>
+        <text>TT</text>
+        <structure>
+          <usersort declaration="TT"/>
+        </structure>
+      </type>
+    </place>
+  </net>
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="T" name="T">
+          <cyclicenumeration>
+            <feconstant id="1" name="T"/>
+            <feconstant id="2" name="T"/>
+          </cyclicenumeration>
+        </namedsort>
+        <namedsort id="TT" name="TT">
+          <productsort>
+            <usersort declaration="T"/>
+            <usersort declaration="T"/>
+          </productsort>
+        </namedsort>
+      </declarations>
+    </structure>
+  </declaration>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>

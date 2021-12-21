@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<property-set xmlns="http://tapaal.net/">
+  
+  <property>
+    <id>Six voted no</id>
+    <description>Six voted no</description>
+    <formula>
+      <exists-path>
+        <finally>
+          <integer-eq>
+            <tokens-count>
+              <place>voted_no</place>
+            </tokens-count>
+            <integer-constant>6</integer-constant>
+          </integer-eq>
+        </finally>
+      </exists-path>
+    </formula>
+  </property>
+  <property>
+    <id>Tie vote</id>
+    <description>Tie vote</description>
+    <formula>
+      <exists-path>
+        <finally>
+          <conjunction>
+            <integer-eq>
+              <tokens-count>
+                <place>ready</place>
+              </tokens-count>
+              <integer-constant>0</integer-constant>
+            </integer-eq>
+            <integer-eq>
+              <tokens-count>
+                <place>voting</place>
+              </tokens-count>
+              <integer-constant>0</integer-constant>
+            </integer-eq>
+            <integer-eq>
+              <tokens-count>
+                <place>voted_yes</place>
+              </tokens-count>
+              <tokens-count>
+                <place>voted_no</place>
+              </tokens-count>
+            </integer-eq>
+          </conjunction>
+        </finally>
+      </exists-path>
+    </formula>
+  </property>
+</property-set>

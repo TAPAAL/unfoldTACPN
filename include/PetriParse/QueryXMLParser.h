@@ -23,14 +23,14 @@
 #include <string.h>
 #include <vector>
 #include <memory>
-#include <sstream> 
+#include <sstream>
 #include <set>
 
 #include <rapidxml.hpp>
 
 #include "PNMLParser.h"
 #include "QueryParser.h"
-using namespace PetriEngine::PQL;
+using namespace unfoldtacpn::PQL;
 
 class QueryXMLParser {
 public:
@@ -39,9 +39,7 @@ public:
 
     std::vector<QueryItem>  queries;
 
-    bool parse(std::ifstream& xml, const std::set<size_t>& );
-    void printQueries();
-    void printQueries(size_t i);
+    bool parse(std::istream& xml, const std::set<size_t>& );
 
 private:
     bool parsePropertySet(rapidxml::xml_node<>* element, const std::set<size_t>&);

@@ -1,0 +1,39 @@
+name: Build MacOS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [synchronize, opened, reopened, ready_for_review]
+  workflow_dispatch:
+
+concurrency: 
+  group: build-MacOS-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event.pull_request.draft == false
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Packages
+        run: |
+          brew install flex bison
+        
+      - name: Build 
+        uses: lukka/run-cmake@v2.5
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeAppendedArgs: >-
+            -DUNFOLDTACPN_TEST=OFF
+            -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison 
+            -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex
+          cmakeBuildType: Release
+          cmakeGenerator: UnixMakefiles
+          buildDirectory: '${{runner.workspace}}/build'
+        env:
+          CC: gcc-9
+          CXX: g++-9

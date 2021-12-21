@@ -3,8 +3,8 @@
 #define QUERYPARSER_H
 
 
-#include "PetriEngine/PQL/PQL.h"
-using namespace PetriEngine::PQL;
+#include "PQL/PQL.h"
+using namespace unfoldtacpn::PQL;
 
 struct QueryItem {
     std::string id; // query name

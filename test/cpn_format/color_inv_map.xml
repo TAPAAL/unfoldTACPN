@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <net active="true" id="TAPN1" type="P/T net">
+    <place displayName="true" id="P0" initialMarking="0" invariant="&lt;= 4" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="510" positionY="135">
+      <type>
+        <text>T</text>
+        <structure>
+          <usersort declaration="T"/>
+        </structure>
+      </type>
+      <colorinvariant>
+        <inscription inscription="&lt;= 1"/>
+        <colortype name="T">
+          <color value="1"/>
+        </colortype>
+      </colorinvariant>
+      <colorinvariant>
+        <inscription inscription="&lt;= 2"/>
+        <colortype name="T">
+          <color value="2"/>
+        </colortype>
+      </colorinvariant>
+    </place>
+  </net>
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="T" name="T">
+          <cyclicenumeration>
+            <feconstant id="1" name="T"/>
+            <feconstant id="2" name="T"/>
+          </cyclicenumeration>
+        </namedsort>
+      </declarations>
+    </structure>
+  </declaration>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>

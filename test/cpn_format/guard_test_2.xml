@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <net active="true" id="TAPN1" type="P/T net">
+    <place displayName="true" id="P0" initialMarking="0" invariant="&lt; inf" name="P0" nameOffsetX="0" nameOffsetY="0" positionX="285" positionY="165">
+      <type>
+        <text>T1</text>
+        <structure>
+          <usersort declaration="T1"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="P1" initialMarking="0" invariant="&lt; inf" name="P1" nameOffsetX="0" nameOffsetY="0" positionX="285" positionY="345">
+      <type>
+        <text>T1</text>
+        <structure>
+          <usersort declaration="T1"/>
+        </structure>
+      </type>
+    </place>
+    <transition angle="0" displayName="true" id="T0" infiniteServer="false" name="T0" nameOffsetX="0" nameOffsetY="0" player="0" positionX="435" positionY="255" priority="0" urgent="false">
+      <condition>
+        <text>VT1 !eq VT2 and VT1 eq A</text>
+        <structure>
+          <and>
+            <subterm>
+              <inequality>
+                <subterm>
+                  <variable refvariable="VarVT1"/>
+                </subterm>
+                <subterm>
+                  <variable refvariable="VarVT2"/>
+                </subterm>
+              </inequality>
+            </subterm>
+            <subterm>
+              <equality>
+                <subterm>
+                  <variable refvariable="VarVT1"/>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="A"/>
+                </subterm>
+              </equality>
+            </subterm>
+          </and>
+        </structure>
+      </condition>
+    </transition>
+    <arc id="A0" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="P0" target="T0" type="timed" weight="1">
+      <hlinscription>
+        <text>1'VT2</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <variable refvariable="VarVT2"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="312" yCoord="187"/>
+      <arcpath arcPointType="false" id="1" xCoord="445" yCoord="267"/>
+    </arc>
+    <arc id="A1" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="P1" target="T0" type="timed" weight="1">
+      <hlinscription>
+        <text>1'VT1</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <variable refvariable="VarVT1"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="312" yCoord="352"/>
+      <arcpath arcPointType="false" id="1" xCoord="444" yCoord="273"/>
+    </arc>
+  </net>
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="T1" name="T1">
+          <cyclicenumeration>
+            <feconstant id="A" name="T1"/>
+            <feconstant id="B" name="T1"/>
+          </cyclicenumeration>
+        </namedsort>
+        <variabledecl id="VarVT1" name="VT1">
+          <usersort declaration="T1"/>
+        </variabledecl>
+        <variabledecl id="VarVT2" name="VT2">
+          <usersort declaration="T1"/>
+        </variabledecl>
+      </declarations>
+    </structure>
+  </declaration>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>
