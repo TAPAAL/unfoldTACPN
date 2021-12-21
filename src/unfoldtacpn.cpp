@@ -66,7 +66,8 @@ namespace unfoldtacpn {
         NamingContext context(cpnBuilder.getUnfoldedPlaceNames(),
             cpnBuilder.getUnfoldedTransitionNames());
         for (auto& q : queries) {
-            q.first->analyze(context);
+            if(q.first)
+                q.first->analyze(context);
         }
     }
 
