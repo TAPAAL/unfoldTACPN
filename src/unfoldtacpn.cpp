@@ -95,8 +95,12 @@ namespace unfoldtacpn {
 
 
         for (size_t i = 0; i < queries.size(); ++i) {
-            if(to_parse.count(i) == 0) continue;
             auto& q = queries[i];
+            if(to_parse.count(i) == 0)
+            {
+                conditions.emplace_back(q.query, q.id);
+                continue;
+            }
             if (q.parsingResult == QueryItem::UNSUPPORTED_QUERY) {
                 fprintf(stdout, "The selected query in the XML query file is not supported\n");
                 fprintf(stdout, "FORMULA %s CANNOT_COMPUTE\n", q.id.c_str());
