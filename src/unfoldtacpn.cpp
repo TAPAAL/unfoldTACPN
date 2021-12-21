@@ -66,7 +66,8 @@ namespace unfoldtacpn {
         NamingContext context(cpnBuilder.getUnfoldedPlaceNames(),
             cpnBuilder.getUnfoldedTransitionNames());
         for (auto& q : queries) {
-            q.first->analyze(context);
+            if(q.first)
+                q.first->analyze(context);
         }
     }
 
@@ -94,9 +95,13 @@ namespace unfoldtacpn {
         auto queries = std::move(parser.queries);
 
 
-        size_t i = 0;
-        for (auto& q : queries) {
-            ++i;
+        for (size_t i = 0; i < queries.size(); ++i) {
+            auto& q = queries[i];
+            if(to_parse.count(i) == 0)
+            {
+                conditions.emplace_back(q.query, q.id);
+                continue;
+            }
             if (q.parsingResult == QueryItem::UNSUPPORTED_QUERY) {
                 fprintf(stdout, "The selected query in the XML query file is not supported\n");
                 fprintf(stdout, "FORMULA %s CANNOT_COMPUTE\n", q.id.c_str());
