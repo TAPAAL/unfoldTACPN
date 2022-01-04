@@ -1,6 +1,6 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_library(Colored STATIC ColoredPetriNetBuilder.cpp
+add_library(Colored OBJECT ColoredPetriNetBuilder.cpp
     Colors.cpp
     Multiset.cpp
     TimeInterval.cpp
