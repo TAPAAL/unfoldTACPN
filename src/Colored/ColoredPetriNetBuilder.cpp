@@ -216,7 +216,7 @@ namespace unfoldtacpn {
                 const Colored::Color* color = &place.type->operator[](i);
                 Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
                 auto r = place.marking[color];
-                builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), x + offset, y);
+                builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), x, y + offset);
 
                 _ptplacenames[place.name][color->getId()] = std::move(name);
                 offset += 15;
@@ -288,7 +288,7 @@ namespace unfoldtacpn {
             std::string name = transition.name;
             if(!gen.isInitial())
                 name += "__" + std::to_string(i++);
-            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos) + offset, std::get<1>(transitionPos));
+            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset);
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
                 unfoldArc(builder, arc, b, name);
