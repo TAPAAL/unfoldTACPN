@@ -202,34 +202,32 @@ namespace unfoldtacpn {
     }
 
     void ColoredPetriNetBuilder::unfoldPlace(TAPNBuilderInterface& builder, const Colored::Place& place) {
-        double xBuffer = 0;
-        double yBuffer = 0;
         uint32_t index = _placenames[place.name];
         auto placePos = _placelocations[index];
         size_t size = place.type == nullptr ? 1 : place.type->size();
         if(size != 1)
         {
+            double offset = 0;
             size_t i = 0;
             for (; i < place.type->size(); ++i) {
-                double x = xBuffer + std::get<0>(placePos);
-                double y = yBuffer + std::get<1>(placePos);
+                double x = std::get<0>(placePos);
+                double y = std::get<1>(placePos);
                 std::string name = place.name + "__" + std::to_string(i);
                 const Colored::Color* color = &place.type->operator[](i);
                 Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
                 auto r = place.marking[color];
-                builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), x, y);
+                builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), x + offset, y);
 
                 _ptplacenames[place.name][color->getId()] = std::move(name);
-                xBuffer += 50;
-                yBuffer += 0;
-
+                offset += 15;
             }
+
             if(place.inhibiting)
             {
-                double x = xBuffer + std::get<0>(placePos);
-                double y = yBuffer + std::get<1>(placePos);
+                double x = std::get<0>(placePos);
+                double y = std::get<1>(placePos);
                 std::string placeName = "__" + place.name + "__SUM";
-                builder.addPlace(placeName, place.marking.size(), true, std::numeric_limits<int>::max(), x, y);
+                builder.addPlace(placeName, place.marking.size(), true, std::numeric_limits<int>::max(), x + 30, y - 30);
                 _sumPlacesNames[place.name] = std::move(placeName);
             }
         }
@@ -282,7 +280,7 @@ namespace unfoldtacpn {
 
     void ColoredPetriNetBuilder::unfoldTransition(TAPNBuilderInterface& builder, const Colored::Transition& transition) {
         BindingGenerator gen(transition, _colors);
-        double buffer = 0;
+        double offset = 0;
         uint32_t transitionId = _transitionnames[transition.name];
         auto transitionPos = _transitionlocations[transitionId];
         size_t i = 0;
@@ -290,7 +288,7 @@ namespace unfoldtacpn {
             std::string name = transition.name;
             if(!gen.isInitial())
                 name += "__" + std::to_string(i++);
-            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos) + buffer, std::get<1>(transitionPos));
+            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos) + offset, std::get<1>(transitionPos));
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
                 unfoldArc(builder, arc, b, name);
@@ -300,7 +298,7 @@ namespace unfoldtacpn {
                 unfoldTransport(builder, transport, b, name);
             }
             unfoldInhibitorArc(builder, transitionId, name);
-            buffer += 250;
+            offset += 15;
         }
     }
 
