@@ -6,9 +6,8 @@ if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
 endif()
 
 # Project Definition
-set(VERIFYPN_NAME "unfoldTACPN")
-set(VERIFYPN_VERSION 0.0.2)
-project(${VERIFYPN_NAME} VERSION ${VERIFYPN_VERSION} LANGUAGES CXX C)
+set(UNFOLD_NAME "unfoldTACPN")
+project("unfoldTACPN" VERSION 0.0.3 LANGUAGES CXX C)
 
 # C++ Definition
 set(CMAKE_CXX_STANDARD 17)
@@ -20,32 +19,18 @@ option(UNFOLDTACPN_Static "Link libraries statically" ON)
 option(UNFOLDTACPN_GetDependencies "Fetch external dependencies from web." ON)
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external CACHE PATH "Install location for external dependencies")
 option(UNFOLDTACPN_TEST "Build unit tests" OFF)
-set(UNFOLDTACPN_TARGETDIR "${CMAKE_BINARY_DIR}/${VERIFYPN_NAME}" CACHE PATH "Traget directory for build files")
-set(UNFOLDTACPN_OSX_DEPLOYMENT_TARGET 10.8 CACHE STRING "Specify the minimum version of the target platform for MacOS on which the target binaries are to be deployed ") 
+set(UNFOLDTACPN_TARGETDIR "${CMAKE_BINARY_DIR}/${UNFOLD_NAME}" CACHE PATH "Target directory for build files")
+set(UNFOLDTACPN_OSX_DEPLOYMENT_TARGET 10.8 CACHE STRING "Specify the minimum version of the target platform for MacOS on which the target binaries are to be deployed ")
 
 # Configure Project
 
 ## Configure Static
 if (UNFOLDTACPN_Static)
     set(BUILD_SHARED_LIBS OFF)
-    if (NOT APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-    else () 
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
-    endif()
 else()
     set(BUILD_SHARED_LIBS ON)
 endif ()
 
-## Configure Traget Platform 
-if (UNIX AND NOT APPLE)
-    set(ARCH_TYPE "linux64")
-elseif (APPLE)
-    set(ARCH_TYPE "osx64")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET ${VERIFYPN_OSX_DEPLOYMENT_TARGET})
-else ()
-    set(ARCH_TYPE "win64")
-endif ()
 
 ## Enabled INTERPROCEDURAL_OPTIMIZATION for non-macos
 if (CMAKE_BUILD_TYPE MATCHES Release)
@@ -85,9 +70,6 @@ if (UNFOLDTACPN_GetDependencies)
     link_directories(${EXTERNAL_INSTALL_LOCATION}/lib64)
     include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
 endif ()
-
-# Set Macros
-add_compile_definitions(UNFOLDTACPN_VERSION=\"${UNFOLDTACPN_VERSION}\")
 
 # Source
 include_directories(include)

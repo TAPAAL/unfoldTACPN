@@ -5,7 +5,7 @@ add_subdirectory(PetriParse)
 add_subdirectory(Colored)
 add_subdirectory(PQL)
 
-add_library(unfoldtacpn ${HEADER_FILES} unfoldtacpn.cpp)
+add_library(unfoldtacpn STATIC ${HEADER_FILES} unfoldtacpn.cpp)
 
 target_link_libraries(unfoldtacpn PRIVATE PQL PetriParse Colored)
 
