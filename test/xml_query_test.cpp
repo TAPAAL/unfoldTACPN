@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(GameQuery) {
     BOOST_REQUIRE_EQUAL(parser.queries[0].parsingResult, QueryItem::PARSING_OK);
     BOOST_REQUIRE(parser.queries[0].query != nullptr);
     BOOST_REQUIRE_EQUAL(parser.queries[1].parsingResult, QueryItem::PARSING_OK);
-    BOOST_REQUIRE(parser.queries[1].query == nullptr); // not parsed,
+    BOOST_REQUIRE(parser.queries[1].query != nullptr);
 }
 
 using namespace PQL;
