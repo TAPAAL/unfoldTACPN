@@ -54,7 +54,18 @@ BOOST_AUTO_TEST_CASE(ReferendumQuery) {
     BOOST_REQUIRE(parser.queries[1].query == nullptr); // not parsed,
 }
 
-
+BOOST_AUTO_TEST_CASE(GameQuery) {
+    auto f = loadFile("game_queries.xml");
+    BOOST_REQUIRE(f);
+    QueryXMLParser parser;
+    std::set<size_t> to_read{0, 1};
+    parser.parse(f, to_read);
+    BOOST_REQUIRE_EQUAL(parser.queries.size(), 2);
+    BOOST_REQUIRE_EQUAL(parser.queries[0].parsingResult, QueryItem::PARSING_OK);
+    BOOST_REQUIRE(parser.queries[0].query != nullptr);
+    BOOST_REQUIRE_EQUAL(parser.queries[1].parsingResult, QueryItem::PARSING_OK);
+    BOOST_REQUIRE(parser.queries[1].query == nullptr); // not parsed,
+}
 
 using namespace PQL;
 class DummyVisitor : public PQL::Visitor {

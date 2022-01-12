@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<property-set xmlns="http://tapaal.net/">
+
+  <property>
+    <id>Query Comment/Name Here</id>
+    <description>Query Comment/Name Here</description>
+    <formula>
+        <control>
+            <all-paths>
+              <finally>
+                <true/>
+              </finally>
+            </all-paths>
+        </control>
+    </formula>
+  </property>
+  <property>
+    <id>Query Comment/Name Here</id>
+    <description>Query Comment/Name Here</description>
+    <formula>
+        <control>
+            <all-paths>
+              <globally>
+                <true/>
+              </globally>
+            </all-paths>
+        </control>
+    </formula>
+  </property>
+</property-set>
