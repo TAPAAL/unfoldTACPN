@@ -167,6 +167,13 @@ Condition_ptr QueryXMLParser::parseFormula(rapidxml::xml_node<>*  element) {
         }
         if(bound == nullptr) fatal_error(childName);
         return std::make_shared<KSafeCondition>(bound);
+    } else if(childName == "control") {
+        if((cond = parseBooleanFormula(element->first_node())) != nullptr)
+            return std::make_shared<ControlCondition>(cond);
+        else {
+            fatal_error(childName);
+            return nullptr;
+        }
     } else if ((cond = parseBooleanFormula(child)) != nullptr) {
         return cond;
     } else {
