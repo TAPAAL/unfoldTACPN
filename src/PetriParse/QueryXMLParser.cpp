@@ -167,6 +167,13 @@ Condition_ptr QueryXMLParser::parseFormula(rapidxml::xml_node<>*  element) {
         }
         if(bound == nullptr) fatal_error(childName);
         return std::make_shared<KSafeCondition>(bound);
+    } else if(childName == "control") {
+        if((cond = parseBooleanFormula(child->first_node())) != nullptr)
+            return std::make_shared<ControlCondition>(cond);
+        else {
+            fatal_error(childName);
+            return nullptr;
+        }
     } else if ((cond = parseBooleanFormula(child)) != nullptr) {
         return cond;
     } else {
@@ -492,10 +499,10 @@ Expr_ptr QueryXMLParser::parseIntegerExpression(rapidxml::xml_node<>*  element) 
         for (; it; it = it->next_sibling()) {
             els.emplace_back(parseIntegerExpression(it));
             if(!els.back())
-        {
-            assert(false);
-            return nullptr;
-        }
+            {
+                assert(false);
+                return nullptr;
+            }
         }
 
         if (els.size() < 2)
