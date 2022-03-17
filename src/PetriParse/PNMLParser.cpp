@@ -81,14 +81,6 @@ void PNMLParser::parse(std::istream& xml,
         parseDeclarations(declarations);
     }
 
-    auto netType = root->first_node("net");
-    rapidxml::xml_node<> *placeElement = netType->first_node("place");
-    while(placeElement == nullptr && netType != nullptr){
-        netType = netType->first_node();
-        placeElement = netType->first_node("place");
-    }
-
-    //xml_node<> *child = node->first_node(); child; child = child->next_sibling()
     for (auto it = root->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "constant") == 0)
             constantValues[it->first_attribute("name")->value()] = atoi(it->first_attribute("value")->value());
@@ -157,6 +149,18 @@ void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
             if (strcmp(it->name(), "usersort") == 0) {
                 ((unfoldtacpn::Colored::ProductType*)ct)->addType(_colorTypes[it->first_attribute("declaration")->value()]);
             }
+            else
+            {
+                std::cerr << "Trying to deal with int-range?" << std::endl;
+                std::cerr << type->name() << std::endl;
+            }
+        }
+    } else if (strcmp(type->name(), "finiteintrange") == 0) {
+        uint32_t start = (uint32_t)atoll(type->first_attribute("start")->value());
+        uint32_t end = (uint32_t)atoll(type->first_attribute("end")->value());
+        for (uint32_t i = start; i<=end;i++) {
+            auto str = std::to_string(i);
+            ct->addColor(str.c_str());
         }
     } else {
         for (auto it = type->first_node(); it; it = it->next_sibling()) {
@@ -272,6 +276,27 @@ unfoldtacpn::Colored::ColorExpression_ptr PNMLParser::parseColorExpression(rapid
         return std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors), type);
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {
         return parseColorExpression(element->first_node(), type);
+    }
+    else if (strcmp(element->name(), "finiteintrangeconstant") == 0)
+    {
+        std::vector<unfoldtacpn::Colored::ColorExpression_ptr> colors;
+		auto value = atoll(element->first_attribute("value")->value());
+		auto intRangeElement = element->first_node("finiteintrange");
+		auto start = intRangeElement->first_attribute("start")->value();
+		auto end = intRangeElement->first_attribute("end")->value();
+        auto si = atoll(start);
+        auto ei = atoll(end);
+        for(auto [_, ct] : _colorTypes)
+        {
+            if(ct->size() != size_t(ei-si)+1) continue;
+            if(ct->begin()->getColorName().compare(start) == 0)
+            {
+                assert(value >= si);
+                const unfoldtacpn::Colored::Color* color = &(*ct)[(size_t)(value-si)];
+                auto res = std::make_shared<unfoldtacpn::Colored::UserOperatorExpression>(color);
+                return std::dynamic_pointer_cast<unfoldtacpn::Colored::ColorExpression>(res);
+            }
+        }
     }
     assert(false);
     return nullptr;
@@ -590,15 +615,21 @@ unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml
 
 std::vector<Colored::TimeInterval> PNMLParser::parseTimeGuard(rapidxml::xml_node<>* element) {
     auto el = element->first_attribute("inscription");
-    if(el == nullptr) return {};
-    auto interval = el->value();
     std::vector<const Colored::Color*> colors;
     colors.push_back(new Colored::Color());
     std::vector<Colored::TimeInterval> intervals;
-    intervals.push_back(Colored::TimeInterval::createFor(interval, colors, constantValues));
-    for (auto it = element->first_node("colorinterval"); it; it = it->next_sibling("colorinterval")) {
-        auto pair = parseTimeConstraint(it);
-        intervals.push_back(Colored::TimeInterval::createFor(pair.first, pair.second, constantValues));
+    if(el == nullptr) {
+        std::string def = "[0,inf)";
+        intervals.push_back(Colored::TimeInterval::createFor(def, colors, constantValues));
+    }
+    else
+    {
+        auto interval = el->value();
+        intervals.push_back(Colored::TimeInterval::createFor(interval, colors, constantValues));
+        for (auto it = element->first_node("colorinterval"); it; it = it->next_sibling("colorinterval")) {
+            auto pair = parseTimeConstraint(it);
+            intervals.push_back(Colored::TimeInterval::createFor(pair.first, pair.second, constantValues));
+        }
     }
     return intervals;
 }

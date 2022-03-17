@@ -11,7 +11,9 @@ namespace unfoldtacpn {
     namespace Colored {
 
         TimeInvariant TimeInvariant::createFor(const std::string& invariant, const std::vector<const Colored::Color*>& colors, const std::unordered_map<std::string, uint32_t>& constants){
-
+            Colored::Color color = createColor(colors);
+            if(invariant.empty())
+                return TimeInvariant(std::move(color));
             bool strict = invariant.find("<=") == std::string::npos;
             int bound = std::numeric_limits<int>().max();
 
@@ -28,7 +30,7 @@ namespace unfoldtacpn {
                     bound = constants.find(number)->second;
             }
 
-            Colored::Color color = createColor(colors);
+
             if (bound == std::numeric_limits<int>().max())
                 return TimeInvariant(std::move(color));
             else

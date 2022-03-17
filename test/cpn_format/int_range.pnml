@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+    <net id="ComposedModel" type="http://www.pnml.org/version-2009/grammar/ptnet">
+        <name>
+            <text>ComposedModel</text>
+        </name>
+        <declaration>
+            <structure>
+                <declarations>
+                    <namedsort id="dot" name="dot">
+                        <dot/>
+                    </namedsort>
+                    <namedsort id="a" name="a">
+                        <finiteintrange end="4" start="1"/>
+                    </namedsort>
+                    <namedsort id="b" name="b">
+                        <finiteintrange end="3" start="2"/>
+                    </namedsort>
+                    <variabledecl id="Varxa" name="xa">
+                        <usersort declaration="a"/>
+                    </variabledecl>
+                    <variabledecl id="Varxb" name="xb">
+                        <usersort declaration="b"/>
+                    </variabledecl>
+                </declarations>
+            </structure>
+        </declaration>
+        <page id="page0">
+            <place id="P0">
+                <name>
+                    <text>P0</text>
+                    <graphics>
+                        <offset x="0" y="0"/>
+                    </graphics>
+                </name>
+                <graphics>
+                    <position x="270" y="165"/>
+                </graphics>
+                <type>
+                    <text>a</text>
+                    <structure>
+                        <usersort declaration="a"/>
+                    </structure>
+                </type>
+                <hlinitialMarking>
+                    <text>(1'2)</text>
+                    <structure>
+                        <add>
+                            <subterm>
+                                <numberof>
+                                    <subterm>
+                                        <numberconstant value="1">
+                                            <positive/>
+                                        </numberconstant>
+                                    </subterm>
+                                    <subterm>
+                                        <finiteintrangeconstant value="2">
+                                            <finiteintrange end="4" start="1"/>
+                                        </finiteintrangeconstant>
+                                    </subterm>
+                                </numberof>
+                            </subterm>
+                        </add>
+                    </structure>
+                </hlinitialMarking>
+            </place>
+            <place id="P1">
+                <name>
+                    <text>P1</text>
+                    <graphics>
+                        <offset x="0" y="0"/>
+                    </graphics>
+                </name>
+                <graphics>
+                    <position x="270" y="315"/>
+                </graphics>
+                <type>
+                    <text>b</text>
+                    <structure>
+                        <usersort declaration="b"/>
+                    </structure>
+                </type>
+                <hlinitialMarking>
+                    <text>(1'2)</text>
+                    <structure>
+                        <add>
+                            <subterm>
+                                <numberof>
+                                    <subterm>
+                                        <numberconstant value="1">
+                                            <positive/>
+                                        </numberconstant>
+                                    </subterm>
+                                    <subterm>
+                                        <finiteintrangeconstant value="2">
+                                            <finiteintrange end="3" start="2"/>
+                                        </finiteintrangeconstant>
+                                    </subterm>
+                                </numberof>
+                            </subterm>
+                        </add>
+                    </structure>
+                </hlinitialMarking>
+            </place>
+            <place id="P2">
+                <name>
+                    <text>P2</text>
+                    <graphics>
+                        <offset x="0" y="0"/>
+                    </graphics>
+                </name>
+                <graphics>
+                    <position x="630" y="225"/>
+                </graphics>
+                <type>
+                    <text>b</text>
+                    <structure>
+                        <usersort declaration="b"/>
+                    </structure>
+                </type>
+            </place>
+            <place id="target">
+                <name>
+                    <text>target</text>
+                    <graphics>
+                        <offset x="0" y="0"/>
+                    </graphics>
+                </name>
+                <graphics>
+                    <position x="675" y="510"/>
+                </graphics>
+                <type>
+                    <text>dot</text>
+                    <structure>
+                        <usersort declaration="dot"/>
+                    </structure>
+                </type>
+            </place>
+            <transition id="T0">
+                <name>
+                    <graphics>
+                        <offset x="0" y="0"/>
+                    </graphics>
+                    <text>T0</text>
+                </name>
+                <graphics>
+                    <position x="420" y="225"/>
+                </graphics>
+                <condition>
+                    <text>xa-- eq 1</text>
+                    <structure>
+                        <equality>
+                            <subterm>
+                                <predecessor>
+                                    <subterm>
+                                        <variable refvariable="Varxa"/>
+                                    </subterm>
+                                </predecessor>
+                            </subterm>
+                            <subterm>
+                                <finiteintrangeconstant value="1">
+                                    <finiteintrange end="4" start="1"/>
+                                </finiteintrangeconstant>
+                            </subterm>
+                        </equality>
+                    </structure>
+                </condition>
+            </transition>
+            <transition id="T1">
+                <name>
+                    <graphics>
+                        <offset x="0" y="0"/>
+                    </graphics>
+                    <text>T1</text>
+                </name>
+                <graphics>
+                    <position x="645" y="360"/>
+                </graphics>
+            </transition>
+            <arc id="P0_to_T0" source="P0" target="T0" type="normal">
+                <hlinscription>
+                    <text>1'xa</text>
+                    <structure>
+                        <numberof>
+                            <subterm>
+                                <numberconstant value="1">
+                                    <positive/>
+                                </numberconstant>
+                            </subterm>
+                            <subterm>
+                                <variable refvariable="Varxa"/>
+                            </subterm>
+                        </numberof>
+                    </structure>
+                </hlinscription>
+            </arc>
+            <arc id="P1_to_T0" source="P1" target="T0" type="normal">
+                <hlinscription>
+                    <text>1'xb</text>
+                    <structure>
+                        <numberof>
+                            <subterm>
+                                <numberconstant value="1">
+                                    <positive/>
+                                </numberconstant>
+                            </subterm>
+                            <subterm>
+                                <variable refvariable="Varxb"/>
+                            </subterm>
+                        </numberof>
+                    </structure>
+                </hlinscription>
+            </arc>
+            <arc id="P2_to_T1" source="P2" target="T1" type="normal">
+                <hlinscription>
+                    <text>1'3</text>
+                    <structure>
+                        <numberof>
+                            <subterm>
+                                <numberconstant value="1">
+                                    <positive/>
+                                </numberconstant>
+                            </subterm>
+                            <subterm>
+                                <finiteintrangeconstant value="3">
+                                    <finiteintrange end="3" start="2"/>
+                                </finiteintrangeconstant>
+                            </subterm>
+                        </numberof>
+                    </structure>
+                </hlinscription>
+            </arc>
+            <arc id="T0_to_P2" source="T0" target="P2" type="normal">
+                <hlinscription>
+                    <text>1'xb--</text>
+                    <structure>
+                        <numberof>
+                            <subterm>
+                                <numberconstant value="1">
+                                    <positive/>
+                                </numberconstant>
+                            </subterm>
+                            <subterm>
+                                <predecessor>
+                                    <subterm>
+                                        <variable refvariable="Varxb"/>
+                                    </subterm>
+                                </predecessor>
+                            </subterm>
+                        </numberof>
+                    </structure>
+                </hlinscription>
+            </arc>
+            <arc id="T1_to_target" source="T1" target="target" type="normal">
+                <hlinscription>
+                    <text>1'dot</text>
+                    <structure>
+                        <numberof>
+                            <subterm>
+                                <numberconstant value="1">
+                                    <positive/>
+                                </numberconstant>
+                            </subterm>
+                            <subterm>
+                                <useroperator declaration="dot"/>
+                            </subterm>
+                        </numberof>
+                    </structure>
+                </hlinscription>
+            </arc>
+        </page>
+    </net>
+</pnml>
