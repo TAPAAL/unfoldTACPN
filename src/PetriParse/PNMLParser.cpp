@@ -615,15 +615,21 @@ unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml
 
 std::vector<Colored::TimeInterval> PNMLParser::parseTimeGuard(rapidxml::xml_node<>* element) {
     auto el = element->first_attribute("inscription");
-    if(el == nullptr) return {};
-    auto interval = el->value();
     std::vector<const Colored::Color*> colors;
     colors.push_back(new Colored::Color());
     std::vector<Colored::TimeInterval> intervals;
-    intervals.push_back(Colored::TimeInterval::createFor(interval, colors, constantValues));
-    for (auto it = element->first_node("colorinterval"); it; it = it->next_sibling("colorinterval")) {
-        auto pair = parseTimeConstraint(it);
-        intervals.push_back(Colored::TimeInterval::createFor(pair.first, pair.second, constantValues));
+    if(el == nullptr) {
+        std::string def = "[0,inf)";
+        intervals.push_back(Colored::TimeInterval::createFor(def, colors, constantValues));
+    }
+    else
+    {
+        auto interval = el->value();
+        intervals.push_back(Colored::TimeInterval::createFor(interval, colors, constantValues));
+        for (auto it = element->first_node("colorinterval"); it; it = it->next_sibling("colorinterval")) {
+            auto pair = parseTimeConstraint(it);
+            intervals.push_back(Colored::TimeInterval::createFor(pair.first, pair.second, constantValues));
+        }
     }
     return intervals;
 }
