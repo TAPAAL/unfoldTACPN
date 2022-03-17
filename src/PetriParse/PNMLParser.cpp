@@ -288,7 +288,7 @@ unfoldtacpn::Colored::ColorExpression_ptr PNMLParser::parseColorExpression(rapid
         auto ei = atoll(end);
         for(auto [_, ct] : _colorTypes)
         {
-            if(ct->size() != (ei-si)+1) continue;
+            if(ct->size() != size_t(ei-si)+1) continue;
             if(ct->begin()->getColorName().compare(start) == 0)
             {
                 assert(value >= si);
