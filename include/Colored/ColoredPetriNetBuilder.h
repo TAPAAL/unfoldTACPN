@@ -135,15 +135,14 @@ namespace unfoldtacpn {
         Colored::GuardExpression_ptr _expr;
         Colored::ExpressionContext::BindingMap _bindings;
         const ColoredPetriNetBuilder::ColorTypeMap& _colorTypes;
+        bool _empty = false;
 
         bool eval();
-
+        Colored::ExpressionContext::BindingMap& nextBinding();
+        Colored::ExpressionContext::BindingMap& currentBinding();
     public:
         BindingGenerator(const Colored::Transition& transition,
                 const ColoredPetriNetBuilder::ColorTypeMap& colorTypes);
-
-        Colored::ExpressionContext::BindingMap& nextBinding();
-        Colored::ExpressionContext::BindingMap& currentBinding();
         bool isInitial() const;
         Iterator begin();
         Iterator end();
