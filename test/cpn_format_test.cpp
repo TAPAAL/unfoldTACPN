@@ -1091,6 +1091,53 @@ BOOST_AUTO_TEST_CASE(UnfoldLoop, * utf::timeout(5)) {
     b.unfold(p);
 }
 
+BOOST_AUTO_TEST_CASE(UnsatCPNGuard, * utf::timeout(5)) {
+    class PBuilder : public DummyBuilder {
+    public:
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+        }
+
+        size_t n_trans = 0;
+        virtual void addTransition(const std::string &name, int player, bool urgent,
+            double, double) {
+            BOOST_REQUIRE(false);
+        };
+
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("unsat_cpn_guard.pnml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+}
+
 BOOST_AUTO_TEST_CASE(GameTest) {
 
     class PBuilder : public DummyBuilder {

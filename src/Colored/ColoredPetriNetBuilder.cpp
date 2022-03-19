@@ -519,6 +519,7 @@ namespace unfoldtacpn {
 
         if (!eval())
             nextBinding();
+        _empty = !eval();
     }
 
     bool BindingGenerator::eval() {
@@ -559,6 +560,8 @@ namespace unfoldtacpn {
     }
 
     BindingGenerator::Iterator BindingGenerator::begin() {
+        if(_empty)
+            return {nullptr};
         return {this};
     }
 
