@@ -270,20 +270,25 @@ unfoldtacpn::Colored::ColorExpression_ptr PNMLParser::parseColorExpression(rapid
         auto* pt = static_cast<const Colored::ProductType*>(type);
         size_t i = 0;
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
-            colors.push_back(parseColorExpression(it, pt->getType(i)));
+            if(type != &_global_scope)
+                colors.push_back(parseColorExpression(it, pt->getType(i)));
+            else
+                colors.push_back(parseColorExpression(it, type));
             ++i;
         }
-        return std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors), type);
+        if(type != &_global_scope)
+            return std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors), type);
+        else
+            return std::make_shared<unfoldtacpn::Colored::TupleExpression>(std::move(colors), nullptr);
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {
         return parseColorExpression(element->first_node(), type);
     }
     else if (strcmp(element->name(), "finiteintrangeconstant") == 0)
     {
-        std::vector<unfoldtacpn::Colored::ColorExpression_ptr> colors;
-		auto value = atoll(element->first_attribute("value")->value());
-		auto intRangeElement = element->first_node("finiteintrange");
-		auto start = intRangeElement->first_attribute("start")->value();
-		auto end = intRangeElement->first_attribute("end")->value();
+        auto value = atoll(element->first_attribute("value")->value());
+        auto intRangeElement = element->first_node("finiteintrange");
+        auto start = intRangeElement->first_attribute("start")->value();
+        auto end = intRangeElement->first_attribute("end")->value();
         auto si = atoll(start);
         auto ei = atoll(end);
         for(auto [_, ct] : _colorTypes)
@@ -361,8 +366,12 @@ void PNMLParser::collectColorsInTuple(rapidxml::xml_node<>* element,
     std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>>& collectedColors,
     const Colored::ColorType* type){
     if (strcmp(element->name(), "tuple") == 0) {
+        size_t i = 0;
         for (auto it = element->first_node(); it; it = it->next_sibling()) {
-            collectColorsInTuple(it->first_node(), collectedColors, type);
+            auto* prod = dynamic_cast<const Colored::ProductType*>(type);
+            assert(prod);
+            collectColorsInTuple(it->first_node(), collectedColors, prod->getType(i));
+            ++i;
         }
     } else if (strcmp(element->name(), "all") == 0) {
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> expressionsToAdd;

@@ -303,7 +303,7 @@ namespace unfoldtacpn {
 
             TupleExpression(std::vector<ColorExpression_ptr>&& colors, const ColorType* type)
                     : _colors(std::move(colors)), _colorType(type) {
-                assert(dynamic_cast<const ProductType*>(_colorType));
+                assert(dynamic_cast<const ProductType*>(_colorType) || type == nullptr);
             }
         };
 
