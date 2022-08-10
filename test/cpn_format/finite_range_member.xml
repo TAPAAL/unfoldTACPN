@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pnml xmlns="http://www.informatik.hu-berlin.de/top/pnml/ptNetb">
+  <declaration>
+    <structure>
+      <declarations>
+        <namedsort id="dot" name="dot">
+          <dot/>
+        </namedsort>
+        <namedsort id="col1" name="col1">
+          <cyclicenumeration>
+            <feconstant id="c" name="col1"/>
+            <feconstant id="o" name="col1"/>
+            <feconstant id="l" name="col1"/>
+          </cyclicenumeration>
+        </namedsort>
+        <namedsort id="col2" name="col2">
+          <finiteintrange end="2" start="1"/>
+        </namedsort>
+        <namedsort id="col3" name="col3">
+          <productsort>
+            <usersort declaration="dot"/>
+            <usersort declaration="col1"/>
+            <usersort declaration="col2"/>
+          </productsort>
+        </namedsort>
+      </declarations>
+    </structure>
+  </declaration>
+  <net active="true" id="ComposedModel" type="P/T net">
+    <place displayName="true" id="TAPN1_P1" initialMarking="1" invariant="&lt; 5" name="TAPN1_P1" nameOffsetX="0" nameOffsetY="1" positionX="405" positionY="390">
+      <type>
+        <text>col3</text>
+        <structure>
+          <usersort declaration="col3"/>
+        </structure>
+      </type>
+      <hlinitialMarking>
+        <text>(1'(dot, c, 1))</text>
+        <structure>
+          <add>
+            <subterm>
+              <numberof>
+                <subterm>
+                  <numberconstant value="1">
+                    <positive/>
+                  </numberconstant>
+                </subterm>
+                <subterm>
+                  <tuple>
+                    <subterm>
+                      <useroperator declaration="dot"/>
+                    </subterm>
+                    <subterm>
+                      <useroperator declaration="c"/>
+                    </subterm>
+                    <subterm>
+                      <finiteintrangeconstant value="1">
+                        <finiteintrange end="2" start="1"/>
+                      </finiteintrangeconstant>
+                    </subterm>
+                  </tuple>
+                </subterm>
+              </numberof>
+            </subterm>
+          </add>
+        </structure>
+      </hlinitialMarking>
+    </place>
+    <place displayName="true" id="TAPN1_P3" initialMarking="0" invariant="&lt; inf" name="TAPN1_P3" nameOffsetX="0" nameOffsetY="0" positionX="735" positionY="285">
+      <type>
+        <text>dot</text>
+        <structure>
+          <usersort declaration="dot"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="TAPN1_P4" initialMarking="0" invariant="&lt; inf" name="TAPN1_P4" nameOffsetX="0" nameOffsetY="0" positionX="735" positionY="510">
+      <type>
+        <text>dot</text>
+        <structure>
+          <usersort declaration="dot"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="TAPN1_P5" initialMarking="0" invariant="&lt; inf" name="TAPN1_P5" nameOffsetX="0" nameOffsetY="0" positionX="945" positionY="375">
+      <type>
+        <text>dot</text>
+        <structure>
+          <usersort declaration="dot"/>
+        </structure>
+      </type>
+    </place>
+    <place displayName="true" id="TAPN1_P6" initialMarking="0" invariant="&lt; inf" name="TAPN1_P6" nameOffsetX="0" nameOffsetY="0" positionX="570" positionY="390">
+      <type>
+        <text>dot</text>
+        <structure>
+          <usersort declaration="dot"/>
+        </structure>
+      </type>
+    </place>
+    <transition angle="0" displayName="true" id="TAPN1_T1" infiniteServer="false" name="TAPN1_T1" nameOffsetX="107" nameOffsetY="-42" player="0" positionX="570" positionY="270" priority="0" urgent="false"/>
+    <transition angle="0" displayName="true" id="TAPN1_T2" infiniteServer="false" name="TAPN1_T2" nameOffsetX="0" nameOffsetY="0" player="0" positionX="555" positionY="525" priority="0" urgent="false"/>
+    <transition angle="0" displayName="true" id="TAPN1_T3" infiniteServer="false" name="TAPN1_T3" nameOffsetX="0" nameOffsetY="0" player="0" positionX="840" positionY="375" priority="0" urgent="false"/>
+    <arc id="TAPN1_P1_to_TAPN1_T1" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="TAPN1_P1" target="TAPN1_T1" type="timed" weight="1">
+      <hlinscription>
+        <text>1'(dot, c, 1)</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <tuple>
+                <subterm>
+                  <useroperator declaration="dot"/>
+                </subterm>
+                <subterm>
+                  <useroperator declaration="c"/>
+                </subterm>
+                <subterm>
+                  <finiteintrangeconstant value="1">
+                    <finiteintrange end="2" start="1"/>
+                  </finiteintrangeconstant>
+                </subterm>
+              </tuple>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="431" yCoord="395"/>
+      <arcpath arcPointType="false" id="1" xCoord="579" yCoord="285"/>
+    </arc>
+    <arc id="TAPN1_P3_to_TAPN1_T3" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="TAPN1_P3" target="TAPN1_T3" type="timed" weight="1">
+      <hlinscription>
+        <text>1'dot</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <useroperator declaration="dot"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="761" yCoord="309"/>
+      <arcpath arcPointType="false" id="1" xCoord="850" yCoord="385"/>
+    </arc>
+    <arc id="TAPN1_P4_to_TAPN1_T3" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="TAPN1_P4" target="TAPN1_T3" type="timed" weight="1">
+      <hlinscription>
+        <text>5 * (1'dot + 2'dot.all)</text>
+        <structure>
+          <scalarproduct>
+            <subterm>
+              <numberconstant value="5"/>
+            </subterm>
+            <subterm>
+              <add>
+                <subterm>
+                  <numberof>
+                    <subterm>
+                      <numberconstant value="1">
+                        <positive/>
+                      </numberconstant>
+                    </subterm>
+                    <subterm>
+                      <useroperator declaration="dot"/>
+                    </subterm>
+                  </numberof>
+                </subterm>
+                <subterm>
+                  <numberof>
+                    <subterm>
+                      <numberconstant value="2">
+                        <positive/>
+                      </numberconstant>
+                    </subterm>
+                    <subterm>
+                      <all>
+                        <usersort declaration="dot"/>
+                      </all>
+                    </subterm>
+                  </numberof>
+                </subterm>
+              </add>
+            </subterm>
+          </scalarproduct>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="759" yCoord="513"/>
+      <arcpath arcPointType="false" id="1" xCoord="849" yCoord="395"/>
+    </arc>
+    <arc id="TAPN1_T1_to_TAPN1_P6" inscription="1" nameOffsetX="0" nameOffsetY="0" source="TAPN1_T1" target="TAPN1_P6" type="normal" weight="1">
+      <hlinscription>
+        <text>1'dot</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <useroperator declaration="dot"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="585" yCoord="300"/>
+      <arcpath arcPointType="false" id="1" xCoord="585" yCoord="390"/>
+    </arc>
+    <arc id="TAPN1_T1_to_TAPN1_P3" inscription="1" nameOffsetX="0" nameOffsetY="0" source="TAPN1_T1" target="TAPN1_P3" type="normal" weight="1">
+      <hlinscription>
+        <text>1'dot</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <useroperator declaration="dot"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="589" yCoord="285"/>
+      <arcpath arcPointType="false" id="1" xCoord="735" yCoord="298"/>
+    </arc>
+    <arc id="TAPN1_T3_to_TAPN1_P5" inscription="1" nameOffsetX="0" nameOffsetY="0" source="TAPN1_T3" target="TAPN1_P5" type="normal" weight="1">
+      <hlinscription>
+        <text>1'dot</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <useroperator declaration="dot"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="859" yCoord="390"/>
+      <arcpath arcPointType="false" id="1" xCoord="945" yCoord="390"/>
+    </arc>
+    <arc id="TAPN1_T2_to_TAPN1_P4" inscription="1" nameOffsetX="0" nameOffsetY="0" source="TAPN1_T2" target="TAPN1_P4" type="normal" weight="1">
+      <hlinscription>
+        <text>1'dot</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <useroperator declaration="dot"/>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="574" yCoord="540"/>
+      <arcpath arcPointType="false" id="1" xCoord="735" yCoord="526"/>
+    </arc>
+    <arc id="TAPN1_P1_to_TAPN1_T2" inscription="[0,inf)" nameOffsetX="0" nameOffsetY="0" source="TAPN1_P1" target="TAPN1_T2" type="tapnInhibitor" weight="1">
+      <hlinscription>
+        <text>1'col3.all</text>
+        <structure>
+          <numberof>
+            <subterm>
+              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+            </subterm>
+            <subterm>
+              <all>
+                <usersort declaration="col3"/>
+              </all>
+            </subterm>
+          </numberof>
+        </structure>
+      </hlinscription>
+      <arcpath arcPointType="false" id="0" xCoord="430" yCoord="415"/>
+      <arcpath arcPointType="false" id="1" xCoord="564" yCoord="540"/>
+    </arc>
+  </net>
+  <k-bound bound="3"/>
+  <feature isColored="true" isGame="true" isTimed="true"/>
+</pnml>

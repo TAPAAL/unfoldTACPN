@@ -1144,6 +1144,53 @@ BOOST_AUTO_TEST_CASE(IntRange) {
 }
 
 
+BOOST_AUTO_TEST_CASE(FiniteIntRange) {
+    class PBuilder : public DummyBuilder {
+    public:
+        void addPlace(const std::string& name,
+            int tokens,
+            bool strict,
+            int bound,
+            double x,
+            double y) {
+        }
+
+        size_t n_trans = 0;
+        virtual void addTransition(const std::string &name, int player, bool urgent,
+            double, double) {
+            ++n_trans;
+        };
+
+        virtual void addInputArc(const std::string &place,
+            const std::string &transition,
+            bool inhibitor,
+            int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+        };
+
+        /** Add output arc with given weight */
+        virtual void addOutputArc(const std::string& transition,
+            const std::string& place,
+            int weight) {
+        };
+
+        /* Add transport arc with given arc expression */
+        virtual void addTransportArc(const std::string& source,
+            const std::string& transition,
+            const std::string& target, int weight,
+            bool lstrict, bool ustrict, int lower, int upper) {
+            BOOST_REQUIRE(false);
+        }
+    };
+
+    auto f = loadFile("finite_range_member.xml");
+    BOOST_REQUIRE(f);
+    ColoredPetriNetBuilder b;
+    b.parseNet(f);
+    PBuilder p;
+    b.unfold(p);
+}
+
 BOOST_AUTO_TEST_CASE(UnfoldLoop, * utf::timeout(5)) {
     class PBuilder : public DummyBuilder {
     public:
