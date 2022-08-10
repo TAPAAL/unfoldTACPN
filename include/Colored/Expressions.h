@@ -269,7 +269,8 @@ namespace unfoldtacpn {
                 }
 
                 const ProductType* pt = context.findProductColorType(types);
-
+                if(pt == nullptr)
+                    throw "Could not match color types during parsing";
                 const Color* col = pt->getColor(colors);
                 assert(col != nullptr);
                 return col;

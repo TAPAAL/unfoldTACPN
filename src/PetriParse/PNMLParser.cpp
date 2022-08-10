@@ -138,21 +138,22 @@ void PNMLParser::parseDeclarations(rapidxml::xml_node<>* element) {
 
 void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
     auto type = element->first_node();
-    auto ct = strcmp(type->name(), "productsort") == 0 ?
+    bool is_product = strcmp(type->name(), "productsort") == 0;
+    std::string id = element->first_attribute("id")->value();
+    auto* ct = is_product?
               new unfoldtacpn::Colored::ProductType(std::string(element->first_attribute("id")->value())) :
               new unfoldtacpn::Colored::ColorType(std::string(element->first_attribute("id")->value()));
-
     if (strcmp(type->name(), "dot") == 0) {
         return;
-    } else if (strcmp(type->name(), "productsort") == 0) {
+    } else if (is_product) {
         for (auto it = type->first_node(); it; it = it->next_sibling()) {
             if (strcmp(it->name(), "usersort") == 0) {
-                ((unfoldtacpn::Colored::ProductType*)ct)->addType(_colorTypes[it->first_attribute("declaration")->value()]);
+                auto* child_type = _colorTypes[it->first_attribute("declaration")->value()];
+                ((unfoldtacpn::Colored::ProductType*)ct)->addType(child_type);
             }
             else
             {
-                std::cerr << "Trying to deal with int-range?" << std::endl;
-                std::cerr << type->name() << std::endl;
+                throw "Cannot to deal with int-range in product sort";
             }
         }
     } else if (strcmp(type->name(), "finiteintrange") == 0) {
@@ -171,7 +172,6 @@ void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
         }
     }
 
-    std::string id = element->first_attribute("id")->value();
     _colorTypes[id] = ct;
     _builder->addColorType(id, ct);
     _global_scope.addType(ct);
@@ -389,14 +389,14 @@ void PNMLParser::collectColorsInTuple(rapidxml::xml_node<>* element,
     } else if (strcmp(element->name(), "subterm") == 0 || strcmp(element->name(), "structure") == 0) {
         collectColorsInTuple(element->first_node(), collectedColors, type);
     } else if (strcmp(element->name(), "useroperator") == 0 || strcmp(element->name(), "dotconstant") == 0 || strcmp(element->name(), "variable") == 0
-                    || strcmp(element->name(), "successor") == 0 || strcmp(element->name(), "predecessor") == 0) {
+                    || strcmp(element->name(), "successor") == 0 || strcmp(element->name(), "predecessor") == 0 || strcmp(element->name(), "finiteintrangeconstant") == 0) {
         std::vector<unfoldtacpn::Colored::ColorExpression_ptr> expressionsToAdd;
         auto color = parseColorExpression(element, type);
         expressionsToAdd.push_back(color);
         collectedColors.push_back(expressionsToAdd);
         return;
-    } else{
-        printf("Could not collect tuple colors from arc expression '%s'\n", element->name());
+    } else {
+        throw "Could not collect tuple colors from arc expression";
         return;
     }
 }
