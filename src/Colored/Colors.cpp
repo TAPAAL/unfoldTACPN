@@ -234,7 +234,7 @@ namespace unfoldtacpn {
         }
 
         const Color& ProductType::operator[](const std::string& index) const {
-            std::string str(index.substr(1, index.size() - 2));
+            std::string str(index.empty() || index[0] != '(' ? index : index.substr(1, index.size() - 2));
             std::vector<std::string> parts = split(str, ',');
 
             if (parts.size() != constituents.size()) {
