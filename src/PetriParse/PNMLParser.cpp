@@ -517,15 +517,24 @@ std::pair<std::string, std::vector<const Colored::Color*>> PNMLParser::parseTime
                 std::exit(ErrorCode);
             }
             else {
+                size_t id = 0;
+                auto* type = _colorTypes[colorTypeName];
                 for (auto it = i->first_node(); it; it = it->next_sibling()) {
                     if (strcmp(it->name(), "color") == 0) {
-                        auto* type = _colorTypes[colorTypeName];
-                        colors.emplace_back(&(*type)[it->first_attribute("value")->value()]);
+                        if(auto* prod = dynamic_cast<const Colored::ProductType*>(type))
+                        {
+                            colors.emplace_back(&(*prod->getType(id))[it->first_attribute("value")->value()]);
+                        }
+                        else
+                        {
+                            colors.emplace_back(&(*type)[it->first_attribute("value")->value()]);
+                        }
                     }
                     else {
                         std::cerr << "ERROR: The colortype to the place element " << element->first_attribute("id")->value() << " does not have or should only have colors" << std::endl;
                         exit(ErrorCode);
                     }
+                    ++id;
                 }
             }
         } else if (strcmp(i->name(), "inscription") == 0) {

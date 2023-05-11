@@ -15,7 +15,7 @@ concurrency:
 jobs:
   build:
     if: github.event.pull_request.draft == false
-    runs-on: macos-latest
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
 
@@ -35,5 +35,5 @@ jobs:
           cmakeGenerator: UnixMakefiles
           buildDirectory: '${{runner.workspace}}/build'
         env:
-          CC: gcc-9
-          CXX: g++-9
+          CC: gcc-10
+          CXX: g++-10
