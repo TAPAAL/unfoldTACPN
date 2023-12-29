@@ -287,10 +287,10 @@ namespace unfoldtacpn {
         for (auto& b : gen) {
            
             std::string name = transition.name;
-            if(!gen.isInitial())
+            //if(!gen.isInitial())
                 name += "__" + std::to_string(i++);
              std::cout << "Unfolded transition: " << name << " binding:";
-            for (const auto var: b) {
+            for (const auto &var: b) {
                 std::cout << "   " << var.first << " -> " << var.second->getColorName();
             }
             std::cout << "\n";
