@@ -285,10 +285,15 @@ namespace unfoldtacpn {
         auto transitionPos = _transitionlocations[transitionId];
         size_t i = 0;
         for (auto& b : gen) {
-            std::cout << "\n Unfolded transition: " << transition.name;
+           
             std::string name = transition.name;
             if(!gen.isInitial())
                 name += "__" + std::to_string(i++);
+             std::cout << "Unfolded transition: " << name << "\n";
+            for (const auto var: b) {
+                std::cout << "Variable: " << var.first << " -> " << var.second->getColorName();
+            }
+
             builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset);
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
