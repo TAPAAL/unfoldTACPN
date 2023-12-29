@@ -15,8 +15,8 @@ mkdir build && cd  build
 cmake ..
 
 #For mac, one need to enforce that we use the GCC compiler using:
-export CC=gcc-9
-export CXX=g++-9
+export CC=gcc-13
+export CXX=g++-13
 #and point to the correct version of flex and bison by adding
 #-DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex
 #to cmake call
