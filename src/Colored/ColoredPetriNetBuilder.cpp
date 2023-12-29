@@ -285,7 +285,7 @@ namespace unfoldtacpn {
         auto transitionPos = _transitionlocations[transitionId];
         size_t i = 0;
         for (auto& b : gen) {
-            std:cout << "\n Unfolded transition: " << transition.name;
+            std::cout << "\n Unfolded transition: " << transition.name;
             std::string name = transition.name;
             if(!gen.isInitial())
                 name += "__" + std::to_string(i++);
