@@ -16,7 +16,11 @@ namespace unfoldtacpn {
     ColoredPetriNetBuilder::ColoredPetriNetBuilder(std::ostream* output_stream):
     _output_stream(output_stream) 
     {
-    std::cout << "Outstream is " << output_stream ? "not-null" : "null" << "\n";
+    if (output_stream) {
+        std::cout << "Output stream is not-empty\n";
+    } else {
+        std::cout << "Output stream i empty\n";
+    }
     }
 
     ColoredPetriNetBuilder::ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig)
