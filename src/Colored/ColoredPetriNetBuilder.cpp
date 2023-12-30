@@ -16,7 +16,7 @@ namespace unfoldtacpn {
     ColoredPetriNetBuilder::ColoredPetriNetBuilder(std::ostream* output_stream):
     _output_stream(output_stream) 
     {
-    std::cout << "Outstream is " << output_stream ? "not-null" : null << "\n";
+    std::cout << "Outstream is " << output_stream ? "not-null" : "null" << "\n";
     }
 
     ColoredPetriNetBuilder::ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig)
