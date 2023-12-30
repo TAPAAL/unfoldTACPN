@@ -196,10 +196,10 @@ namespace unfoldtacpn {
             unfoldPlace(builder, place);
         }
 
-        //if (!_output_stream)) {
+        if (!_output_stream)) {
             std::cout << "Printing bindings for each unfolded transition.\n";
             std::cout << "<bindings>\n";
-    }
+        }
 
         for (auto& transition : _transitions) {
             unfoldTransition(builder, transition);
