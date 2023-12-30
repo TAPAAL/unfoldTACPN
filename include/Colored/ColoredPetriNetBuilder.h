@@ -22,8 +22,8 @@ namespace unfoldtacpn {
         typedef std::unordered_map<std::string, std::vector<std::string>> PTTransitionMap;
 
     public:
-        ColoredPetriNetBuilder(const bool print_binding=true);
-        ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const bool print_binding=true);
+        ColoredPetriNetBuilder(const bool print_binding=false);
+        ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const bool print_binding=false);
         virtual ~ColoredPetriNetBuilder();
         void parseNet(std::istream& istream);
 
