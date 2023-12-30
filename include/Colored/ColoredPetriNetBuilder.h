@@ -23,7 +23,7 @@ namespace unfoldtacpn {
 
     public:
         ColoredPetriNetBuilder();
-        ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig);
+        ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const bool print_binding=false);
         virtual ~ColoredPetriNetBuilder();
         void parseNet(std::istream& istream);
 
@@ -82,6 +82,10 @@ namespace unfoldtacpn {
             return _pttransitionnames;
         }
 
+        const bool getPrintBindingStatus() const {
+            return _print_binding;
+        }
+
         void unfold(TAPNBuilderInterface& builder);
         void clear() { _sumPlacesNames.clear(); _pttransitionnames.clear(); _ptplacenames.clear(); }
     private:
@@ -98,6 +102,8 @@ namespace unfoldtacpn {
         std::map<uint32_t, std::vector<Colored::Arc>> _inhibitorArcs;
         ColorTypeMap _colors;
         double _time;
+
+        bool _print_binding;
 
         std::string arcToString(const Colored::Arc& arc) const;
         const std::string& findSumName(const std::string& id) const;
