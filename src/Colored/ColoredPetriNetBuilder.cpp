@@ -197,7 +197,7 @@ namespace unfoldtacpn {
         }
 
         if (_output_stream) {
-            std::cout << "Printing bindings for each unfolded transition.\n";
+            *_output_stream << "Printing bindings for each unfolded transition.\n";
             std::cout << "<bindings>\n";
         }
 
