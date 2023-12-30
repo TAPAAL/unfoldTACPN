@@ -13,7 +13,10 @@
 #include "errorcodes.h"
 
 namespace unfoldtacpn {
-    ColoredPetriNetBuilder::ColoredPetriNetBuilder() {
+    ColoredPetriNetBuilder::ColoredPetriNetBuilder(const bool print_binding):
+    _print_binding(print_binding) 
+    {
+    
     }
 
     ColoredPetriNetBuilder::ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const bool print_binding)
