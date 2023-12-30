@@ -16,7 +16,7 @@ namespace unfoldtacpn {
     ColoredPetriNetBuilder::ColoredPetriNetBuilder() {
     }
 
-    ColoredPetriNetBuilder::ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const print_binding)
+    ColoredPetriNetBuilder::ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const bool print_binding)
     : _placenames(orig._placenames), _transitionnames(orig._transitionnames),
        _placelocations(orig._placelocations), _transitionlocations(orig._transitionlocations),
        _transitions(orig._transitions), _places(orig._places), _print_binding(print_binding)
