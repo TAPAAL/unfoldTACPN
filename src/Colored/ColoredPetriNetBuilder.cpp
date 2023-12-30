@@ -193,8 +193,17 @@ namespace unfoldtacpn {
             unfoldPlace(builder, place);
         }
 
+        if (getPrintBindingStatus()) {
+            std::cout << "Printing bindings for each unfolded transition.\n";
+            std::cout << "<bindings>\n";
+        }
+
         for (auto& transition : _transitions) {
             unfoldTransition(builder, transition);
+        }
+
+        if (getPrintBindingStatus()) {
+            std::cout << "</bindings>\n";
         }
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -290,12 +299,15 @@ namespace unfoldtacpn {
             //if(!gen.isInitial())
             name += "__" + std::to_string(i++);
 
-            if (getPrintBindingStatus()) {
-            std::cout << "Unfolded transition: " << name << " binding:";
-            for (const auto &var: b) {
-                std::cout << "   " << var.first << " -> " << var.second->getColorName();
-            }
-            std::cout << "\n";
+            // Print bindings for each transition
+            if (getPrintBindingStatus()) {     
+                std::cout << "   <transition id=\"" << name << "\">\n";    
+                for(auto const &var: b) {
+                    std::cout << "      <variable id=\"" << var.first << "\">\n";
+                    std::cout << "         <color>" << var.second->getColorName() << "</color>\n";
+                    std::cout << "      </variable>\n";
+                }
+                std::cout << "   </transition>\n";
             }
 
             builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset);
