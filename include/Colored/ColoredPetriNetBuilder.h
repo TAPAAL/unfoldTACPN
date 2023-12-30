@@ -103,7 +103,7 @@ namespace unfoldtacpn {
         ColorTypeMap _colors;
         double _time;
 
-        bool _print_binding;
+        bool _print_binding = true;
 
         std::string arcToString(const Colored::Arc& arc) const;
         const std::string& findSumName(const std::string& id) const;
