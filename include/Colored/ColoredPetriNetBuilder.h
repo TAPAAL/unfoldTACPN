@@ -23,7 +23,7 @@ namespace unfoldtacpn {
 
     public:
         ColoredPetriNetBuilder();
-        ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const bool print_binding=false);
+        ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig, const bool print_binding=true);
         virtual ~ColoredPetriNetBuilder();
         void parseNet(std::istream& istream);
 
