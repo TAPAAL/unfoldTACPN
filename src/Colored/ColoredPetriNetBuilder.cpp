@@ -196,7 +196,7 @@ namespace unfoldtacpn {
             unfoldPlace(builder, place);
         }
 
-        if (!_output_stream)) {
+        if (_output_stream) {
             std::cout << "Printing bindings for each unfolded transition.\n";
             std::cout << "<bindings>\n";
         }
@@ -205,7 +205,7 @@ namespace unfoldtacpn {
             unfoldTransition(builder, transition);
         }
 
-        if (_output_stream)) {
+        if (_output_stream) {
             std::cout << "</bindings>\n";
         }
 
@@ -303,7 +303,7 @@ namespace unfoldtacpn {
             name += "__" + std::to_string(i++);
 
             // Print bindings for each transition if output stream is not null
-            if (_output_stream)) {     
+            if (_output_stream) {     
                 std::cout << "   <transition id=\"" << name << "\">\n";    
                 for(auto const &var: b) {
                     std::cout << "      <variable id=\"" << var.first << "\">\n";
