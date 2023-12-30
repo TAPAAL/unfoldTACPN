@@ -288,12 +288,15 @@ namespace unfoldtacpn {
            
             std::string name = transition.name;
             //if(!gen.isInitial())
-                name += "__" + std::to_string(i++);
-             std::cout << "Unfolded transition: " << name << " binding:";
+            name += "__" + std::to_string(i++);
+
+            if (getPrintBindingStatus()) {
+            std::cout << "Unfolded transition: " << name << " binding:";
             for (const auto &var: b) {
                 std::cout << "   " << var.first << " -> " << var.second->getColorName();
             }
             std::cout << "\n";
+            }
 
             builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset);
             _pttransitionnames[transition.name].push_back(name);
@@ -471,7 +474,7 @@ namespace unfoldtacpn {
         return !arc.input ? "(" + _transitions[arc.transition].name + ", " + _places[arc.place].name + ")" :
                "(" + _places[arc.place].name + ", " + _transitions[arc.transition].name + ")";
     }
-
+  
     BindingGenerator::Iterator::Iterator(BindingGenerator* generator)
             : _generator(generator)
     {
