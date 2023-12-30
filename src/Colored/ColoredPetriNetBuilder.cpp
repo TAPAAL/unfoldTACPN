@@ -13,14 +13,11 @@
 #include "errorcodes.h"
 
 namespace unfoldtacpn {
-    ColoredPetriNetBuilder::ColoredPetriNetBuilder(std::stringstream &output_stream):
-    _output_stream(output_stream) 
+    ColoredPetriNetBuilder::ColoredPetriNetBuilder(std::stringstream &output_stream, const bool print_bindings):
+    _output_stream(output_stream),
+    _print_bindings(print_bindings)
     {
-    if (output_stream) {
-        std::cout << "Output stream is not-empty\n";
-    } else {
-        std::cout << "Output stream i empty\n";
-    }
+    
     }
 
     ColoredPetriNetBuilder::ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig)
@@ -200,7 +197,7 @@ namespace unfoldtacpn {
             unfoldPlace(builder, place);
         }
 
-        if (_output_stream) {
+        if (_print_bindings) {
             std::cout << "Printing bindings for each unfolded transition.\n";
             std::cout << "<bindings>\n";
         }
@@ -209,7 +206,7 @@ namespace unfoldtacpn {
             unfoldTransition(builder, transition);
         }
 
-        if (_output_stream) {
+        if (_print_bindings) {
             std::cout << "</bindings>\n";
         }
 
@@ -307,7 +304,7 @@ namespace unfoldtacpn {
             name += "__" + std::to_string(i++);
 
             // Print bindings for each transition if output stream is not null
-            if (_output_stream) {     
+            if (_print_bindings) {     
                 std::cout << "   <transition id=\"" << name << "\">\n";    
                 for(auto const &var: b) {
                     std::cout << "      <variable id=\"" << var.first << "\">\n";
