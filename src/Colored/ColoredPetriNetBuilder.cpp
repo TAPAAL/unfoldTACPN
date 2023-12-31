@@ -199,7 +199,7 @@ namespace unfoldtacpn {
 
         if (_output_stream) {
             (*_output_stream) << "Printing bindings for each unfolded transition.\n";
-            std::cout << "<bindings>\n";
+            (*_output_stream) << "<bindings>\n";
         }
 
         for (auto& transition : _transitions) {
@@ -207,7 +207,7 @@ namespace unfoldtacpn {
         }
 
         if (_output_stream) {
-            std::cout << "</bindings>\n";
+            (*_output_stream) << "</bindings>\n";
         }
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -305,13 +305,13 @@ namespace unfoldtacpn {
 
             // Print bindings for each transition if output stream is not null
             if (_output_stream) {     
-                std::cout << "   <transition id=\"" << name << "\">\n";    
+                (*_output_stream) << "   <transition id=\"" << name << "\">\n";    
                 for(auto const &var: b) {
-                    std::cout << "      <variable id=\"" << var.first << "\">\n";
-                    std::cout << "         <color>" << var.second->getColorName() << "</color>\n";
-                    std::cout << "      </variable>\n";
+                    (*_output_stream) << "      <variable id=\"" << var.first << "\">\n";
+                    (*_output_stream) << "         <color>" << var.second->getColorName() << "</color>\n";
+                    (*_output_stream) << "      </variable>\n";
                 }
-                std::cout << "   </transition>\n";
+                (*_output_stream) << "   </transition>\n";
             }
 
             builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset);
