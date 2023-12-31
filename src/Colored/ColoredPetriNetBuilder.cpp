@@ -303,7 +303,7 @@ namespace unfoldtacpn {
             //if(!gen.isInitial())
             name += "__" + std::to_string(i++);
 
-            // Print bindings for each transition if output stream is not null
+            // Print bindings for each transition if output stream exists
             if (_output_stream) {     
                 (*_output_stream) << "   <transition id=\"" << name << "\">\n";    
                 for(auto const &var: b) {
