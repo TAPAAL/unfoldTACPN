@@ -7,13 +7,17 @@
 
 #include <chrono>
 #include <tuple>
+#include <sstream>
 
 #include "Colored/ColoredPetriNetBuilder.h"
 #include "PetriParse/PNMLParser.h"
 #include "errorcodes.h"
 
 namespace unfoldtacpn {
-    ColoredPetriNetBuilder::ColoredPetriNetBuilder() {
+    ColoredPetriNetBuilder::ColoredPetriNetBuilder(std::stringstream *output_stream):
+    _output_stream(output_stream)
+    {
+    
     }
 
     ColoredPetriNetBuilder::ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig)
@@ -193,8 +197,17 @@ namespace unfoldtacpn {
             unfoldPlace(builder, place);
         }
 
+        if (_output_stream) {
+            (*_output_stream) << "\nBINDINGS FOR EACH UNFOLDED TRANSITION\n";
+            (*_output_stream) << "<bindings>\n";
+        }
+
         for (auto& transition : _transitions) {
             unfoldTransition(builder, transition);
+        }
+
+        if (_output_stream) {
+            (*_output_stream) << "</bindings>\n";
         }
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -285,9 +298,22 @@ namespace unfoldtacpn {
         auto transitionPos = _transitionlocations[transitionId];
         size_t i = 0;
         for (auto& b : gen) {
+           
             std::string name = transition.name;
-            if(!gen.isInitial())
-                name += "__" + std::to_string(i++);
+            //if(!gen.isInitial())
+            name += "__" + std::to_string(i++);
+
+            // Print bindings for each transition if output stream exists
+            if (_output_stream) {     
+                (*_output_stream) << "   <transition id=\"" << name << "\">\n";    
+                for(auto const &var: b) {
+                    (*_output_stream) << "      <variable id=\"" << var.first << "\">\n";
+                    (*_output_stream) << "         <color>" << var.second->getColorName() << "</color>\n";
+                    (*_output_stream) << "      </variable>\n";
+                }
+                (*_output_stream) << "   </transition>\n";
+            }
+
             builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset);
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
@@ -464,7 +490,7 @@ namespace unfoldtacpn {
         return !arc.input ? "(" + _transitions[arc.transition].name + ", " + _places[arc.place].name + ")" :
                "(" + _places[arc.place].name + ", " + _transitions[arc.transition].name + ")";
     }
-
+  
     BindingGenerator::Iterator::Iterator(BindingGenerator* generator)
             : _generator(generator)
     {

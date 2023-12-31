@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <sstream>
 
 #include "ColoredNetStructures.h"
 #include "../TAPNBuilderInterface.h"
@@ -22,7 +23,7 @@ namespace unfoldtacpn {
         typedef std::unordered_map<std::string, std::vector<std::string>> PTTransitionMap;
 
     public:
-        ColoredPetriNetBuilder();
+        ColoredPetriNetBuilder(std::stringstream *output_stream = nullptr);
         ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig);
         virtual ~ColoredPetriNetBuilder();
         void parseNet(std::istream& istream);
@@ -82,6 +83,7 @@ namespace unfoldtacpn {
             return _pttransitionnames;
         }
 
+
         void unfold(TAPNBuilderInterface& builder);
         void clear() { _sumPlacesNames.clear(); _pttransitionnames.clear(); _ptplacenames.clear(); }
     private:
@@ -99,6 +101,8 @@ namespace unfoldtacpn {
         ColorTypeMap _colors;
         double _time;
 
+        std::stringstream* _output_stream;
+        
         std::string arcToString(const Colored::Arc& arc) const;
         const std::string& findSumName(const std::string& id) const;
         const std::string& findSumName(uint32_t id) const { return findSumName(_places[id].name); }
