@@ -7,7 +7,6 @@
 
 #include <chrono>
 #include <tuple>
-#include <iostream>
 #include <sstream>
 
 #include "Colored/ColoredPetriNetBuilder.h"
