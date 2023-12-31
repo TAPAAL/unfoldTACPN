@@ -198,7 +198,7 @@ namespace unfoldtacpn {
         }
 
         if (_output_stream) {
-            (*_output_stream) << "\nBINDINGS FOR EACH UNFOLDED TRANSITION:\n";
+            (*_output_stream) << "\nBINDINGS FOR EACH UNFOLDED TRANSITION\n";
             (*_output_stream) << "<bindings>\n";
         }
 
