@@ -300,8 +300,8 @@ namespace unfoldtacpn {
         for (auto& b : gen) {
            
             std::string name = transition.name;
-            //if(!gen.isInitial())
-            name += "__" + std::to_string(i++);
+            if(!gen.isInitial())
+                name += "__" + std::to_string(i++);
 
             // Print bindings for each transition if output stream exists
             if (_output_stream) {     
