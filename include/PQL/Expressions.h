@@ -288,14 +288,15 @@ namespace unfoldtacpn {
 
         class ProbaCondition : public SimpleQuantifierCondition {
         public:
-            ProbaCondition(Expr_ptr bound, Condition_ptr cond)
+            ProbaCondition(Expr* bound, Condition_ptr cond)
             : SimpleQuantifierCondition(cond) {
-                _bound = bound;
+                _bound = (BoundExpr*) bound;
             }
+            ~ProbaCondition() { delete _bound; }
             void analyze(NamingContext& context) override;
-            virtual const Expr_ptr& bound() const { return _bound; }
+            virtual const BoundExpr* bound() const { return _bound; }
         protected:
-            Expr_ptr _bound;
+            BoundExpr* _bound;
         };
 
         class PFCondition : public ProbaCondition {

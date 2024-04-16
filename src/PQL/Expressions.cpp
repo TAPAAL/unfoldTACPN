@@ -261,12 +261,7 @@ namespace unfoldtacpn {
         void UnfoldedIdentifierExpr::visit(Visitor& ctx) const
         {
             ctx.accept<decltype(this)>(this);
-        }
-
-        void BoundExpr::visit(Visitor& ctx) const 
-        {
-            ctx.accept<decltype(this)>(this);
-        }
+        }        
 
         void MinusExpr::visit(Visitor& ctx) const
         {
@@ -284,6 +279,11 @@ namespace unfoldtacpn {
         }
 
         void MultiplyExpr::visit(Visitor& ctx) const
+        {
+            ctx.accept<decltype(this)>(this);
+        }
+
+        void BoundExpr::visit(Visitor& ctx) const
         {
             ctx.accept<decltype(this)>(this);
         }

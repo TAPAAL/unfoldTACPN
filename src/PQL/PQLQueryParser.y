@@ -101,8 +101,8 @@ proba_comp
 		;
 */
 
-proba	: PF bound logic				{ $$ = new PFCondition(Expr_ptr($2), Condition_ptr($3)); }
-		| PG bound logic				{ $$ = new PGCondition(Expr_ptr($2), Condition_ptr($3)); }
+proba	: PF bound logic				{ $$ = new PFCondition($2, Condition_ptr($3)); }
+		| PG bound logic				{ $$ = new PGCondition($2, Condition_ptr($3)); }
 		;
 
 bound 	: LBRACK LESSEQUAL INT RBRACK			{ $$ = new BoundExpr(TimeBoundExpr, atol($3->c_str())); delete $3; }
