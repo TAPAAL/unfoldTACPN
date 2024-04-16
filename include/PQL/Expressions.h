@@ -153,25 +153,18 @@ namespace unfoldtacpn {
             std::string _name;
         };
 
-        class TimeBoundExpr : public Expr {
+        enum BoundExprType { TimeBoundExpr, StepBoundExpr };
+        class BoundExpr : public Expr {
         public:
-            TimeBoundExpr(int value) : _value(value) {}
+            BoundExpr(BoundExprType type, int value) : _type(type), _value(value) {}
             void analyze(NamingContext& context) override {};
             void visit(Visitor& visitor) const override;
             int getValue() const { return _value; }
             void setValue(int value) { _value = value; }
+            BoundExprType getType() const { return _type; }
+            void setType(BoundExprType type) { _type = type; }
         private:
-            int _value;
-        };
-
-        class StepBoundExpr : public Expr {
-        public:
-            StepBoundExpr(int value) : _value(value) {}
-            void analyze(NamingContext& context) override {};
-            void visit(Visitor& visitor) const override;
-            int getValue() const { return _value; }
-            void setValue(int value) { _value = value; }
-        private:
+            BoundExprType _type;
             int _value;
         };
 

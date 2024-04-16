@@ -263,16 +263,10 @@ namespace unfoldtacpn {
             ctx.accept<decltype(this)>(this);
         }
 
-        void TimeBoundExpr::visit(Visitor& ctx) const 
+        void BoundExpr::visit(Visitor& ctx) const 
         {
             ctx.accept<decltype(this)>(this);
         }
-
-        void StepBoundExpr::visit(Visitor& ctx) const 
-        {
-            ctx.accept<decltype(this)>(this);
-        }
-
 
         void MinusExpr::visit(Visitor& ctx) const
         {

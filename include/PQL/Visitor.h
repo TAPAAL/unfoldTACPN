@@ -73,8 +73,7 @@ namespace unfoldtacpn
             virtual void _accept(const SubtractExpr* element) = 0;
             
             // Not used unless for SMC, therefore default implementation (default is error)
-            virtual void _accept(const TimeBoundExpr* element);
-            virtual void _accept(const StepBoundExpr* element);
+            virtual void _accept(const BoundExpr* element);
 
             // shallow expression, default to error
             virtual void _accept(const IdentifierExpr* element);

@@ -105,6 +105,6 @@ proba	: PF bound logic				{ $$ = new PFCondition(Expr_ptr($2), Condition_ptr($3)
 		| PG bound logic				{ $$ = new PGCondition(Expr_ptr($2), Condition_ptr($3)); }
 		;
 
-bound 	: LBRACK LESSEQUAL INT RBRACK			{ $$ = new TimeBoundExpr(atol($3->c_str())); delete $3; }
-		| LBRACK COUNT LESSEQUAL INT RBRACK		{ $$ = new StepBoundExpr(atol($4->c_str())); delete $4; }
+bound 	: LBRACK LESSEQUAL INT RBRACK			{ $$ = new BoundExpr(TimeBoundExpr, atol($3->c_str())); delete $3; }
+		| LBRACK COUNT LESSEQUAL INT RBRACK		{ $$ = new BoundExpr(StepBoundExpr, atol($4->c_str())); delete $4; }
 		;
