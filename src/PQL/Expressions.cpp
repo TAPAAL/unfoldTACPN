@@ -98,6 +98,18 @@ namespace unfoldtacpn {
             _cond2->analyze(context);
         }
 
+        void ProbaCondition::analyze(NamingContext &context)
+        {
+            _bound->analyze(context);
+            _cond->analyze(context);
+        }
+
+        /*void ProbaCompCondition::analyze(NamingContext &context) 
+        {
+            _cond1->analyze(context);
+            _cond2->analyze(context);
+        }*/
+
         void LogicalCondition::analyze(NamingContext& context) {
             for(auto& c : _conds) c->analyze(context);
         }
@@ -166,6 +178,16 @@ namespace unfoldtacpn {
         }
 
         void AGCondition::visit(Visitor& ctx) const
+        {
+            ctx.accept<decltype(this)>(this);
+        }
+
+        void PFCondition::visit(Visitor& ctx) const
+        {
+            ctx.accept<decltype(this)>(this);
+        }
+
+        void PGCondition::visit(Visitor& ctx) const
         {
             ctx.accept<decltype(this)>(this);
         }
@@ -240,6 +262,17 @@ namespace unfoldtacpn {
         {
             ctx.accept<decltype(this)>(this);
         }
+
+        void TimeBoundExpr::visit(Visitor& ctx) const 
+        {
+            ctx.accept<decltype(this)>(this);
+        }
+
+        void StepBoundExpr::visit(Visitor& ctx) const 
+        {
+            ctx.accept<decltype(this)>(this);
+        }
+
 
         void MinusExpr::visit(Visitor& ctx) const
         {

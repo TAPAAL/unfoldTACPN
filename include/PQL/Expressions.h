@@ -153,6 +153,28 @@ namespace unfoldtacpn {
             std::string _name;
         };
 
+        class TimeBoundExpr : public Expr {
+        public:
+            TimeBoundExpr(int value) : _value(value) {}
+            void analyze(NamingContext& context) override {};
+            void visit(Visitor& visitor) const override;
+            int getValue() const { return _value; }
+            void setValue(int value) { _value = value; }
+        private:
+            int _value;
+        };
+
+        class StepBoundExpr : public Expr {
+        public:
+            StepBoundExpr(int value) : _value(value) {}
+            void analyze(NamingContext& context) override {};
+            void visit(Visitor& visitor) const override;
+            int getValue() const { return _value; }
+            void setValue(int value) { _value = value; }
+        private:
+            int _value;
+        };
+
         class ShallowCondition : public Condition
         {
         public:
@@ -270,6 +292,57 @@ namespace unfoldtacpn {
             using UntilCondition::UntilCondition;
             void visit(Visitor&) const override;
         };
+
+        class ProbaCondition : public SimpleQuantifierCondition {
+        public:
+            ProbaCondition(Expr_ptr bound, Condition_ptr cond)
+            : SimpleQuantifierCondition(cond) {
+                _bound = bound;
+            }
+            void analyze(NamingContext& context) override;
+            virtual const Expr_ptr& bound() const { return _bound; }
+        protected:
+            Expr_ptr _bound;
+        };
+
+        class PFCondition : public ProbaCondition {
+        public:
+            using ProbaCondition::ProbaCondition;
+            void visit(Visitor&) const override;
+        };
+
+        class PGCondition : public ProbaCondition {
+        public:
+            using ProbaCondition::ProbaCondition;
+            void visit(Visitor&) const override;
+        };
+
+        /*class StaticProbaCompCondition : public SimpleQuantifierCondition {
+        public:
+            StaticProbaCompCondition(Condition_ptr cond, double comp)
+            : SimpleQuantifierCondition(cond) {
+                _comp = comp;
+            }
+            void visit(Visitor&) const override;
+            virtual const double bound() const { return _comp; }
+        protected:
+            double _comp;
+        };
+
+        class ProbaCompCondition : public QuantifierCondition {
+        public:
+            ProbaCompCondition(Condition_ptr cond1, Condition_ptr cond2) {
+                _cond1 = cond1; 
+                _cond2 = cond2;
+            }
+            void visit(Visitor&) const override;
+            void analyze(NamingContext& context) override;
+            virtual const Condition_ptr& operator[] (size_t i) const override
+            { if(i == 0) return _cond1; return _cond2;}
+        protected:
+            Condition_ptr _cond1;
+            Condition_ptr _cond2;
+        };*/
 
         /******************** CONDITIONS ********************/
         class LogicalCondition : public Condition {

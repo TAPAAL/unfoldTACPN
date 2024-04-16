@@ -55,6 +55,8 @@ namespace unfoldtacpn
             virtual void _accept(const AXCondition*);
             virtual void _accept(const EUCondition*);
             virtual void _accept(const AUCondition*);
+            virtual void _accept(const PFCondition*);
+            virtual void _accept(const PGCondition*);
 
             // shallow elements, neither of these should exist in a compiled expression
             virtual void _accept(const KSafeCondition* element);
@@ -69,6 +71,10 @@ namespace unfoldtacpn
             virtual void _accept(const MultiplyExpr* element) = 0;
             virtual void _accept(const MinusExpr* element) = 0;
             virtual void _accept(const SubtractExpr* element) = 0;
+            
+            // Not used unless for SMC, therefore default implementation (default is error)
+            virtual void _accept(const TimeBoundExpr* element);
+            virtual void _accept(const StepBoundExpr* element);
 
             // shallow expression, default to error
             virtual void _accept(const IdentifierExpr* element);
