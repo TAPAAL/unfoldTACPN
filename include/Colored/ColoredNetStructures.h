@@ -50,9 +50,9 @@ namespace unfoldtacpn {
             GuardExpression_ptr guard;
             int player;
             bool urgent;
+            float probabilityRate = -1;
             std::vector<Arc> arcs;
             std::vector<TransportArc> transport;
-            float probabilityRate = -1;
         };
 
         struct Place {

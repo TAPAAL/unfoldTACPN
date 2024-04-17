@@ -65,7 +65,7 @@ namespace unfoldtacpn {
             float rate) {
         if (_transitionnames.count(name) == 0) {
             uint32_t next = _transitionnames.size();
-            _transitions.emplace_back(Colored::Transition {name, guard, player, urgent, .probabilityRate = rate});
+            _transitions.emplace_back(Colored::Transition {name, guard, player, urgent, rate});
             _transitionnames[name] = next;
             _transitionlocations.push_back(std::tuple<double, double>(x,y));
         }
