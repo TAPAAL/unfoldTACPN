@@ -52,6 +52,7 @@ namespace unfoldtacpn {
             bool urgent;
             std::vector<Arc> arcs;
             std::vector<TransportArc> transport;
+            float probabilityRate = -1;
         };
 
         struct Place {

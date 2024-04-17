@@ -771,6 +771,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     double x = 0, y = 0;
     bool urgent = false;
     int player = 0;
+    float rate = -1;
     unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
     auto name = element->first_attribute("id")->value();
 
@@ -792,6 +793,10 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
         player = atoi(pl_el->value());
     }
 
+    auto rate_el = element->first_attribute("rate");
+    if(rate_el != nullptr) {
+        rate = atof(rate_el->value());
+    }
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "graphics") == 0) {
@@ -806,7 +811,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    _builder->addTransition(name, expr, player, urgent, x, y);
+    _builder->addTransition(name, expr, player, urgent, x, y, rate);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, std::string& text) {
