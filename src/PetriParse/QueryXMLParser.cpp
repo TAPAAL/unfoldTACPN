@@ -338,6 +338,40 @@ Condition_ptr QueryXMLParser::parseBooleanFormula(rapidxml::xml_node<>*  element
                 return std::make_shared<NotCondition>(cond);
             }
         }
+    } else if (elementName == "probability") {
+        if(getChildCount(element) != 2) {
+            assert(false);
+            return nullptr;
+        }
+        auto children = element->first_node();
+        int i;
+        if (sscanf(children->value(), "%d", &i) == EOF)
+        {
+            assert(false);
+            return nullptr;
+        }
+        Expr* bound;
+        if(strcmp(children->name(), "time-bound") == 0) {
+            bound = new BoundExpr(TimeBoundExpr, i);
+        } else if(strcmp(children->name(), "step-bound") == 0) {
+            bound = new BoundExpr(StepBoundExpr, i);
+        } else {
+            assert(false);
+            return nullptr;
+        }
+        children = children->next_sibling();
+        if(strcmp(children->name(), "finally") == 0) {
+            if ((cond = parseBooleanFormula(children->first_node())) != nullptr) {
+                return std::make_shared<PFCondition>(bound, cond);
+            }
+        } else if(strcmp(children->name(), "globally") == 0) {
+            if ((cond = parseBooleanFormula(children->first_node())) != nullptr) {
+                return std::make_shared<PGCondition>(bound, cond);
+            }
+        } else {
+            assert(false);
+            return nullptr;
+        }
     } else if (elementName == "conjunction") {
         auto children = element->first_node();
         if (getChildCount(element) < 2)
