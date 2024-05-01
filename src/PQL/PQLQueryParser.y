@@ -37,8 +37,8 @@ void pqlqerror(const char *s) { printf("ERROR: %s\n", s); std::exit(-1); }
 %right NOT
 
 /* Nonterminal type definition */
-%type <expr> expr term factor bound
-%type <cond> logic compare query proba
+%type <expr> expr term factor
+%type <cond> logic compare query
 
 /* Operator precedence, more possibly coming */
 
@@ -56,8 +56,6 @@ query	: EF logic					{ $$ = new EFCondition(Condition_ptr($2)); }
         | AG logic                  { $$ = new AGCondition(Condition_ptr($2)); }
         | EG logic                  { $$ = new EGCondition(Condition_ptr($2)); }
         | AF logic                  { $$ = new AFCondition(Condition_ptr($2)); }
-/*		| proba_comp				{ $$ = $1; }*/
-		| proba						{ $$ = $1; }
 		;
 
 logic	: logic AND logic			{ $$ = new AndCondition(Condition_ptr($1), Condition_ptr($3)); }
@@ -91,20 +89,4 @@ term	: term MULTIPLY factor	{ $$ = new MultiplyExpr(std::vector<Expr_ptr>({Expr_
 factor	: LPAREN expr RPAREN	{ $$ = $2; }
 		| INT			{ $$ = new LiteralExpr(atol($1->c_str())); delete $1; }
 		| ID			{ $$ = new IdentifierExpr(*$1); delete $1; }
-		;
-
-/*
-proba_comp
-		: proba GREATEREQUAL FLOAT 		{ $$ = new StaticProbaCompCondition(Condition_ptr($1), atol($3->c_str())); delete $3; }
-		| proba GREATEREQUAL proba 		{ $$ = new ProbaCompCondition(Condition_ptr($1), Condition_ptr($3)); }
-		| proba LESSEQUAL proba 		{ $$ = new ProbaCompCondition(Condition_ptr($3), Condition_ptr($1)); }
-		;
-*/
-
-proba	: PF bound logic				{ $$ = new PFCondition($2, Condition_ptr($3)); }
-		| PG bound logic				{ $$ = new PGCondition($2, Condition_ptr($3)); }
-		;
-
-bound 	: LBRACK LESSEQUAL INT RBRACK			{ $$ = new BoundExpr(TimeBoundExpr, atol($3->c_str())); delete $3; }
-		| LBRACK COUNT LESSEQUAL INT RBRACK		{ $$ = new BoundExpr(StepBoundExpr, atol($4->c_str())); delete $4; }
 		;

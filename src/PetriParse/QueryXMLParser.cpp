@@ -94,6 +94,7 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
     string id;
     bool tagsOK = true;
     rapidxml::xml_node<>* formulaPtr = nullptr;
+    rapidxml::xml_node<>* smcPtr = nullptr;
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "id") == 0) {
             id = it->value();
@@ -101,6 +102,8 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
             formulaPtr = it;
         } else if (strcmp(it->name(), "tags") == 0) {
             tagsOK = parseTags(it);
+        } else if (strcmp(it->name(), "smc") == 0) {
+            smcPtr = it;
         }
     }
 
@@ -111,9 +114,13 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
 
     QueryItem queryItem;
     queryItem.id = id;
-    if(tagsOK)
-    {
+    if(tagsOK && smcPtr == nullptr) {
         queryItem.query = parseFormula(formulaPtr);
+        assert(queryItem.query);
+        queryItem.parsingResult = QueryItem::PARSING_OK;
+    } else if(tagsOK && smcPtr != nullptr) {
+        SMCSettings settings = parseSmcSettings(smcPtr);
+        queryItem.query = parseSmcFormula(settings, formulaPtr);
         assert(queryItem.query);
         queryItem.parsingResult = QueryItem::PARSING_OK;
     } else {
@@ -338,40 +345,6 @@ Condition_ptr QueryXMLParser::parseBooleanFormula(rapidxml::xml_node<>*  element
                 return std::make_shared<NotCondition>(cond);
             }
         }
-    } else if (elementName == "probability") {
-        if(getChildCount(element) != 2) {
-            assert(false);
-            return nullptr;
-        }
-        auto children = element->first_node();
-        int i;
-        if (sscanf(children->value(), "%d", &i) == EOF)
-        {
-            assert(false);
-            return nullptr;
-        }
-        Expr* bound;
-        if(strcmp(children->name(), "time-bound") == 0) {
-            bound = new BoundExpr(TimeBoundExpr, i);
-        } else if(strcmp(children->name(), "step-bound") == 0) {
-            bound = new BoundExpr(StepBoundExpr, i);
-        } else {
-            assert(false);
-            return nullptr;
-        }
-        children = children->next_sibling();
-        if(strcmp(children->name(), "finally") == 0) {
-            if ((cond = parseBooleanFormula(children->first_node())) != nullptr) {
-                return std::make_shared<PFCondition>(bound, cond);
-            }
-        } else if(strcmp(children->name(), "globally") == 0) {
-            if ((cond = parseBooleanFormula(children->first_node())) != nullptr) {
-                return std::make_shared<PGCondition>(bound, cond);
-            }
-        } else {
-            assert(false);
-            return nullptr;
-        }
     } else if (elementName == "conjunction") {
         auto children = element->first_node();
         if (getChildCount(element) < 2)
@@ -481,6 +454,70 @@ Condition_ptr QueryXMLParser::parseBooleanFormula(rapidxml::xml_node<>*  element
         else if (elementName == "integer-ge") return std::make_shared<LessThanOrEqualCondition>(expr2, expr1);
     }
     fatal_error(elementName);
+    return nullptr;
+}
+
+SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
+    SMCSettings settings {
+        SMCSettings::StepBound, 100,
+        0.05f, 0.05f,
+        0.05f, 0.05f,
+        0.1f,
+        0.95f, 0.05f
+    };
+    auto boundType = smcNode->first_attribute("bound-type");
+    if(boundType != nullptr)
+        settings.boundType = strcmp(boundType->value(), "time") == 0 ? SMCSettings::TimeBound : SMCSettings::StepBound;
+    auto boundValue = smcNode->first_attribute("bound");
+    if(boundValue != nullptr) 
+        settings.bound = atoi(boundValue->value());
+    auto falsePos = smcNode->first_attribute("false-positives");
+    if(falsePos != nullptr)
+        settings.falsePositives = atof(falsePos->value());
+    auto falseNeg = smcNode->first_attribute("false-negatives");
+    if(falseNeg != nullptr)
+        settings.falseNegatives = atof(falseNeg->value());
+    auto indifference = smcNode->first_attribute("indifference");
+    if(indifference != nullptr) {
+        settings.indifferenceRegionDown = atof(indifference->value());
+        settings.indifferenceRegionUp = atof(indifference->value());
+    }
+    auto defaultRate = smcNode->first_attribute("default-rate");
+    if(defaultRate != nullptr) 
+        settings.defaultRate = atof(defaultRate->value());
+    auto confidence = smcNode->first_attribute("confidence");
+    if(confidence != nullptr)
+        settings.confidence = atof(confidence->value());
+    auto intervalWidth = smcNode->first_attribute("interval-width");
+    if(intervalWidth != nullptr) 
+        settings.estimationIntervalWidth = atof(intervalWidth->value());
+    return settings;
+}
+
+Condition_ptr QueryXMLParser::parseSmcFormula(SMCSettings settings, rapidxml::xml_node<>* element) {
+    if (getChildCount(element) != 1) {
+        assert(false);
+        return nullptr;
+    }
+    auto child = element->first_node();
+    string childName = child->name();
+    Condition_ptr cond = nullptr;
+    if(childName == "finally") {
+        if (getChildCount(child) != 1) {
+            assert(false);
+            return nullptr;
+        }
+        if ((cond = parseBooleanFormula(child->first_node())) != nullptr)
+            return std::make_shared<PFCondition>(settings, cond);
+    } else if(childName == "globally") {
+        if (getChildCount(child) != 1) {
+            assert(false);
+            return nullptr;
+        }
+        if ((cond = parseBooleanFormula(child->first_node())) != nullptr)
+            return std::make_shared<PGCondition>(settings, cond);
+    }
+    assert(false);
     return nullptr;
 }
 

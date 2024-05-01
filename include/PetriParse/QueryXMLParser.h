@@ -30,6 +30,8 @@
 
 #include "PNMLParser.h"
 #include "QueryParser.h"
+#include "PQL/Expressions.h"
+
 using namespace unfoldtacpn::PQL;
 
 class QueryXMLParser {
@@ -47,6 +49,8 @@ private:
     bool parseTags(rapidxml::xml_node<>*  element);
     Condition_ptr parseFormula(rapidxml::xml_node<>*  element);
     Condition_ptr parseBooleanFormula(rapidxml::xml_node<>*  element);
+    SMCSettings parseSmcSettings(rapidxml::xml_node<>* smcNode);
+    Condition_ptr parseSmcFormula(SMCSettings settings, rapidxml::xml_node<>* element);
     Expr_ptr parseIntegerExpression(rapidxml::xml_node<>*  element);
     std::string parsePlace(rapidxml::xml_node<>*  element);
     void fatal_error(const std::string& token);

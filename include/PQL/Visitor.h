@@ -71,9 +71,6 @@ namespace unfoldtacpn
             virtual void _accept(const MultiplyExpr* element) = 0;
             virtual void _accept(const MinusExpr* element) = 0;
             virtual void _accept(const SubtractExpr* element) = 0;
-            
-            // Not used unless for SMC, therefore default implementation (default is error)
-            virtual void _accept(const BoundExpr* element);
 
             // shallow expression, default to error
             virtual void _accept(const IdentifierExpr* element);

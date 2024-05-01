@@ -100,7 +100,6 @@ namespace unfoldtacpn {
 
         void ProbaCondition::analyze(NamingContext &context)
         {
-            _bound->analyze(context);
             _cond->analyze(context);
         }
 
@@ -279,11 +278,6 @@ namespace unfoldtacpn {
         }
 
         void MultiplyExpr::visit(Visitor& ctx) const
-        {
-            ctx.accept<decltype(this)>(this);
-        }
-
-        void BoundExpr::visit(Visitor& ctx) const
         {
             ctx.accept<decltype(this)>(this);
         }

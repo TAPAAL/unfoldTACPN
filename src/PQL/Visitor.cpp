@@ -40,9 +40,6 @@ namespace unfoldtacpn
                 exit(0);
             }
 
-            void Visitor::_accept(const BoundExpr*)
-            {   assert(false); std::cerr << "No accept for PGCondition" << std::endl; exit(0);}
-
             // shallow expression, default to error
             void Visitor::_accept(const IdentifierExpr* element)
             {   assert(false); std::cerr << "No accept for IdentifierExpr" << std::endl; exit(0);}

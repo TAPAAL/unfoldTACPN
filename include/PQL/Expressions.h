@@ -153,21 +153,6 @@ namespace unfoldtacpn {
             std::string _name;
         };
 
-        enum BoundExprType { TimeBoundExpr, StepBoundExpr };
-        class BoundExpr : public Expr {
-        public:
-            BoundExpr(BoundExprType type, int value) : _type(type), _value(value) {}
-            void analyze(NamingContext& context) override {};
-            void visit(Visitor& visitor) const override;
-            int getValue() const { return _value; }
-            void setValue(int value) { _value = value; }
-            BoundExprType getType() const { return _type; }
-            void setType(BoundExprType type) { _type = type; }
-        private:
-            BoundExprType _type;
-            int _value;
-        };
-
         class ShallowCondition : public Condition
         {
         public:
@@ -286,17 +271,29 @@ namespace unfoldtacpn {
             void visit(Visitor&) const override;
         };
 
+        struct SMCSettings {
+            enum SMCBoundType { TimeBound, StepBound };
+            SMCBoundType boundType;
+            int bound;
+            float falsePositives;
+            float falseNegatives;
+            float indifferenceRegionUp;
+            float indifferenceRegionDown;
+            float defaultRate;
+            float confidence;
+            float estimationIntervalWidth;
+        };
+
         class ProbaCondition : public SimpleQuantifierCondition {
         public:
-            ProbaCondition(Expr* bound, Condition_ptr cond)
+            ProbaCondition(SMCSettings settings, Condition_ptr cond)
             : SimpleQuantifierCondition(cond) {
-                _bound = (BoundExpr*) bound;
+                _settings = settings;
             }
-            ~ProbaCondition() { delete _bound; }
             void analyze(NamingContext& context) override;
-            virtual const BoundExpr* bound() const { return _bound; }
+            virtual const SMCSettings settings() const { return _settings; }
         protected:
-            BoundExpr* _bound;
+            SMCSettings _settings;
         };
 
         class PFCondition : public ProbaCondition {
