@@ -18,6 +18,7 @@
 
 #include "PetriParse/QueryXMLParser.h"
 #include "PQL/Expressions.h"
+#include "PQL/SMCExpressions.h"
 #include "errorcodes.h"
 
 #include <string>

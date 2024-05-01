@@ -13,6 +13,7 @@
 #define VISITOR_H
 
 #include "PQL/Expressions.h"
+#include "PQL/SMCExpressions.h"
 
 #include <type_traits>
 #include <cassert>

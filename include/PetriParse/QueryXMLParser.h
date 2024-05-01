@@ -30,7 +30,7 @@
 
 #include "PNMLParser.h"
 #include "QueryParser.h"
-#include "PQL/Expressions.h"
+#include "PQL/SMCExpressions.h"
 
 using namespace unfoldtacpn::PQL;
 
