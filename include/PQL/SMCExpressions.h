@@ -16,6 +16,8 @@ namespace unfoldtacpn::PQL {
         float defaultRate;
         float confidence;
         float estimationIntervalWidth;
+        bool compareToFloat;
+        float geqThan;
     };
 
     class ProbaCondition : public SimpleQuantifierCondition {

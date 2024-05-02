@@ -464,7 +464,8 @@ SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
         0.05f, 0.05f,
         0.05f, 0.05f,
         0.1f,
-        0.95f, 0.05f
+        0.95f, 0.05f,
+        false, 0.0f
     };
     auto boundType = smcNode->first_attribute("bound-type");
     if(boundType != nullptr)
@@ -492,6 +493,11 @@ SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
     auto intervalWidth = smcNode->first_attribute("interval-width");
     if(intervalWidth != nullptr) 
         settings.estimationIntervalWidth = atof(intervalWidth->value());
+    auto compareToF = smcNode->first_attribute("compare-to");
+    if(compareToF != nullptr) {
+        settings.compareToFloat = true;
+        settings.geqThan = atof(compareToF->value());
+    }
     return settings;
 }
 
