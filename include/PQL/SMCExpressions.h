@@ -7,6 +7,7 @@ namespace unfoldtacpn::PQL {
 
     struct SMCSettings {
         enum SMCBoundType { TimeBound, StepBound };
+        enum SMCSemantics { Weak, Strong };
         SMCBoundType boundType;
         int bound;
         float falsePositives;
@@ -18,6 +19,7 @@ namespace unfoldtacpn::PQL {
         float estimationIntervalWidth;
         bool compareToFloat;
         float geqThan;
+        SMCSemantics semantics;
     };
 
     class ProbaCondition : public SimpleQuantifierCondition {

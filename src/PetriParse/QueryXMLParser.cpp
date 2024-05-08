@@ -465,11 +465,15 @@ SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
         0.05f, 0.05f,
         0.1f,
         0.95f, 0.05f,
-        false, 0.0f
+        false, 0.0f,
+        SMCSettings::Weak
     };
     auto boundType = smcNode->first_attribute("bound-type");
     if(boundType != nullptr)
         settings.boundType = strcmp(boundType->value(), "time") == 0 ? SMCSettings::TimeBound : SMCSettings::StepBound;
+    auto semantics = smcNode->first_attribute("semantics");
+    if(semantics != nullptr)
+        settings.semantics = strcmp(semantics->value(), "strong") == 0 ? SMCSettings::Strong : SMCSettings::Weak;
     auto boundValue = smcNode->first_attribute("bound");
     if(boundValue != nullptr) 
         settings.bound = atoi(boundValue->value());
