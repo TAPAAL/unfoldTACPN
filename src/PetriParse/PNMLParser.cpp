@@ -774,6 +774,8 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     float rate = -1;
     unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
     auto name = element->first_attribute("id")->value();
+    Colored::SMC::Distribution distrib = Colored::SMC::Constant;
+    Colored::SMC::DistributionParameters distrib_params = { 1.0, 0.0 };
 
     auto posX = element->first_attribute("positionX");
     if (posX != nullptr){
@@ -798,6 +800,28 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
         rate = atof(rate_el->value());
     }
 
+    auto distrib_el = element->first_attribute("distribution");
+    if(distrib_el != nullptr && !urgent) {
+        char* distrib_name = distrib_el->value();
+        if(strcmp(distrib_name, "constant") == 0) {
+            distrib = Colored::SMC::Constant;
+            distrib_params.param1 = atof(element->first_attribute("value")->value());
+        } else if(strcmp(distrib_name, "uniform") == 0) {
+            distrib = Colored::SMC::Uniform;
+            distrib_params.param1 = atof(element->first_attribute("a")->value());
+            distrib_params.param2 = atof(element->first_attribute("b")->value());
+        } else if(strcmp(distrib_name, "exponential") == 0) {
+            distrib = Colored::SMC::Exponential;
+            distrib_params.param1 = atof(element->first_attribute("rate")->value());
+        } else if(strcmp(distrib_name, "normal") == 0) {
+            distrib = Colored::SMC::Normal;
+            distrib_params.param1 = atof(element->first_attribute("mean")->value());
+            distrib_params.param2 = atof(element->first_attribute("stddev")->value());
+        }
+    } else if(urgent) {
+        distrib_params.param1 = 0;
+    }
+
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "graphics") == 0) {
             parsePosition(it, x, y);
@@ -811,7 +835,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    _builder->addTransition(name, expr, player, urgent, x, y, rate);
+    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, std::string& text) {

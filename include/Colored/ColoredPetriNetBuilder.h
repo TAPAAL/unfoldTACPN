@@ -40,7 +40,8 @@ namespace unfoldtacpn {
                            bool urgent,
                            double x,
                            double y,
-                           float rate = -1);
+                           Colored::SMC::Distribution distrib = Colored::SMC::Constant,
+                           Colored::SMC::DistributionParameters params = { 0.0, 0.0 });
         void addArc(const std::string& source, const std::string& target,
                     int weight, bool inhibitor, const unfoldtacpn::Colored::ArcExpression_ptr &expr,
                                              const std::vector<unfoldtacpn::Colored::TimeInterval>& intervals);
