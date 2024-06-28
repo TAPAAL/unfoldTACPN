@@ -14,7 +14,6 @@ namespace unfoldtacpn::PQL {
         float falseNegatives;
         float indifferenceRegionUp;
         float indifferenceRegionDown;
-        float defaultRate;
         float confidence;
         float estimationIntervalWidth;
         bool compareToFloat;

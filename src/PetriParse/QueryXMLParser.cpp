@@ -463,7 +463,6 @@ SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
         SMCSettings::StepBound, 100,
         0.05f, 0.05f,
         0.05f, 0.05f,
-        0.1f,
         0.95f, 0.05f,
         false, 0.0f,
         SMCSettings::Weak
@@ -488,9 +487,6 @@ SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
         settings.indifferenceRegionDown = atof(indifference->value());
         settings.indifferenceRegionUp = atof(indifference->value());
     }
-    auto defaultRate = smcNode->first_attribute("default-rate");
-    if(defaultRate != nullptr) 
-        settings.defaultRate = atof(defaultRate->value());
     auto confidence = smcNode->first_attribute("confidence");
     if(confidence != nullptr)
         settings.confidence = atof(confidence->value());

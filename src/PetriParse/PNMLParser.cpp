@@ -771,7 +771,6 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     double x = 0, y = 0;
     bool urgent = false;
     int player = 0;
-    float rate = -1;
     unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
     auto name = element->first_attribute("id")->value();
     Colored::SMC::Distribution distrib = Colored::SMC::Constant;
@@ -793,11 +792,6 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     auto pl_el = element->first_attribute("player");
     if(pl_el != nullptr) {
         player = atoi(pl_el->value());
-    }
-
-    auto rate_el = element->first_attribute("rate");
-    if(rate_el != nullptr) {
-        rate = atof(rate_el->value());
     }
 
     auto distrib_el = element->first_attribute("distribution");
