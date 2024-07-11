@@ -35,5 +35,5 @@ jobs:
           cmakeGenerator: UnixMakefiles
           buildDirectory: '${{runner.workspace}}/build'
         env:
-          CC: gcc-10
-          CXX: g++-10
+          CC: gcc-11
+          CXX: g++-11
