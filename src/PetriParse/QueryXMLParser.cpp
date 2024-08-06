@@ -460,22 +460,18 @@ Condition_ptr QueryXMLParser::parseBooleanFormula(rapidxml::xml_node<>*  element
 
 SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
     SMCSettings settings {
-        SMCSettings::StepBound, 100,
+        std::numeric_limits<int>::max(), std::numeric_limits<int>::max(),
         0.05f, 0.05f,
         0.05f, 0.05f,
         0.95f, 0.05f,
         false, 0.0f,
-        SMCSettings::Weak
     };
-    auto boundType = smcNode->first_attribute("bound-type");
-    if(boundType != nullptr)
-        settings.boundType = strcmp(boundType->value(), "time") == 0 ? SMCSettings::TimeBound : SMCSettings::StepBound;
-    auto semantics = smcNode->first_attribute("semantics");
-    if(semantics != nullptr)
-        settings.semantics = strcmp(semantics->value(), "strong") == 0 ? SMCSettings::Strong : SMCSettings::Weak;
-    auto boundValue = smcNode->first_attribute("bound");
-    if(boundValue != nullptr) 
-        settings.bound = atoi(boundValue->value());
+    auto timeBound = smcNode->first_attribute("time-bound");
+    if(timeBound != nullptr)
+        settings.timeBound = atoi(timeBound->value());
+    auto stepBound = smcNode->first_attribute("step-bound");
+    if(stepBound != nullptr)
+        settings.stepBound = atoi(stepBound->value());
     auto falsePos = smcNode->first_attribute("false-positives");
     if(falsePos != nullptr)
         settings.falsePositives = atof(falsePos->value());
