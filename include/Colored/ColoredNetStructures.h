@@ -36,7 +36,6 @@ namespace unfoldtacpn {
             struct DistributionParameters {
                 double param1;
                 double param2;
-                bool discrete = false;
             };
         }
 
@@ -67,7 +66,7 @@ namespace unfoldtacpn {
             bool urgent;
             SMC::Distribution distribution;
             SMC::DistributionParameters distributionParams;
-            double priority;
+            double weight;
             std::vector<Arc> arcs;
             std::vector<TransportArc> transport;
         };

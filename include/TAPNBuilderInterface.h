@@ -40,7 +40,7 @@ namespace unfoldtacpn {
         // add a time transition with a unique name
         virtual void addTransition(const std::string &name, int player, bool urgent,
                                             double, double, 
-                                            int distrib = 0, double distribParam1 = 1, double distribParam2 = 1, bool discrete = false, double priority = 1.0) = 0;
+                                            int distrib = 0, double distribParam1 = 1, double distribParam2 = 1, double weight = 1.0) = 0;
 
         /* Add timed colored input arc with given arc expression*/
         virtual void addInputArc(const std::string &place,
