@@ -797,7 +797,8 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
 
     if(!urgent) {
         auto dist_data = parseDistribution(element);
-        
+        distrib = std::get<0>(dist_data);
+        distrib_params = std::get<1>(dist_data);
     } else if(urgent) {
         distrib_params.param1 = 0;
     }
