@@ -317,7 +317,8 @@ namespace unfoldtacpn {
                 (*_output_stream) << "   </transition>\n";
             }
 
-            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset, transition.distribution, transition.distributionParams.param1, transition.distributionParams.param2, transition.priority);
+            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset, 
+                transition.distribution, transition.distributionParams.param1, transition.distributionParams.param2, transition.distributionParams.discrete, transition.priority);
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
                 unfoldArc(builder, arc, b, name);
