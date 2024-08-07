@@ -30,11 +30,13 @@ namespace unfoldtacpn {
                 Constant,
                 Uniform,
                 Exponential,
-                Normal, 
+                Normal,
+                Gamma
             };
             struct DistributionParameters {
                 double param1;
                 double param2;
+                bool discrete = false;
             };
         }
 
@@ -65,6 +67,7 @@ namespace unfoldtacpn {
             bool urgent;
             SMC::Distribution distribution;
             SMC::DistributionParameters distributionParams;
+            double priority;
             std::vector<Arc> arcs;
             std::vector<TransportArc> transport;
         };

@@ -774,7 +774,8 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
     auto name = element->first_attribute("id")->value();
     Colored::SMC::Distribution distrib = Colored::SMC::Constant;
-    Colored::SMC::DistributionParameters distrib_params = { 1.0, 0.0 };
+    Colored::SMC::DistributionParameters distrib_params = { 1.0, 0.0, false };
+    double priority = 1.0;
 
     auto posX = element->first_attribute("positionX");
     if (posX != nullptr){
@@ -811,9 +812,22 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             distrib = Colored::SMC::Normal;
             distrib_params.param1 = atof(element->first_attribute("mean")->value());
             distrib_params.param2 = atof(element->first_attribute("stddev")->value());
+        } else if(strcmp(distrib_name, "gamma") == 0) {
+            distrib = Colored::SMC::Gamma;
+            distrib_params.param1 = atof(element->first_attribute("shape")->value());
+            distrib_params.param2 = atof(element->first_attribute("scale")->value());
+        }
+        auto discrete_el = element->first_attribute("discrete");
+        if(discrete_el != nullptr) {
+            distrib_params.discrete = stringToBool(discrete_el->value());
         }
     } else if(urgent) {
         distrib_params.param1 = 0;
+    }
+
+    auto prio_el = element->first_attribute("priority");
+    if(prio_el != nullptr) {
+        priority = atof(prio_el->value());
     }
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
@@ -829,7 +843,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params);
+    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params, priority);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, std::string& text) {
