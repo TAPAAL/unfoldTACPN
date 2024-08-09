@@ -80,6 +80,7 @@ private:
     void parseValue(rapidxml::xml_node<>* element, std::string& text);
     uint32_t parseNumberConstant(rapidxml::xml_node<>* element);
     void parsePosition(rapidxml::xml_node<>* element, double& x, double& y);
+    std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> parseDistribution(rapidxml::xml_node<>* element);
     bool isTransition(const std::string& s);
     void checkKeyword(const char* id);
     unfoldtacpn::ColoredPetriNetBuilder* _builder;

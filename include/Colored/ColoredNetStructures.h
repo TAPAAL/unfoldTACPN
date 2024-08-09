@@ -25,6 +25,21 @@
 namespace unfoldtacpn {
     namespace Colored {
 
+        namespace SMC {
+            enum Distribution {
+                Constant,
+                Uniform,
+                Exponential,
+                Normal,
+                Gamma,
+                DiscreteUniform
+            };
+            struct DistributionParameters {
+                double param1;
+                double param2;
+            };
+        }
+
         struct Arc {
             uint32_t place;
             uint32_t transition;
@@ -50,6 +65,9 @@ namespace unfoldtacpn {
             GuardExpression_ptr guard;
             int player;
             bool urgent;
+            SMC::Distribution distribution;
+            SMC::DistributionParameters distributionParams;
+            double weight;
             std::vector<Arc> arcs;
             std::vector<TransportArc> transport;
         };
