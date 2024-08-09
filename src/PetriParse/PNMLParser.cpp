@@ -848,6 +848,10 @@ std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNM
             distrib = Colored::SMC::Gamma;
             distrib_params.param1 = atof(element->first_attribute("shape")->value());
             distrib_params.param2 = atof(element->first_attribute("scale")->value());
+        } else if(strcmp(distrib_name, "discrete uniform") == 0) {
+            distrib = Colored::SMC::DiscreteUniform;
+            distrib_params.param1 = atof(element->first_attribute("a")->value());
+            distrib_params.param2 = atof(element->first_attribute("b")->value());
         }
     }
     return std::make_pair(distrib, distrib_params);
