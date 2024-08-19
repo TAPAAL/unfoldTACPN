@@ -38,6 +38,11 @@ namespace unfoldtacpn {
                 double param1;
                 double param2;
             };
+            enum FiringMode {
+                Oldest, 
+                Youngest,
+                Random
+            };
         }
 
         struct Arc {
@@ -68,6 +73,7 @@ namespace unfoldtacpn {
             SMC::Distribution distribution;
             SMC::DistributionParameters distributionParams;
             double weight;
+            SMC::FiringMode firingMode;
             std::vector<Arc> arcs;
             std::vector<TransportArc> transport;
         };
