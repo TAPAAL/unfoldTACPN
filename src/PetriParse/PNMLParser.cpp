@@ -860,10 +860,17 @@ std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNM
             distrib = Colored::SMC::Gamma;
             distrib_params.param1 = atof(element->first_attribute("shape")->value());
             distrib_params.param2 = atof(element->first_attribute("scale")->value());
+        } else if(strcasecmp(distrib_name, "erlang") == 0) {
+            distrib = Colored::SMC::Erlang;
+            distrib_params.param1 = atof(element->first_attribute("shape")->value());
+            distrib_params.param2 = atof(element->first_attribute("scale")->value());
         } else if(strcasecmp(distrib_name, "discrete uniform") == 0) {
             distrib = Colored::SMC::DiscreteUniform;
             distrib_params.param1 = atof(element->first_attribute("a")->value());
             distrib_params.param2 = atof(element->first_attribute("b")->value());
+        } else if(strcasecmp(distrib_name, "geometric") == 0) {
+            distrib = Colored::SMC::Geometric;
+            distrib_params.param1 = atof(element->first_attribute("p")->value());
         }
     }
     return std::make_pair(distrib, distrib_params);

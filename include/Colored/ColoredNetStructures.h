@@ -32,7 +32,9 @@ namespace unfoldtacpn {
                 Exponential,
                 Normal,
                 Gamma,
-                DiscreteUniform
+                Erlang,
+                DiscreteUniform,
+                Geometric
             };
             struct DistributionParameters {
                 double param1;
