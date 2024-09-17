@@ -24,13 +24,13 @@ void pqlqerror(const char *s) { printf("ERROR: %s\n", s); std::exit(-1); }
 }
 
 /* Terminal type definition */
-%token <string> ID INT
-%token <token> DEADLOCK TRUE FALSE
-%token <token> LPAREN RPAREN
+%token <string> ID INT FLOAT
+%token <token> DEADLOCK TRUE FALSE COUNT
+%token <token> LPAREN RPAREN LBRACK RBRACK
 %token <token> AND OR NOT
 %token <token> EQUAL NEQUAL LESS LESSEQUAL GREATER GREATEREQUAL
 %token <token> PLUS MINUS MULTIPLY
-%token <token> EF AG AF EG CONTROL COLON
+%token <token> EF AG AF EG PF PG CONTROL COLON
 
 /* Terminal associativity */
 %left AND OR

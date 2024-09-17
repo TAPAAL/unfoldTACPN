@@ -26,24 +26,27 @@ digit         [0-9]
 letter        [a-zA-Z_]
 %%
 
-[ \t\n\r]         ;
-"true"            {return TOKEN(TRUE);}
-"false"           {return TOKEN(FALSE);}
-"deadlock"          {return TOKEN(DEADLOCK);}
-"and"           {return TOKEN(AND);}
-"AND"           {return TOKEN(AND);}
-"or"            {return TOKEN(OR);}
-"OR"            {return TOKEN(OR);}
-"not"           {return TOKEN(NOT);}
-"NOT"           {return TOKEN(NOT);}
+[ \t\n\r]         			;
+"true"            			{return TOKEN(TRUE);}
+"false"           			{return TOKEN(FALSE);}
+"deadlock"          		{return TOKEN(DEADLOCK);}
+"and"           			{return TOKEN(AND);}
+"AND"           			{return TOKEN(AND);}
+"or"            			{return TOKEN(OR);}
+"OR"            			{return TOKEN(OR);}
+"not"           			{return TOKEN(NOT);}
+"NOT"           			{return TOKEN(NOT);}
 "AG"						{return TOKEN(AG);}
 "EG"						{return TOKEN(EG);}
 "AF"						{return TOKEN(AF);}
 "EF"						{return TOKEN(EF);}
+"PG"						{return TOKEN(PG);}
+"PF"						{return TOKEN(PF);}
 "control"                   {return TOKEN(CONTROL);}
 {letter}({letter}|{digit})* {SAVE_TOKEN; return ID;}
-{digit}+          {SAVE_TOKEN; return INT;}
-(\"(\\.|[^"])*\") {SAVE_QUOTED_TOKEN; return ID;}
+{digit}+          			{SAVE_TOKEN; return INT;}
+{digit}+\.{digit}+			{SAVE_TOKEN; return FLOAT;}
+(\"(\\.|[^"])*\") 			{SAVE_QUOTED_TOKEN; return ID;}
 "&&"						{return TOKEN(AND);}
 "||"						{return TOKEN(OR);}
 "!"							{return TOKEN(NOT);}
@@ -55,11 +58,14 @@ letter        [a-zA-Z_]
 ">="						{return TOKEN(GREATEREQUAL);}
 "("							{return TOKEN(LPAREN);}
 ")"							{return TOKEN(RPAREN);}
+"["							{return TOKEN(LBRACK);}
+"]"							{return TOKEN(RBRACK);}
 "+"							{return TOKEN(PLUS);}
 "-"							{return TOKEN(MINUS);}
 "*"							{return TOKEN(MULTIPLY);}
 "="							{return TOKEN(EQUAL);}
 ":"							{return TOKEN(COLON);}
+"#"							{return TOKEN(COUNT);}
 .							{printf("Unknown token %s!\n", pqlqtext); yyterminate();}
 
 %%

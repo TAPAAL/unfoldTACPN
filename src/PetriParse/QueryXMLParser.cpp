@@ -18,6 +18,7 @@
 
 #include "PetriParse/QueryXMLParser.h"
 #include "PQL/Expressions.h"
+#include "PQL/SMCExpressions.h"
 #include "errorcodes.h"
 
 #include <string>
@@ -94,6 +95,7 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
     string id;
     bool tagsOK = true;
     rapidxml::xml_node<>* formulaPtr = nullptr;
+    rapidxml::xml_node<>* smcPtr = nullptr;
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "id") == 0) {
             id = it->value();
@@ -101,6 +103,8 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
             formulaPtr = it;
         } else if (strcmp(it->name(), "tags") == 0) {
             tagsOK = parseTags(it);
+        } else if (strcmp(it->name(), "smc") == 0) {
+            smcPtr = it;
         }
     }
 
@@ -111,9 +115,13 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
 
     QueryItem queryItem;
     queryItem.id = id;
-    if(tagsOK)
-    {
+    if(tagsOK && smcPtr == nullptr) {
         queryItem.query = parseFormula(formulaPtr);
+        assert(queryItem.query);
+        queryItem.parsingResult = QueryItem::PARSING_OK;
+    } else if(tagsOK && smcPtr != nullptr) {
+        SMCSettings settings = parseSmcSettings(smcPtr);
+        queryItem.query = parseSmcFormula(settings, formulaPtr);
         assert(queryItem.query);
         queryItem.parsingResult = QueryItem::PARSING_OK;
     } else {
@@ -447,6 +455,72 @@ Condition_ptr QueryXMLParser::parseBooleanFormula(rapidxml::xml_node<>*  element
         else if (elementName == "integer-ge") return std::make_shared<LessThanOrEqualCondition>(expr2, expr1);
     }
     fatal_error(elementName);
+    return nullptr;
+}
+
+SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
+    SMCSettings settings {
+        std::numeric_limits<int>::max(), std::numeric_limits<int>::max(),
+        0.05f, 0.05f,
+        0.05f, 0.05f,
+        0.95f, 0.05f,
+        false, 0.0f,
+    };
+    auto timeBound = smcNode->first_attribute("time-bound");
+    if(timeBound != nullptr)
+        settings.timeBound = atoi(timeBound->value());
+    auto stepBound = smcNode->first_attribute("step-bound");
+    if(stepBound != nullptr)
+        settings.stepBound = atoi(stepBound->value());
+    auto falsePos = smcNode->first_attribute("false-positives");
+    if(falsePos != nullptr)
+        settings.falsePositives = atof(falsePos->value());
+    auto falseNeg = smcNode->first_attribute("false-negatives");
+    if(falseNeg != nullptr)
+        settings.falseNegatives = atof(falseNeg->value());
+    auto indifference = smcNode->first_attribute("indifference");
+    if(indifference != nullptr) {
+        settings.indifferenceRegionDown = atof(indifference->value());
+        settings.indifferenceRegionUp = atof(indifference->value());
+    }
+    auto confidence = smcNode->first_attribute("confidence");
+    if(confidence != nullptr)
+        settings.confidence = atof(confidence->value());
+    auto intervalWidth = smcNode->first_attribute("interval-width");
+    if(intervalWidth != nullptr) 
+        settings.estimationIntervalWidth = atof(intervalWidth->value());
+    auto compareToF = smcNode->first_attribute("compare-to");
+    if(compareToF != nullptr) {
+        settings.compareToFloat = true;
+        settings.geqThan = atof(compareToF->value());
+    }
+    return settings;
+}
+
+Condition_ptr QueryXMLParser::parseSmcFormula(SMCSettings settings, rapidxml::xml_node<>* element) {
+    if (getChildCount(element) != 1) {
+        assert(false);
+        return nullptr;
+    }
+    auto child = element->first_node();
+    string childName = child->name();
+    Condition_ptr cond = nullptr;
+    if(childName == "finally") {
+        if (getChildCount(child) != 1) {
+            assert(false);
+            return nullptr;
+        }
+        if ((cond = parseBooleanFormula(child->first_node())) != nullptr)
+            return std::make_shared<PFCondition>(settings, cond);
+    } else if(childName == "globally") {
+        if (getChildCount(child) != 1) {
+            assert(false);
+            return nullptr;
+        }
+        if ((cond = parseBooleanFormula(child->first_node())) != nullptr)
+            return std::make_shared<PGCondition>(settings, cond);
+    }
+    assert(false);
     return nullptr;
 }
 

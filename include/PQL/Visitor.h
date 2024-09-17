@@ -13,6 +13,7 @@
 #define VISITOR_H
 
 #include "PQL/Expressions.h"
+#include "PQL/SMCExpressions.h"
 
 #include <type_traits>
 #include <cassert>
@@ -55,6 +56,8 @@ namespace unfoldtacpn
             virtual void _accept(const AXCondition*);
             virtual void _accept(const EUCondition*);
             virtual void _accept(const AUCondition*);
+            virtual void _accept(const PFCondition*);
+            virtual void _accept(const PGCondition*);
 
             // shallow elements, neither of these should exist in a compiled expression
             virtual void _accept(const KSafeCondition* element);

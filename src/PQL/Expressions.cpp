@@ -98,6 +98,12 @@ namespace unfoldtacpn {
             _cond2->analyze(context);
         }
 
+        /*void ProbaCompCondition::analyze(NamingContext &context) 
+        {
+            _cond1->analyze(context);
+            _cond2->analyze(context);
+        }*/
+
         void LogicalCondition::analyze(NamingContext& context) {
             for(auto& c : _conds) c->analyze(context);
         }
@@ -239,7 +245,7 @@ namespace unfoldtacpn {
         void UnfoldedIdentifierExpr::visit(Visitor& ctx) const
         {
             ctx.accept<decltype(this)>(this);
-        }
+        }        
 
         void MinusExpr::visit(Visitor& ctx) const
         {

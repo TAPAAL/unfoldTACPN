@@ -773,6 +773,10 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
     int player = 0;
     unfoldtacpn::Colored::GuardExpression_ptr expr = nullptr;
     auto name = element->first_attribute("id")->value();
+    Colored::SMC::Distribution distrib = Colored::SMC::Constant;
+    Colored::SMC::DistributionParameters distrib_params = { 1.0, 0.0 };
+    double weight = 1.0;
+    Colored::SMC::FiringMode firingMode = Colored::SMC::Oldest;
 
     auto posX = element->first_attribute("positionX");
     if (posX != nullptr){
@@ -792,6 +796,29 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
         player = atoi(pl_el->value());
     }
 
+    if(!urgent) {
+        auto dist_data = parseDistribution(element);
+        distrib = std::get<0>(dist_data);
+        distrib_params = std::get<1>(dist_data);
+    } else if(urgent) {
+        distrib_params.param1 = 0;
+    }
+
+    auto weight_el = element->first_attribute("weight");
+    if(weight_el != nullptr) {
+        weight = atof(weight_el->value());
+    }
+
+    auto firing_el = element->first_attribute("firingMode");
+    if(firing_el != nullptr) {
+        if (strcasecmp(firing_el->value(), "oldest") == 0) {
+            firingMode = Colored::SMC::Oldest;
+        } else if (strcasecmp(firing_el->value(), "youngest") == 0) {
+            firingMode = Colored::SMC::Youngest;
+        } else if (strcasecmp(firing_el->value(), "random") == 0) {
+            firingMode = Colored::SMC::Random;
+        } 
+    }
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "graphics") == 0) {
@@ -806,7 +833,47 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    _builder->addTransition(name, expr, player, urgent, x, y);
+    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params, weight, firingMode);
+}
+
+std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNMLParser::parseDistribution(rapidxml::xml_node<>* element) {
+    Colored::SMC::Distribution distrib = Colored::SMC::Constant;
+    Colored::SMC::DistributionParameters distrib_params = { 1.0, 0.0 };
+    auto distrib_el = element->first_attribute("distribution");
+    if(distrib_el != nullptr) {
+        char* distrib_name = distrib_el->value();
+        if(strcasecmp(distrib_name, "constant") == 0) {
+            distrib = Colored::SMC::Constant;
+            distrib_params.param1 = atof(element->first_attribute("value")->value());
+        } else if(strcasecmp(distrib_name, "uniform") == 0) {
+            distrib = Colored::SMC::Uniform;
+            distrib_params.param1 = atof(element->first_attribute("a")->value());
+            distrib_params.param2 = atof(element->first_attribute("b")->value());
+        } else if(strcasecmp(distrib_name, "exponential") == 0) {
+            distrib = Colored::SMC::Exponential;
+            distrib_params.param1 = atof(element->first_attribute("rate")->value());
+        } else if(strcasecmp(distrib_name, "normal") == 0) {
+            distrib = Colored::SMC::Normal;
+            distrib_params.param1 = atof(element->first_attribute("mean")->value());
+            distrib_params.param2 = atof(element->first_attribute("stddev")->value());
+        } else if(strcasecmp(distrib_name, "gamma") == 0) {
+            distrib = Colored::SMC::Gamma;
+            distrib_params.param1 = atof(element->first_attribute("shape")->value());
+            distrib_params.param2 = atof(element->first_attribute("scale")->value());
+        } else if(strcasecmp(distrib_name, "erlang") == 0) {
+            distrib = Colored::SMC::Erlang;
+            distrib_params.param1 = atof(element->first_attribute("shape")->value());
+            distrib_params.param2 = atof(element->first_attribute("scale")->value());
+        } else if(strcasecmp(distrib_name, "discrete uniform") == 0) {
+            distrib = Colored::SMC::DiscreteUniform;
+            distrib_params.param1 = atof(element->first_attribute("a")->value());
+            distrib_params.param2 = atof(element->first_attribute("b")->value());
+        } else if(strcasecmp(distrib_name, "geometric") == 0) {
+            distrib = Colored::SMC::Geometric;
+            distrib_params.param1 = atof(element->first_attribute("p")->value());
+        }
+    }
+    return std::make_pair(distrib, distrib_params);
 }
 
 void PNMLParser::parseValue(rapidxml::xml_node<>* element, std::string& text) {

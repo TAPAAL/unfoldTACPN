@@ -73,6 +73,10 @@ namespace unfoldtacpn {
 
             void _accept(const AFCondition *condition) override;
 
+            void _accept(const PGCondition *condition) override;
+
+            void _accept(const PFCondition *condition) override;
+
             void _accept(const EXCondition *condition) override;
 
             void _accept(const AXCondition *condition) override;

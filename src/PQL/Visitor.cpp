@@ -24,6 +24,10 @@ namespace unfoldtacpn
             {   assert(false); std::cerr << "No accept for EUCondition" << std::endl; exit(0);}
             void Visitor::_accept(const AUCondition*)
             {   assert(false); std::cerr << "No accept for AUCondition" << std::endl; exit(0);}
+            void Visitor::_accept(const PFCondition*)
+            {   assert(false); std::cerr << "No accept for PFCondition" << std::endl; exit(0);}
+            void Visitor::_accept(const PGCondition*)
+            {   assert(false); std::cerr << "No accept for PGCondition" << std::endl; exit(0);}
 
             // shallow elements, neither of these should exist in a compiled expression
             void Visitor::_accept(const KSafeCondition* element)

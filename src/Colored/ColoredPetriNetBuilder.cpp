@@ -61,10 +61,14 @@ namespace unfoldtacpn {
             int player,
             bool urgent,
             double x,
-            double y) {
+            double y,
+            Colored::SMC::Distribution distrib,
+            Colored::SMC::DistributionParameters params,
+            double weight,
+            Colored::SMC::FiringMode firingMode) {
         if (_transitionnames.count(name) == 0) {
             uint32_t next = _transitionnames.size();
-            _transitions.emplace_back(Colored::Transition {name, guard, player, urgent});
+            _transitions.emplace_back(Colored::Transition {name, guard, player, urgent, distrib, params, weight, firingMode});
             _transitionnames[name] = next;
             _transitionlocations.push_back(std::tuple<double, double>(x,y));
         }
@@ -314,7 +318,8 @@ namespace unfoldtacpn {
                 (*_output_stream) << "   </transition>\n";
             }
 
-            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset);
+            builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset, 
+                transition.distribution, transition.distributionParams.param1, transition.distributionParams.param2, transition.weight, transition.firingMode);
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
                 unfoldArc(builder, arc, b, name);
