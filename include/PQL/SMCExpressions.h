@@ -18,6 +18,8 @@ namespace unfoldtacpn::PQL {
         float geqThan;
     };
 
+    typedef std::tuple<std::string, Expr_ptr> Observable;
+
     class ProbaCondition : public SimpleQuantifierCondition {
     public:
         ProbaCondition(SMCSettings settings, Condition_ptr cond)
@@ -25,9 +27,12 @@ namespace unfoldtacpn::PQL {
             _settings = settings;
         }
         void analyze(NamingContext& context) override;
+        void setObservables(std::vector<Observable> obs) { _observables = obs; }
+        const std::vector<Observable>& getObservables() const { return _observables; }
         virtual const SMCSettings settings() const { return _settings; }
     protected:
         SMCSettings _settings;
+        std::vector<Observable> _observables;
     };
 
     class PFCondition : public ProbaCondition {

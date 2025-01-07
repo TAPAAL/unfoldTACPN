@@ -50,6 +50,7 @@ private:
     Condition_ptr parseFormula(rapidxml::xml_node<>*  element);
     Condition_ptr parseBooleanFormula(rapidxml::xml_node<>*  element);
     SMCSettings parseSmcSettings(rapidxml::xml_node<>* smcNode);
+    std::vector<Observable> parseObservables(rapidxml::xml_node<>* element);
     Condition_ptr parseSmcFormula(SMCSettings settings, rapidxml::xml_node<>* element);
     Expr_ptr parseIntegerExpression(rapidxml::xml_node<>*  element);
     std::string parsePlace(rapidxml::xml_node<>*  element);
