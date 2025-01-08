@@ -22,6 +22,8 @@ jobs:
       - name: Install Packages
         run: |
           brew install flex bison
+          export PATH="/opt/homebrew/opt/bison/bin:$PATH"
+          export PATH="/opt/homebrew/opt/flex/bin:$PATH"
         
       - name: Build 
         uses: lukka/run-cmake@v2.5
