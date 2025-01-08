@@ -22,8 +22,6 @@ jobs:
       - name: Install Packages
         run: |
           brew install flex bison
-          export PATH="/opt/homebrew/opt/bison/bin:$PATH"
-          export PATH="/opt/homebrew/opt/flex/bin:$PATH"
         
       - name: Build 
         uses: lukka/run-cmake@v2.5
@@ -31,8 +29,8 @@ jobs:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeAppendedArgs: >-
             -DUNFOLDTACPN_TEST=OFF
-            -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison 
-            -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex
+            -DBISON_EXECUTABLE="$(brew --prefix bison)/bin/bison"
+            -DFLEX_EXECUTABLE="$(brew --prefix bison)/bin/flex"
           cmakeBuildType: Release
           cmakeGenerator: UnixMakefiles
           buildDirectory: '${{runner.workspace}}/build'
