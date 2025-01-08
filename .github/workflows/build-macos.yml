@@ -29,8 +29,8 @@ jobs:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeAppendedArgs: >-
             -DUNFOLDTACPN_TEST=OFF
-            -DBISON_EXECUTABLE="$(brew --prefix bison)/bin/bison"
-            -DFLEX_EXECUTABLE="$(brew --prefix bison)/bin/flex"
+            -DBISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison
+            -DFLEX_EXECUTABLE=/opt/homebrew/opt/flex/bin/flex
           cmakeBuildType: Release
           cmakeGenerator: UnixMakefiles
           buildDirectory: '${{runner.workspace}}/build'
