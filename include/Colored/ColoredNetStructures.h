@@ -34,12 +34,11 @@ namespace unfoldtacpn {
                 Gamma,
                 Erlang,
                 DiscreteUniform,
-                Geometric
+                Geometric,
+                Triangular,
+                LogNormal
             };
-            struct DistributionParameters {
-                double param1;
-                double param2;
-            };
+            typedef std::vector<double> DistributionParameters;
             enum FiringMode {
                 Oldest, 
                 Youngest,
