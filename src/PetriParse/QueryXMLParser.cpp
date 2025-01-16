@@ -508,7 +508,7 @@ std::vector<Observable> QueryXMLParser::parseObservables(rapidxml::xml_node<>* e
     std::vector<Observable> observables;
     auto child = element->first_node("watch");
     for(auto it = child ; it ; it = it->next_sibling("watch")) {
-        auto nameAttr = child->first_attribute("name");
+        auto nameAttr = it->first_attribute("name");
         if(nameAttr == nullptr) continue;
         Expr_ptr expr = parseIntegerExpression(it->first_node());
         Observable obs = std::make_pair(nameAttr->value(), expr);
