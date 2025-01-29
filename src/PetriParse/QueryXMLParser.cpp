@@ -96,6 +96,7 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
     bool tagsOK = true;
     rapidxml::xml_node<>* formulaPtr = nullptr;
     rapidxml::xml_node<>* smcPtr = nullptr;
+    rapidxml::xml_node<>* obsPtr = nullptr;
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "id") == 0) {
             id = it->value();
@@ -105,6 +106,8 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
             tagsOK = parseTags(it);
         } else if (strcmp(it->name(), "smc") == 0) {
             smcPtr = it;
+        } else if (strcmp(it->name(), "observations") == 0) {
+            obsPtr = it;
         }
     }
 
@@ -123,6 +126,10 @@ bool QueryXMLParser::parseProperty(rapidxml::xml_node<>*  element) {
         SMCSettings settings = parseSmcSettings(smcPtr);
         queryItem.query = parseSmcFormula(settings, formulaPtr);
         assert(queryItem.query);
+        if(obsPtr != nullptr) {
+            std::vector<Observable> obs = parseObservables(obsPtr);
+            std::dynamic_pointer_cast<ProbaCondition>(queryItem.query)->setObservables(obs);
+        }
         queryItem.parsingResult = QueryItem::PARSING_OK;
     } else {
         queryItem.query = nullptr;
@@ -497,6 +504,19 @@ SMCSettings QueryXMLParser::parseSmcSettings(rapidxml::xml_node<>* smcNode) {
     return settings;
 }
 
+std::vector<Observable> QueryXMLParser::parseObservables(rapidxml::xml_node<>* element) {
+    std::vector<Observable> observables;
+    auto child = element->first_node("watch");
+    for(auto it = child ; it ; it = it->next_sibling("watch")) {
+        auto nameAttr = it->first_attribute("name");
+        if(nameAttr == nullptr) continue;
+        Expr_ptr expr = parseIntegerExpression(it->first_node());
+        Observable obs = std::make_pair(nameAttr->value(), expr);
+        observables.push_back(obs);
+    }
+    return observables;
+}
+
 Condition_ptr QueryXMLParser::parseSmcFormula(SMCSettings settings, rapidxml::xml_node<>* element) {
     if (getChildCount(element) != 1) {
         assert(false);
@@ -561,6 +581,13 @@ Expr_ptr QueryXMLParser::parseIntegerExpression(rapidxml::xml_node<>*  element) 
         if (ids.size() == 1) return ids[0];
 
         return std::make_shared<PlusExpr>(std::move(ids));
+    } else if (elementName == "place") { // Shortcut for single places tokens count
+        string placeName = parsePlace(element);
+        if(placeName.empty()) {
+            assert(false);
+            return nullptr;
+        }
+        return std::make_shared<IdentifierExpr>(placeName);
     } else if (elementName == "integer-sum" || elementName == "integer-product") {
         auto children = element->first_node();
         bool isMult = false;
