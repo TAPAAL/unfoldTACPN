@@ -22,6 +22,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <limits>
 #include <istream>
 #include <cstring>
@@ -880,6 +881,17 @@ std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNM
             distrib = Colored::SMC::LogNormal;
             distrib_params.push_back(atof(element->first_attribute("logMean")->value()));
             distrib_params.push_back(atof(element->first_attribute("logStddev")->value()));
+        } else if(strcasecmp(distrib_name, "custom") == 0) {
+            distrib = Colored::SMC::Custom;
+            std::ifstream file(element->first_attribute("path")->value());
+            if(file.good()) {
+                double value;
+                while(file >> value) {
+                    distrib_params.push_back(value);
+                }
+            } else {
+                distrib_params.push_back(0.0);
+            }
         }
     }
     return std::make_pair(distrib, distrib_params);
