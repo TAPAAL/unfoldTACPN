@@ -36,7 +36,8 @@ namespace unfoldtacpn {
                 DiscreteUniform,
                 Geometric,
                 Triangular,
-                LogNormal
+                LogNormal,
+                Custom
             };
             typedef std::vector<double> DistributionParameters;
             enum FiringMode {
