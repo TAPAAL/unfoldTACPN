@@ -897,10 +897,10 @@ std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNM
         } else if(strcasecmp(distrib_name, "custom") == 0) {
             distrib = Colored::SMC::Custom;
             auto name = element->first_attribute("distributionName")->value();
-            if(_customDistributions.count(name)) {
+            if (_customDistributions.count(name)) {
                 distrib_params = _customDistributions[name];
             } else {
-                std::cerr << "ERROR: Custom distribution '" << name << "' not defined." << std::endl;
+                std::cerr << "ERROR: Custom distribution '" << name << "' not defined.\n";
                 std::exit(ErrorCode);
             }
         }
