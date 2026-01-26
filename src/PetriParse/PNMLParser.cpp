@@ -896,7 +896,7 @@ std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNM
             distrib_params.push_back(atof(element->first_attribute("logStddev")->value()));
         } else if(strcasecmp(distrib_name, "custom") == 0) {
             distrib = Colored::SMC::Custom;
-            auto name = element->first_attribute("name")->value();
+            auto name = element->first_attribute("distributionName")->value();
             if(_customDistributions.count(name)) {
                 distrib_params = _customDistributions[name];
             } else {
