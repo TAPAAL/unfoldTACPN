@@ -22,7 +22,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <fstream>
 #include <limits>
 #include <istream>
 #include <cstring>
@@ -91,8 +90,10 @@ void PNMLParser::parse(std::istream& xml,
 
     // we need to parse things in order, so first find the nodes
     node_vector_t regular_arcs, colored_arc, places,
-                  inhib_arcs, trans_arcs, transitions;
-    findNodes(root, colored_arc, regular_arcs, inhib_arcs, trans_arcs, transitions, places);
+                  inhib_arcs, trans_arcs, transitions, custom_distributions;
+    findNodes(root, colored_arc, regular_arcs, inhib_arcs, trans_arcs, transitions, places, custom_distributions);
+    for(auto* d : custom_distributions)
+        parseCustomDistribution(d);
     for(auto* p : places)
         parsePlace(p);
     for(auto* trans : transitions)
@@ -135,6 +136,15 @@ void PNMLParser::parseDeclarations(rapidxml::xml_node<>* element) {
             parseDeclarations(element->first_node());
         }
     }
+}
+
+void PNMLParser::parseCustomDistribution(rapidxml::xml_node<>* element) {
+    auto name = element->first_attribute("name")->value();
+    Colored::SMC::DistributionParameters params;
+    for (auto it = element->first_node("value"); it; it = it->next_sibling("value")) {
+        params.push_back(atof(it->value()));
+    }
+    _customDistributions[name] = params;
 }
 
 void PNMLParser::parseNamedSort(rapidxml::xml_node<>* element) {
@@ -449,7 +459,7 @@ std::vector<std::vector<unfoldtacpn::Colored::ColorExpression_ptr>> PNMLParser::
 }
 
 void PNMLParser::findNodes(rapidxml::xml_node<>* element,
-    node_vector_t& colored_arc, node_vector_t& regular_arcs, node_vector_t& inhib_arcs, node_vector_t& trans_arcs, node_vector_t& transitions, node_vector_t& places) {
+    node_vector_t& colored_arc, node_vector_t& regular_arcs, node_vector_t& inhib_arcs, node_vector_t& trans_arcs, node_vector_t& transitions, node_vector_t& places, node_vector_t& custom_distributions) {
 
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         if (strcmp(it->name(), "place") == 0) {
@@ -466,13 +476,15 @@ void PNMLParser::findNodes(rapidxml::xml_node<>* element,
             inhib_arcs.emplace_back(it);
         } else if (strcmp(it->name(),"arc") == 0) {
             colored_arc.emplace_back(it);
+        } else if (strcmp(it->name(), "custom_distribution") == 0) {
+            custom_distributions.emplace_back(it);
         } else if (strcmp(it->name(), "variable") == 0) {
             std::cerr << "ERROR: variable not supported" << std::endl;
             exit(ErrorCode);
         }
         else
         {
-            findNodes(it, colored_arc, regular_arcs, inhib_arcs, trans_arcs, transitions, places);
+            findNodes(it, colored_arc, regular_arcs, inhib_arcs, trans_arcs, transitions, places, custom_distributions);
         }
     }
 }
@@ -883,14 +895,12 @@ std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNM
             distrib_params.push_back(atof(element->first_attribute("logStddev")->value()));
         } else if(strcasecmp(distrib_name, "custom") == 0) {
             distrib = Colored::SMC::Custom;
-            std::ifstream file(element->first_attribute("path")->value());
-            if(file.good()) {
-                double value;
-                while(file >> value) {
-                    distrib_params.push_back(value);
-                }
+            auto name = element->first_attribute("distributionName")->value();
+            if (_customDistributions.count(name)) {
+                distrib_params = _customDistributions[name];
             } else {
-                distrib_params.push_back(0.0);
+                std::cerr << "ERROR: Custom distribution '" << name << "' not defined.\n";
+                std::exit(ErrorCode);
             }
         }
     }

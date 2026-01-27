@@ -56,12 +56,13 @@ private:
     int parseWeight(rapidxml::xml_node<>* element);
     unfoldtacpn::Colored::ArcExpression_ptr parseHLInscriptions(rapidxml::xml_node<>* element, const Colored::ColorType* type);
     std::vector<Colored::TimeInterval> parseTimeGuard(rapidxml::xml_node<>* element);
-    void findNodes(rapidxml::xml_node<>* element, node_vector_t& colored_arc, node_vector_t& regular_arcs, node_vector_t& inhib_arcs, node_vector_t& trans_arcs, node_vector_t& transitions, node_vector_t& places);
+    void findNodes(rapidxml::xml_node<>* element, node_vector_t& colored_arc, node_vector_t& regular_arcs, node_vector_t& inhib_arcs, node_vector_t& trans_arcs, node_vector_t& transitions, node_vector_t& places, node_vector_t& custom_distributions);
     void parsePlace(rapidxml::xml_node<>* element);
     std::pair<std::string, std::vector<const unfoldtacpn::Colored::Color*>> parseTimeConstraint(rapidxml::xml_node<> *element);
     void parseArc(rapidxml::xml_node<>* element, bool inhibitor = false);
     void handleArc(rapidxml::xml_node<>* element);
     void parseTransition(rapidxml::xml_node<>* element);
+    void parseCustomDistribution(rapidxml::xml_node<>* element);
     void parseDeclarations(rapidxml::xml_node<>* element);
     void parseNamedSort(rapidxml::xml_node<>* element);
     unfoldtacpn::Colored::ArcExpression_ptr parseArcExpression(rapidxml::xml_node<>* element, const Colored::ColorType* type);
@@ -91,6 +92,7 @@ private:
     std::map<std::pair<std::string,std::string>, rapidxml::xml_node<>*> _transportArcs;
     std::unordered_set<std::string> _used_keywords;
     Colored::ScopeType _global_scope;
+    std::unordered_map<std::string, Colored::SMC::DistributionParameters> _customDistributions;
 };
 }
 #endif // PNMLPARSER_H
