@@ -22,7 +22,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <fstream>
 #include <limits>
 #include <istream>
 #include <cstring>
