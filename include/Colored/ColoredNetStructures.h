@@ -78,7 +78,6 @@ namespace unfoldtacpn {
             bool urgent;
             SMC::Distribution distribution;
             SMC::DistributionParameters distributionParams;
-            bool customDistributionRandomStart;
             double weight;
             SMC::FiringMode firingMode;
             std::vector<Arc> arcs;

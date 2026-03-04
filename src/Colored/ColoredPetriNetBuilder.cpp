@@ -320,7 +320,7 @@ namespace unfoldtacpn {
             }
 
             builder.addTransition(name, transition.player, transition.urgent, std::get<0>(transitionPos), std::get<1>(transitionPos) + offset,
-                transition.distribution, transition.distributionParams, transition.customDistributionRandomStart, transition.weight, transition.firingMode);
+                transition.distribution, transition.distributionParams, transition.distributionParams.customDistributionRandomStart, transition.weight, transition.firingMode);
             _pttransitionnames[transition.name].push_back(name);
             for (auto& arc : transition.arcs) {
                 unfoldArc(builder, arc, b, name);
