@@ -39,7 +39,11 @@ namespace unfoldtacpn {
                 LogNormal,
                 Custom
             };
-            typedef std::vector<double> DistributionParameters;
+            struct DistributionParameters : public std::vector<double> {
+                bool customDistributionRandomStart = false;
+                DistributionParameters() = default;
+                DistributionParameters(std::initializer_list<double> l) : std::vector<double>(l), customDistributionRandomStart(false) {}
+            };
             enum FiringMode {
                 Oldest, 
                 Youngest,
@@ -74,6 +78,7 @@ namespace unfoldtacpn {
             bool urgent;
             SMC::Distribution distribution;
             SMC::DistributionParameters distributionParams;
+            bool customDistributionRandomStart;
             double weight;
             SMC::FiringMode firingMode;
             std::vector<Arc> arcs;

@@ -144,6 +144,10 @@ void PNMLParser::parseCustomDistribution(rapidxml::xml_node<>* element) {
     for (auto it = element->first_node("value"); it; it = it->next_sibling("value")) {
         params.push_back(atof(it->value()));
     }
+    auto randomStartAttr = element->first_attribute("randomStart");
+    if (randomStartAttr && strcmp(randomStartAttr->value(), "true") == 0) {
+        params.customDistributionRandomStart = true;
+    }
     _customDistributions[name] = params;
 }
 
@@ -846,7 +850,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params, weight, firingMode);
+    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params, distrib_params.customDistributionRandomStart, weight, firingMode);
 }
 
 std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNMLParser::parseDistribution(rapidxml::xml_node<>* element) {
