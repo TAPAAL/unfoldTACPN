@@ -64,12 +64,11 @@ namespace unfoldtacpn {
             double y,
             Colored::SMC::Distribution distrib,
             Colored::SMC::DistributionParameters params,
-            bool customDistributionRandomStart,
             double weight,
             Colored::SMC::FiringMode firingMode) {
         if (_transitionnames.count(name) == 0) {
             uint32_t next = _transitionnames.size();
-            _transitions.emplace_back(Colored::Transition {name, guard, player, urgent, distrib, params, customDistributionRandomStart, weight, firingMode});
+            _transitions.emplace_back(Colored::Transition {name, guard, player, urgent, distrib, params, weight, firingMode});
             _transitionnames[name] = next;
             _transitionlocations.push_back(std::tuple<double, double>(x,y));
         }

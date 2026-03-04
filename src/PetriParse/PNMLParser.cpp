@@ -850,7 +850,7 @@ void PNMLParser::parseTransition(rapidxml::xml_node<>* element) {
             exit(ErrorCode);
         }
     }
-    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params, distrib_params.customDistributionRandomStart, weight, firingMode);
+    _builder->addTransition(name, expr, player, urgent, x, y, distrib, distrib_params, weight, firingMode);
 }
 
 std::tuple<Colored::SMC::Distribution, Colored::SMC::DistributionParameters> PNMLParser::parseDistribution(rapidxml::xml_node<>* element) {

@@ -42,7 +42,6 @@ namespace unfoldtacpn {
                            double y,
                            Colored::SMC::Distribution distrib = Colored::SMC::Constant,
                            Colored::SMC::DistributionParameters params = { 0.0, 0.0 },
-                           bool customDistributionRandomStart = false,
                            double weight = 1.0,
                            Colored::SMC::FiringMode firingMode = Colored::SMC::Oldest);
         void addArc(const std::string& source, const std::string& target,
