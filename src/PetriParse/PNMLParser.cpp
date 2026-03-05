@@ -144,6 +144,10 @@ void PNMLParser::parseCustomDistribution(rapidxml::xml_node<>* element) {
     for (auto it = element->first_node("value"); it; it = it->next_sibling("value")) {
         params.push_back(atof(it->value()));
     }
+    auto randomStartAttr = element->first_attribute("randomStart");
+    if (randomStartAttr && strcmp(randomStartAttr->value(), "true") == 0) {
+        params.customDistributionRandomStart = true;
+    }
     _customDistributions[name] = params;
 }
 
