@@ -101,22 +101,25 @@ namespace unfoldtacpn {
             Expr_ptr _expr;
         };
 
-        /** Literal integer value expression */
+        /** Literal value expression */
+        template <typename T>
         class LiteralExpr : public Expr {
         public:
 
-            LiteralExpr(int value) : _value(value) {
+            LiteralExpr(T value) : _value(value) {
             }
-            void analyze(NamingContext& context) override;
+            void analyze(NamingContext& context) override {}
             void visit(Visitor& visitor) const override;
-            int value() const {
+            T value() const {
                 return _value;
             };
 
         private:
-            int _value;
+            T _value;
         };
 
+        using LiteralIntExpr = LiteralExpr<int>;
+        using LiteralRealExpr = LiteralExpr<double>;
 
         class IdentifierExpr : public Expr {
         public:

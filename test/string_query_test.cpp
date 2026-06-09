@@ -130,8 +130,11 @@ protected:
 
     }
 
-    virtual void _accept(const LiteralExpr* element)
-    {
+    virtual void _accept(const LiteralIntExpr* element) {
+
+    }
+    
+    virtual void _accept(const LiteralRealExpr* element) {
 
     }
 

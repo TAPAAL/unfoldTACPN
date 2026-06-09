@@ -58,10 +58,6 @@ namespace unfoldtacpn {
             _expr->analyze(context);
         }
 
-        void LiteralExpr::analyze(NamingContext&) {
-            return;
-        }
-
         Expr_ptr generateUnfoldedIdentifierExpr(NamingContext& context, std::unordered_map<uint32_t,std::string>& names, uint32_t colorIndex) {
             const std::string& place = names[colorIndex];
             return std::make_shared<UnfoldedIdentifierExpr>(place);
@@ -229,10 +225,13 @@ namespace unfoldtacpn {
                 ctx.accept<decltype(this)>(this);
         }
 
-        void LiteralExpr::visit(Visitor& ctx) const
-        {
-            ctx.accept<decltype(this)>(this);
+        template<typename T>
+        void LiteralExpr<T>::visit(Visitor& visitor) const {
+            visitor.accept(this);
         }
+
+        template void LiteralExpr<int>::visit(Visitor&) const;
+        template void LiteralExpr<double>::visit(Visitor&) const;
 
         void IdentifierExpr::visit(Visitor& ctx) const
         {
