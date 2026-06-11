@@ -119,7 +119,7 @@ namespace unfoldtacpn {
         };
 
         using LiteralIntExpr = LiteralExpr<int>;
-        using LiteralRealExpr = LiteralExpr<double>;
+        using LiteralRealExpr = LiteralExpr<float>;
 
         class IdentifierExpr : public Expr {
         public:

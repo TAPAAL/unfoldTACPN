@@ -230,8 +230,8 @@ namespace unfoldtacpn {
             visitor.accept(this);
         }
 
-        template void LiteralExpr<int>::visit(Visitor&) const;
-        template void LiteralExpr<double>::visit(Visitor&) const;
+        template void LiteralIntExpr::visit(Visitor&) const;
+        template void LiteralRealExpr::visit(Visitor&) const;
 
         void IdentifierExpr::visit(Visitor& ctx) const
         {
