@@ -67,7 +67,8 @@ namespace unfoldtacpn
 
             // Expression
             virtual void _accept(const UnfoldedIdentifierExpr* element) = 0;
-            virtual void _accept(const LiteralExpr* element) = 0;
+            virtual void _accept(const LiteralIntExpr* element) = 0;
+            virtual void _accept(const LiteralRealExpr* element) = 0;
             virtual void _accept(const PlusExpr* element) = 0;
             virtual void _accept(const MultiplyExpr* element) = 0;
             virtual void _accept(const MinusExpr* element) = 0;

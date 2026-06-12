@@ -177,7 +177,7 @@ Condition_ptr QueryXMLParser::parseFormula(rapidxml::xml_node<>*  element) {
         Expr_ptr bound = nullptr;
         for (auto it = child->first_node(); it ; it = it->next_sibling()) {
             if(bound != nullptr) fatal_error(childName);
-            bound = parseIntegerExpression(child->first_node());
+            bound = parseNumericExpression(child->first_node());
             if(bound == nullptr) fatal_error(childName);
         }
         if(bound == nullptr) fatal_error(childName);
@@ -447,8 +447,8 @@ Condition_ptr QueryXMLParser::parseBooleanFormula(rapidxml::xml_node<>*  element
             assert(false);
             return nullptr;
         }
-        Expr_ptr expr1 = parseIntegerExpression(children);
-        Expr_ptr expr2 = parseIntegerExpression(children->next_sibling());
+        Expr_ptr expr1 = parseNumericExpression(children);
+        Expr_ptr expr2 = parseNumericExpression(children->next_sibling());
         if(expr1 == nullptr || expr2 == nullptr)
         {
             assert(false);
@@ -510,7 +510,7 @@ std::vector<Observable> QueryXMLParser::parseObservables(rapidxml::xml_node<>* e
     for(auto it = child ; it ; it = it->next_sibling("watch")) {
         auto nameAttr = it->first_attribute("name");
         if(nameAttr == nullptr) continue;
-        Expr_ptr expr = parseIntegerExpression(it->first_node());
+        Expr_ptr expr = parseNumericExpression(it->first_node());
         Observable obs = std::make_pair(nameAttr->value(), expr);
         observables.push_back(obs);
     }
@@ -544,16 +544,24 @@ Condition_ptr QueryXMLParser::parseSmcFormula(SMCSettings settings, rapidxml::xm
     return nullptr;
 }
 
-Expr_ptr QueryXMLParser::parseIntegerExpression(rapidxml::xml_node<>*  element) {
+Expr_ptr QueryXMLParser::parseNumericExpression(rapidxml::xml_node<>*  element) {
     string elementName = element->name();
-    if (elementName == "integer-constant") {
+    if (elementName == "real-constant") {
+        double d;
+        if (sscanf(element->value(), "%lf", &d) == EOF)
+        {
+            assert(false);
+            return nullptr;
+        }
+        return std::make_shared<LiteralRealExpr>(d);
+    } else if (elementName == "integer-constant") {
         int i;
         if (sscanf(element->value(), "%d", &i) == EOF)
         {
             assert(false);
             return nullptr;
         }
-        return std::make_shared<LiteralExpr>(i);
+        return std::make_shared<LiteralIntExpr>(i);
     } else if (elementName == "tokens-count") {
         auto children = element->first_node();
         std::vector<Expr_ptr> ids;
@@ -598,7 +606,7 @@ Expr_ptr QueryXMLParser::parseIntegerExpression(rapidxml::xml_node<>*  element) 
         auto it = children;
 
         for (; it; it = it->next_sibling()) {
-            els.emplace_back(parseIntegerExpression(it));
+            els.emplace_back(parseNumericExpression(it));
             if(!els.back())
             {
                 assert(false);
@@ -620,10 +628,10 @@ Expr_ptr QueryXMLParser::parseIntegerExpression(rapidxml::xml_node<>*  element) 
         auto children = element->first_node();
         std::vector<Expr_ptr> els;
         for (auto it = children; it; it = it->next_sibling()) {
-            els.emplace_back(parseIntegerExpression(it));
+            els.emplace_back(parseNumericExpression(it));
         }
         if(els.size() == 1)
-            els.emplace(els.begin(), std::make_shared<LiteralExpr>(0));
+            els.emplace(els.begin(), std::make_shared<LiteralIntExpr>(0));
         return std::make_shared<SubtractExpr>(std::move(els));
     }
     assert(false);

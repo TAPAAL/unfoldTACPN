@@ -87,6 +87,6 @@ term	: term MULTIPLY factor	{ $$ = new MultiplyExpr(std::vector<Expr_ptr>({Expr_
 		;
 
 factor	: LPAREN expr RPAREN	{ $$ = $2; }
-		| INT			{ $$ = new LiteralExpr(atol($1->c_str())); delete $1; }
+		| INT			{ $$ = new LiteralExpr(atoi($1->c_str())); delete $1; }
 		| ID			{ $$ = new IdentifierExpr(*$1); delete $1; }
 		;

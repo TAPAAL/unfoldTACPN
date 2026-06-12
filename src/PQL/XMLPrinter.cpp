@@ -254,8 +254,12 @@ namespace unfoldtacpn {
             closeXmlTag("tokens-count");
         }
 
-        void XMLPrinter::_accept(const LiteralExpr *element) {
+        void XMLPrinter::_accept(const LiteralIntExpr *element) {
             outputLine("<integer-constant>" + std::to_string(element->value()) + "</integer-constant>");
+        }
+
+        void XMLPrinter::_accept(const LiteralRealExpr *element) {
+            outputLine("<real-constant>" + std::to_string(element->value()) + "</real-constant>");
         }
 
         void XMLPrinter::_accept(const PlusExpr *element) {

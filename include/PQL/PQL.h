@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 namespace unfoldtacpn {
     namespace PQL {

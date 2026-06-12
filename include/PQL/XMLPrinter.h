@@ -89,7 +89,9 @@ namespace unfoldtacpn {
 
             void _accept(const UnfoldedIdentifierExpr *element) override;
 
-            void _accept(const LiteralExpr *element) override;
+            void _accept(const LiteralIntExpr *element) override;
+
+            void _accept(const LiteralRealExpr *element) override;
 
             void _accept(const PlusExpr *element) override;
 
