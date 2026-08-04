@@ -613,7 +613,9 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
             unfoldtacpn::Colored::ExpressionContext context {binding, typeMap};
             hlinitialMarking = parseArcExpression(it->first_node("structure"), type)->eval(context);
             found_hl = true;
-        }
+        } else if (strcmp(it->name(), "initialMarkingAge") == 0) {
+            auto initialMarkingAges = parseInitialMarkingAges(it);
+        } 
     }
 
     if(initialMarking >= std::numeric_limits<int>::max())
@@ -630,6 +632,10 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
         hlinitialMarking = unfoldtacpn::Colored::Multiset(&(*type)[0], initialMarking);
     }
     _builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, x, y);
+}
+
+PNMLParser::MarkingAgeMap PNMLParser::parseInitialMarkingAges(rapidxml::xml_node<>* element) {
+    return nullptr; //TODO: finish
 }
 
 unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml::xml_node<>* element, const Colored::ColorType* type)
