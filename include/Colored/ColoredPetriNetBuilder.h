@@ -14,6 +14,7 @@
 
 #include "ColoredNetStructures.h"
 #include "../TAPNBuilderInterface.h"
+#include "../types.hpp"
 
 namespace unfoldtacpn {
     class ColoredPetriNetBuilder {
@@ -27,11 +28,11 @@ namespace unfoldtacpn {
         ColoredPetriNetBuilder(const ColoredPetriNetBuilder& orig);
         virtual ~ColoredPetriNetBuilder();
         void parseNet(std::istream& istream);
-
         void addPlace(const std::string& name,
                       Colored::Multiset&& tokens,
                       const Colored::ColorType* type,
                       const std::vector<Colored::TimeInvariant>& invariant,
+                      types::InitialMarkingAges &&initialAges,
                       double x = 0,
                       double y = 0);
         void addTransition(const std::string& name,

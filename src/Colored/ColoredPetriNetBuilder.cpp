@@ -39,13 +39,15 @@ namespace unfoldtacpn {
     void ColoredPetriNetBuilder::addPlace(const std::string &name,
                                           unfoldtacpn::Colored::Multiset &&tokens,
                                           const Colored::ColorType* type,
-                                          const std::vector<unfoldtacpn::Colored::TimeInvariant> &invariant, double x,
+                                          const std::vector<unfoldtacpn::Colored::TimeInvariant> &invariant, 
+                                          types::InitialMarkingAges &&initialAges,
+                                          double x,
                                           double y) {
         if(_placenames.count(name) == 0){
             uint32_t next = _placenames.size();
             if(type == nullptr)
                 type = _colors["dot"];
-            _places.emplace_back(Colored::Place{name, type, tokens, invariant});
+            _places.emplace_back(Colored::Place{name, std::move(initialAges), type, std::move(tokens), invariant});
             _placenames[name] = next;
             _placelocations.push_back(std::tuple<double, double>(x,y));
         }
@@ -225,15 +227,18 @@ namespace unfoldtacpn {
         if(size != 1)
         {
             double offset = 0;
-            size_t i = 0;
-            for (; i < place.type->size(); ++i) {
+            for (size_t i = 0; i < place.type->size(); ++i) {
                 double x = std::get<0>(placePos);
                 double y = std::get<1>(placePos);
                 std::string name = place.name + "__" + std::to_string(i);
                 const Colored::Color* color = &place.type->operator[](i);
                 Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color); //TODO:: this does not take the correct time invariant
                 auto r = place.marking[color];
-                builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), x, y + offset);
+                auto ageIt = place.initialMarkingAges.find(color->getId());
+                auto nonZeroTokenAges = (ageIt != place.initialMarkingAges.end()) ? ageIt->second : types::InitialTokenAges{};
+                assert(nonZeroTokenAges.size() <= r && "There are more non-zero token ages than tokens in the marking");
+
+                builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), std::move(nonZeroTokenAges), x, y + offset);
 
                 _ptplacenames[place.name][color->getId()] = std::move(name);
                 offset += 15;
@@ -244,7 +249,14 @@ namespace unfoldtacpn {
                 double x = std::get<0>(placePos);
                 double y = std::get<1>(placePos);
                 std::string placeName = "__" + place.name + "__SUM";
-                builder.addPlace(placeName, place.marking.size(), true, std::numeric_limits<int>::max(), x + 30, y - 30);
+
+                types::InitialTokenAges nonZeroTokenAges;
+                nonZeroTokenAges.reserve(place.initialMarkingAges.size());
+                for (const auto &[_, ages] : place.initialMarkingAges) {
+                    nonZeroTokenAges.insert(nonZeroTokenAges.end(), ages.begin(), ages.end());
+                }
+
+                builder.addPlace(placeName, place.marking.size(), true, std::numeric_limits<int>::max(), std::move(nonZeroTokenAges), x + 30, y - 30);
                 _sumPlacesNames[place.name] = std::move(placeName);
             }
         }
@@ -252,8 +264,11 @@ namespace unfoldtacpn {
         {
             _ptplacenames[place.name][0] = place.name;
             const unfoldtacpn::Colored::Color* color = &(*place.type)[0];
+            auto ageIt = place.initialMarkingAges.find(color->getId());
+            auto nonZeroTokenAges = (ageIt != place.initialMarkingAges.end()) ? ageIt->second : types::InitialTokenAges{};
+            assert(nonZeroTokenAges.size() <= place.marking[color] && "There are more non-zero token ages than tokens in the marking");
             Colored::TimeInvariant invariant = getTimeInvariantForPlace(place.invariants, color);
-            builder.addPlace(place.name, place.marking.size(), invariant.isBoundStrict(), invariant.getBound(),
+            builder.addPlace(place.name, place.marking.size(), invariant.isBoundStrict(), invariant.getBound(), std::move(nonZeroTokenAges),
                 std::get<0>(placePos), std::get<1>(placePos));
         }
     }

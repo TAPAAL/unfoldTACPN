@@ -12,6 +12,7 @@ project("unfoldTACPN" VERSION 0.0.3 LANGUAGES CXX C)
 # C++ Definition
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default Values
 ## Build Flags

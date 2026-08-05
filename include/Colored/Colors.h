@@ -100,19 +100,26 @@ namespace unfoldtacpn {
             public:
                 iterator(const ColorType& type, size_t index) : type(type), index(index) {}
 
-                const Color& operator++() {
-                    return type[++index];
+                iterator& operator++() {
+                    ++index;
+                    return *this;
                 }
 
-                const Color& operator++(int) {
-                    return type[index++];
+                iterator operator++(int) {
+                    iterator tmp = *this;
+                    ++index;
+                    return tmp;
                 }
 
-                const Color& operator--() {
-                    return type[--index];
+                iterator& operator--() {
+                    --index;
+                    return *this;
                 }
-                const Color& operator--(int) {
-                    return type[index--];
+
+                iterator operator--(int) {
+                    iterator tmp = *this;
+                    --index;
+                    return tmp;
                 }
 
                 const Color& operator*() {

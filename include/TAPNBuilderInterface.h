@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include "types.hpp"
 
 namespace unfoldtacpn {
 
@@ -34,6 +35,7 @@ namespace unfoldtacpn {
                 int tokens,
                 bool strict,
                 int bound,
+                types::InitialTokenAges &&initialAges,
                 double x = 0,
                 double y = 0) = 0;
 

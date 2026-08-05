@@ -45,6 +45,7 @@ BOOST_AUTO_TEST_CASE(Places) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             BOOST_REQUIRE_EQUAL("TAPN1_P0Sub0", name);
@@ -54,7 +55,10 @@ BOOST_AUTO_TEST_CASE(Places) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE(false);
         };
 
@@ -100,6 +104,7 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             BOOST_REQUIRE_EQUAL("TAPN1_P1", name);
@@ -109,7 +114,10 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE_EQUAL("TAPN1_T6", name);
             BOOST_REQUIRE(!urgent);
         };
@@ -164,12 +172,16 @@ BOOST_AUTO_TEST_CASE(RegularArcGuard) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE_EQUAL("T", name);
         };
 
@@ -238,6 +250,7 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             ++n_places;
@@ -250,7 +263,10 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
 
             ++n_trans;
             BOOST_REQUIRE_EQUAL("TAPN1_T0", name);
@@ -312,6 +328,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             ++n_places;
@@ -337,7 +354,10 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
 
             ++n_trans;
             BOOST_REQUIRE_EQUAL("TAPN1_T0", name);
@@ -395,13 +415,17 @@ BOOST_AUTO_TEST_CASE(GameTest) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
-            if(name.find("TAPN1_CTRL") == 0)
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
+            if(name.find("CTRL") != std::string::npos)
             {
                 BOOST_REQUIRE(player == 0);
             }
@@ -434,7 +458,7 @@ BOOST_AUTO_TEST_CASE(GameTest) {
         }
     };
 
-    auto f = loadFile("game.xml");
+    auto f = loadFile("../cpn_format/game.xml");
     BOOST_REQUIRE(f);
     ColoredPetriNetBuilder b;
     b.parseNet(f);

@@ -47,6 +47,7 @@ BOOST_AUTO_TEST_CASE(Places) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             BOOST_REQUIRE_EQUAL("P0", name);
@@ -56,7 +57,10 @@ BOOST_AUTO_TEST_CASE(Places) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE(false);
         };
 
@@ -102,6 +106,7 @@ BOOST_AUTO_TEST_CASE(ProductPlaces) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             if(name.find("DOT") == 0)
@@ -119,7 +124,10 @@ BOOST_AUTO_TEST_CASE(ProductPlaces) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE(false);
         };
 
@@ -170,6 +178,7 @@ BOOST_AUTO_TEST_CASE(PlacesBoundsMap) {
             int tokens,
             bool strict,
             int b,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             ++n_places;
@@ -182,7 +191,10 @@ BOOST_AUTO_TEST_CASE(PlacesBoundsMap) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE(false);
         };
 
@@ -229,6 +241,7 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             BOOST_REQUIRE_EQUAL("P0", name);
@@ -241,7 +254,10 @@ BOOST_AUTO_TEST_CASE(RegularArc) {
 
         bool seen_transition = false;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE_EQUAL("T2", name);
             BOOST_REQUIRE(!urgent);
             BOOST_REQUIRE(!seen_transition);
@@ -303,13 +319,17 @@ BOOST_AUTO_TEST_CASE(RegularArcGuard) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         bool seen_transition = false;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
         };
 
         /* Add timed colored input arc with given arc expression*/
@@ -372,6 +392,7 @@ BOOST_AUTO_TEST_CASE(ColoredRegularArc) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             ++n_place;
@@ -394,7 +415,10 @@ BOOST_AUTO_TEST_CASE(ColoredRegularArc) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
             BOOST_REQUIRE(name.find("T0") == 0);
             BOOST_REQUIRE(!urgent);
@@ -463,6 +487,7 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             ++n_places;
@@ -488,7 +513,10 @@ BOOST_AUTO_TEST_CASE(InhibitorArc) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
             BOOST_REQUIRE_EQUAL("T0", name);
             BOOST_REQUIRE(!urgent);
@@ -552,6 +580,7 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             ++n_places;
@@ -585,7 +614,10 @@ BOOST_AUTO_TEST_CASE(SinglePlace) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
             BOOST_REQUIRE(false);
         };
@@ -635,6 +667,7 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             ++n_places;
@@ -664,7 +697,10 @@ BOOST_AUTO_TEST_CASE(TransportArc) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
             BOOST_REQUIRE(name.find("T0") == 0);
             BOOST_REQUIRE(!urgent);
@@ -719,6 +755,7 @@ BOOST_AUTO_TEST_CASE(ColoredGuardTest) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             if(name.find("P0") == 0)
@@ -764,7 +801,10 @@ BOOST_AUTO_TEST_CASE(ColoredGuardTest) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
             BOOST_REQUIRE(name.find("T0") == 0);
             BOOST_REQUIRE(!urgent);
@@ -836,6 +876,7 @@ BOOST_AUTO_TEST_CASE(Referendum) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
             if(name.find("ready") == 0)
@@ -847,7 +888,10 @@ BOOST_AUTO_TEST_CASE(Referendum) {
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
         };
 
         /* Add timed colored input arc with given arc expression*/
@@ -910,12 +954,16 @@ BOOST_AUTO_TEST_CASE(TupleTest) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
         };
 
         virtual void addInputArc(const std::string &place,
@@ -954,12 +1002,16 @@ BOOST_AUTO_TEST_CASE(TupleCompTest) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
         };
 
         virtual void addInputArc(const std::string &place,
@@ -1003,12 +1055,16 @@ BOOST_AUTO_TEST_CASE(TupleCompTest2) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++_ntrans;
             BOOST_REQUIRE(urgent);
         };
@@ -1054,13 +1110,17 @@ BOOST_AUTO_TEST_CASE(ColorGuardTest2) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
         };
 
@@ -1102,13 +1162,17 @@ BOOST_AUTO_TEST_CASE(IntRange) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
         };
 
@@ -1151,13 +1215,17 @@ BOOST_AUTO_TEST_CASE(FiniteIntRange) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
         };
 
@@ -1198,13 +1266,17 @@ BOOST_AUTO_TEST_CASE(UnfoldLoop, * utf::timeout(5)) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             ++n_trans;
         };
 
@@ -1245,13 +1317,17 @@ BOOST_AUTO_TEST_CASE(UnsatCPNGuard, * utf::timeout(5)) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             BOOST_REQUIRE(false);
         };
 
@@ -1294,12 +1370,16 @@ BOOST_AUTO_TEST_CASE(GameTest) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
             if(name.find("CTRL") == 0)
             {
                 BOOST_REQUIRE(player == 0);
@@ -1349,13 +1429,17 @@ BOOST_AUTO_TEST_CASE(ColoredGuards, * utf::timeout(5)) {
             int tokens,
             bool strict,
             int bound,
+            types::InitialTokenAges &&initialAges,
             double x,
             double y) {
         }
 
         size_t n_trans = 0;
         virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) {
         };
 
         virtual void addInputArc(const std::string &place,
