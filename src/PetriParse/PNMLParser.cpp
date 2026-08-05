@@ -639,7 +639,8 @@ types::InitialMarkingAges PNMLParser::parseInitialMarkingAges(rapidxml::xml_node
     types::InitialMarkingAges ages;
     ages.reserve(_colorTypes.size());
     for (auto it = element->first_node("token"); it; it = it->next_sibling("token")) {
-        auto colorName = it->first_attribute("color")->value();
+        auto colorAttr = it->first_attribute("color");
+        std::string colorName = colorAttr ? colorAttr->value() : "dot";
         auto colorId = _colorTypes[colorName]->getId();
         auto ageStr = it->first_attribute("age")->value();
         assert(std::stoll(ageStr) >= 0 && "Age must be non-negative");
