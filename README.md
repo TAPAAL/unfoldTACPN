@@ -8,43 +8,29 @@ Over time this should be refactored into a general unfolding library, merged wit
 the functionality of the (faster and better) unfolder of VerifyPN.
 
 
-The four distributions of unfoldTACPN can be compiled as follows
-### Linux64 and OSX64
-```
-mkdir build && cd  build
-cmake ..
+## CMake Workflows
 
-#For mac, one need to enforce that we use the GCC compiler using:
-export CC=gcc-13
-export CXX=g++-13
-#and point to the correct version of flex and bison by adding
-#-DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex
-#to cmake call
+| Workflow | Purpose | Build directory |
+| --- | --- | --- |
+| `release` | Release build | `build-release` |
+| `debug` | Debug build | `build-debug` |
+| `test` | Release build and tests | `build-test` |
+| `win64-release` | Windows cross-compiled release | `build-win64-release` |
 
+```sh
+cmake --workflow --preset <workflow>
 ```
 
-### Windows 64 cross-compilation with minGW
-Install cross-compiler and libs
+### Dependencies (Linux / macOS)
 
-```
-sudo apt install mingw-w64-x86-64-dev mingw-w64-tools g++-mingw-w64-x86-64
-sudo apt install wine wine-binfmt #Needed to run tests compile
+```sh
+sudo apt install flex bison ninja-build gcc-16 g++-16
 ```
 
-To build
+### Dependencies (Windows cross-compilation with MinGW)
 
-```
-mkdir build-win && cd  build-win
-cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-x86_64-w64-mingw32.cmake
-make
-```
-
-### Mac 64 compilation
-```
-mkdir build
-cd build
-cmake -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison -DFLEX_EXECUTABLE=/usr/local/opt/flex/bin/flex -DCMAKE_C_COMPILER=/usr/local/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/local/bin/g++-9 ..
-make
+```sh
+sudo apt install flex bison ninja-build mingw-w64
 ```
 
 ## License

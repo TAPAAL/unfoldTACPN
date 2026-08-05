@@ -15,25 +15,27 @@ concurrency:
 jobs:
   build:
     if: github.event.pull_request.draft == false
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v2
+    runs-on: macos-15-intel
 
-      - name: Install Packages
-        run: |
-          brew install flex bison
-        
-      - name: Build 
-        uses: lukka/run-cmake@v2.5
-        with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeAppendedArgs: >-
-            -DUNFOLDTACPN_TEST=OFF
-            -DBISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison
-            -DFLEX_EXECUTABLE=/opt/homebrew/opt/flex/bin/flex
-          cmakeBuildType: Release
-          cmakeGenerator: UnixMakefiles
-          buildDirectory: '${{runner.workspace}}/build'
-        env:
-          CC: gcc-14
-          CXX: g++-14
+    steps:
+    - uses: actions/checkout@v7.0.1
+    - name: Check architecture
+      shell: bash
+      run: |
+        echo "The runner is of type $(uname -m)."
+        if [ $(uname -m) != "x86_64" ] 
+        then 
+            echo "$(uname -m) detected. This test must be run on x86_64"
+            exit -1
+        fi
+        exit 0
+    
+    - name: Install Packages
+      run: |
+        GCC_VERSION=$(jq -er '.configurePresets[] | select(.name == "use-gcc") | .environment.GCC_VERSION | select(test("^[0-9]+$"))' CMakePresets.json)
+        brew install cmake flex bison ninja "gcc@${GCC_VERSION}"
+    
+    - name: Build
+      run: |
+        export PATH="$(brew --prefix bison)/bin:$(brew --prefix flex)/bin:$PATH"
+        cmake --workflow release

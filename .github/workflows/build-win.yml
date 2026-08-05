@@ -1,4 +1,5 @@
-name: Build Windows (Cross)
+name: Build Windows (Cross Compile)
+
 on:
   push:
     branches: [ main ]
@@ -8,36 +9,21 @@ on:
   workflow_dispatch:
 
 concurrency: 
-  group: build-Win-${{ github.head_ref }}
+  group: build-win-${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v7.0.1
+    
+    - name: Install Packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install flex bison mingw-w64 ninja-build
 
-      - name: Install Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install flex
-          sudo apt-get install mingw-w64-x86-64-dev mingw-w64-tools g++-mingw-w64-x86-64 wine wine-binfmt
-
-          wget https://ftp.gnu.org/gnu/bison/bison-3.7.6.tar.gz
-          tar xvfz bison-3.7.6.tar.gz
-          cd bison-3.7.6
-          ./configure
-          make 
-          sudo make install
-
-      - name: Build 
-        uses: lukka/run-cmake@v2.5
-        with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeAppendedArgs: >-
-            -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/unfoldTACPN/toolchain-x86_64-w64-mingw32.cmake
-            -DUNFOLDTACPN_TEST=OFF
-          cmakeBuildType: Release
-          cmakeGenerator: UnixMakefiles
-          buildDirectory: '${{runner.workspace}}/build'
+    - name: Build Release
+      run: cmake --workflow win64-release

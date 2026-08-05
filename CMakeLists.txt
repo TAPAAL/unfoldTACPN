@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 ## Default to release builds, must be set before project
 if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
@@ -7,7 +7,34 @@ endif()
 
 # Project Definition
 set(UNFOLD_NAME "unfoldTACPN")
+
+# Select GCC compiler
+set(DESIRED_GCC_VERSION "$ENV{GCC_VERSION}")
+if (NOT CMAKE_C_COMPILER AND NOT DEFINED ENV{CC})
+    find_program(GCC_REQ_C "gcc-${DESIRED_GCC_VERSION}")
+    if (GCC_REQ_C)
+        set(CMAKE_C_COMPILER "${GCC_REQ_C}" CACHE STRING "C compiler")
+    else()
+        set(CMAKE_C_COMPILER "gcc" CACHE STRING "C compiler")
+    endif()
+endif()
+
+if (NOT CMAKE_CXX_COMPILER AND NOT DEFINED ENV{CXX})
+    find_program(GCC_REQ_CXX "g++-${DESIRED_GCC_VERSION}")
+    if (GCC_REQ_CXX)
+        set(CMAKE_CXX_COMPILER "${GCC_REQ_CXX}" CACHE STRING "CXX compiler")
+    else()
+        set(CMAKE_CXX_COMPILER "g++" CACHE STRING "CXX compiler")
+    endif()
+endif()
+
 project("unfoldTACPN" VERSION 0.0.3 LANGUAGES CXX C)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS DESIRED_GCC_VERSION)
+        message(FATAL_ERROR "GCC version ${DESIRED_GCC_VERSION} or newer is required (from GCC_VERSION in CMakePresets.json), but found GCC ${CMAKE_CXX_COMPILER_VERSION}")
+    endif()
+endif()
 
 # C++ Definition
 set(CMAKE_CXX_STANDARD 17)
@@ -67,6 +94,7 @@ if (UNFOLDTACPN_GetDependencies)
         INSTALL_COMMAND cd ../rapidxml-ext && ${CMAKE_COMMAND} -E copy rapidxml.hpp rapidxml_iterators.hpp rapidxml_print.hpp rapidxml_utils.hpp ${EXTERNAL_INSTALL_LOCATION}/include
     )
 
+    set(CMAKE_PREFIX_PATH ${EXTERNAL_INSTALL_LOCATION};${CMAKE_PREFIX_PATH})
     link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
     link_directories(${EXTERNAL_INSTALL_LOCATION}/lib64)
     include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
@@ -81,4 +109,3 @@ if (UNFOLDTACPN_TEST)
     enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 endif()
-
