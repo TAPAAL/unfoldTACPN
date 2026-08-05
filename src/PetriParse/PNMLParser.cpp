@@ -618,7 +618,7 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
             hlinitialMarking = parseArcExpression(it->first_node("structure"), type)->eval(context);
             found_hl = true;
         } else if (strcmp(it->name(), "initialMarkingAge") == 0) {
-            initialAges = parseInitialMarkingAges(it);
+            initialAges = parseInitialMarkingAges(it, type);
         } 
     }
 
@@ -635,13 +635,13 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     _builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, std::move(initialAges), x, y);
 }
 
-types::InitialMarkingAges PNMLParser::parseInitialMarkingAges(rapidxml::xml_node<>* element) {
+types::InitialMarkingAges PNMLParser::parseInitialMarkingAges(rapidxml::xml_node<>* element, const Colored::ColorType* type) {
     types::InitialMarkingAges ages;
-    ages.reserve(_colorTypes.size());
+    ages.reserve(type->size());
     for (auto it = element->first_node("token"); it; it = it->next_sibling("token")) {
         auto colorAttr = it->first_attribute("color");
         std::string colorName = colorAttr ? colorAttr->value() : "dot";
-        auto colorId = _colorTypes[colorName]->getId();
+        auto colorId = (*type)[colorName].getId();
         auto ageStr = it->first_attribute("age")->value();
         assert(std::stoll(ageStr) >= 0 && "Age must be non-negative");
         ages[colorId].push_back(std::stoul(ageStr));
