@@ -23,7 +23,7 @@ public:
             int tokens,
             bool strict,
             int bound,
-            types::InitialTokenAges &&initialAges = {},
+            unfoldtacpn::types::InitialTokenAges &&initialAges = {},
             double x = 0,
             double y = 0) override {};
 

@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <string>
 
-namespace types {
+namespace unfoldtacpn::types {
     using InitialTokenAges = std::vector<uint32_t>;
     using InitialMarkingAges = std::unordered_map<uintptr_t,InitialTokenAges>;
 }
