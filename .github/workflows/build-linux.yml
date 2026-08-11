@@ -17,12 +17,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v7.0.1
-    
+
     - name: Install Packages
       run: |
         GCC_VERSION=$(jq -er '.configurePresets[] | select(.name == "use-gcc") | .environment.GCC_VERSION | select(test("^[0-9]+$"))' CMakePresets.json)
         sudo apt update
-        sudo apt install -f flex bison ninja-build "gcc-${GCC_VERSION}" "g++-${GCC_VERSION}"
+        sudo apt install -f flex bison libboost-test-dev ninja-build "gcc-${GCC_VERSION}" "g++-${GCC_VERSION}"
 
     - name: Build
       run: cmake --workflow release

@@ -105,7 +105,7 @@ include_directories(include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/)
 
 # Testing
-if (UNFOLDTACPN_TEST)
+if (BUILD_TESTING AND UNFOLDTACPN_TEST)
     enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 endif()
