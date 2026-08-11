@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 
+set(DEFAULT_GCC_VERSION 16)
+
 ## Default to release builds, must be set before project
 if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
@@ -10,29 +12,32 @@ set(UNFOLD_NAME "unfoldTACPN")
 
 # Select GCC compiler
 set(DESIRED_GCC_VERSION "$ENV{GCC_VERSION}")
-if (NOT CMAKE_C_COMPILER AND NOT DEFINED ENV{CC})
-    find_program(GCC_REQ_C "gcc-${DESIRED_GCC_VERSION}")
-    if (GCC_REQ_C)
-        set(CMAKE_C_COMPILER "${GCC_REQ_C}" CACHE STRING "C compiler")
-    else()
-        set(CMAKE_C_COMPILER "gcc" CACHE STRING "C compiler")
-    endif()
+if (DESIRED_GCC_VERSION STREQUAL "")
+    set(DESIRED_GCC_VERSION ${DEFAULT_GCC_VERSION})
 endif()
 
-if (NOT CMAKE_CXX_COMPILER AND NOT DEFINED ENV{CXX})
-    find_program(GCC_REQ_CXX "g++-${DESIRED_GCC_VERSION}")
-    if (GCC_REQ_CXX)
-        set(CMAKE_CXX_COMPILER "${GCC_REQ_CXX}" CACHE STRING "CXX compiler")
-    else()
-        set(CMAKE_CXX_COMPILER "g++" CACHE STRING "CXX compiler")
-    endif()
+if (NOT CMAKE_C_COMPILER)
+    find_program(GCC_REQ_C NAMES "gcc-${DESIRED_GCC_VERSION}" gcc REQUIRED)
+    set(CMAKE_C_COMPILER "${GCC_REQ_C}" CACHE STRING "C compiler")
+endif()
+
+if (NOT CMAKE_CXX_COMPILER)
+    find_program(GCC_REQ_CXX NAMES "g++-${DESIRED_GCC_VERSION}" g++ REQUIRED)
+    set(CMAKE_CXX_COMPILER "${GCC_REQ_CXX}" CACHE STRING "CXX compiler")
 endif()
 
 project("unfoldTACPN" VERSION 0.0.3 LANGUAGES CXX C)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS DESIRED_GCC_VERSION)
-        message(FATAL_ERROR "GCC version ${DESIRED_GCC_VERSION} or newer is required (from GCC_VERSION in CMakePresets.json), but found GCC ${CMAKE_CXX_COMPILER_VERSION}")
+if (NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(FATAL_ERROR "GCC is required, but found ${CMAKE_C_COMPILER_ID} and ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
+if (NOT CMAKE_CROSSCOMPILING)
+    if (NOT CMAKE_C_COMPILER_VERSION MATCHES "^${DESIRED_GCC_VERSION}([.].*)?$")
+        message(FATAL_ERROR "GCC ${DESIRED_GCC_VERSION} is required, but found GCC ${CMAKE_C_COMPILER_VERSION}")
+    endif()
+    if (NOT CMAKE_CXX_COMPILER_VERSION MATCHES "^${DESIRED_GCC_VERSION}([.].*)?$")
+        message(FATAL_ERROR "G++ ${DESIRED_GCC_VERSION} is required, but found G++ ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
 endif()
 
