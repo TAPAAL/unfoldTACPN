@@ -6,7 +6,7 @@
 *.swp
 nbproject/
 cmake-build-*
-build*
+build*/
 .idea/
 src/PetriEngine/PQL/PQLQueryParser.parser.cpp
 src/PetriEngine/PQL/PQLQueryParser.parser.hpp

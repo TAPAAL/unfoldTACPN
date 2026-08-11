@@ -1,0 +1,30 @@
+name: Build MacOS ARM processor
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [synchronize, opened, reopened, ready_for_review]
+  workflow_dispatch:
+
+concurrency:
+  group: build-MacOS-ARM-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+    - uses: actions/checkout@v7.0.1
+
+    - name: Install depends
+      run: |
+        GCC_VERSION=$(jq -er '.configurePresets[] | select(.name == "use-gcc") | .environment.GCC_VERSION | select(test("^[0-9]+$"))' CMakePresets.json)
+        brew install cmake flex bison ninja "gcc@${GCC_VERSION}"
+
+    - name: Build Release
+      run: |
+        export PATH="$(brew --prefix bison)/bin:$(brew --prefix flex)/bin:$PATH"
+        cmake --workflow release
