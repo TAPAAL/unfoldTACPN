@@ -17,17 +17,22 @@
 #include <TAPNBuilderInterface.h>
 
 class DummyBuilder : public unfoldtacpn::TAPNBuilderInterface {
+public:
     /** Adds a new colored and timed place with a unique name */
-    virtual void addPlace(const std::string& name,
+    void addPlace(const std::string& name,
             int tokens,
             bool strict,
             int bound,
+            unfoldtacpn::types::InitialTokenAges &&initialAges = {},
             double x = 0,
-            double y = 0) {};
+            double y = 0) override {};
 
     // add a time transition with a unique name
-    virtual void addTransition(const std::string &name, int player, bool urgent,
-            double, double) {};
+    void addTransition(const std::string &name, int player, bool urgent,
+            double x = 0, double y = 0,
+            int distrib = 0, std::vector<double> distribParam = std::vector<double>(),
+            bool customDistributionRandomStart = false, double weight = 1.0,
+            int firingMode = 0) override {};
 
     /* Add timed colored input arc with given arc expression*/
     virtual void addInputArc(const std::string &place,

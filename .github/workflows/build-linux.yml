@@ -13,29 +13,20 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v7.0.1
 
-      - name: Install Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install flex
+    - name: Install Packages
+      run: |
+        GCC_VERSION=$(sed -nE 's/^set\(DEFAULT_GCC_VERSION ([0-9]+)\)$/\1/p' CMakeLists.txt)
+        [[ $GCC_VERSION =~ ^[0-9]+$ ]]
+        sudo apt update
+        sudo apt install -f flex bison libboost-test-dev ninja-build "gcc-${GCC_VERSION}" "g++-${GCC_VERSION}"
 
-          wget https://ftp.gnu.org/gnu/bison/bison-3.7.6.tar.gz
-          tar xvfz bison-3.7.6.tar.gz
-          cd bison-3.7.6
-          ./configure
-          make 
-          sudo make install
+    - name: Build
+      run: cmake --workflow release
 
-      - name: Build 
-        uses: lukka/run-cmake@v2.5
-        with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeAppendedArgs: >-
-            -DUNFOLDTACPN_TEST=OFF
-          cmakeBuildType: Release
-          cmakeGenerator: UnixMakefiles
-          buildDirectory: '${{runner.workspace}}/build'
+    - name: Test
+      run: cmake --workflow test

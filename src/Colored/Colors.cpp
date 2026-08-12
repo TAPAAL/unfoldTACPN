@@ -202,7 +202,7 @@ namespace unfoldtacpn {
 
                 std::vector<const Color*> colors;
                 for (auto & constituent : constituents) {
-                    mod = constituents.size();
+                    mod = constituent->size();
                     colors.push_back(&(*constituent)[(index / div) % mod]);
                     div *= mod;
                 }

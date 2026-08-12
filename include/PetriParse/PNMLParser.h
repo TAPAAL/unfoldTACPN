@@ -35,6 +35,7 @@
 #include <vector>
 #include <fstream>
 #include <rapidxml.hpp>
+#include "../types.hpp"
 
 namespace unfoldtacpn {
 class PNMLParser {
@@ -44,7 +45,6 @@ public:
     typedef std::unordered_map<std::string, const unfoldtacpn::Colored::Variable*> VariableMap;
     typedef std::vector<rapidxml::xml_node<>*> node_vector_t;
 
-public:
     PNMLParser() {
         _builder = nullptr;
     }
@@ -57,6 +57,7 @@ private:
     unfoldtacpn::Colored::ArcExpression_ptr parseHLInscriptions(rapidxml::xml_node<>* element, const Colored::ColorType* type);
     std::vector<Colored::TimeInterval> parseTimeGuard(rapidxml::xml_node<>* element);
     void findNodes(rapidxml::xml_node<>* element, node_vector_t& colored_arc, node_vector_t& regular_arcs, node_vector_t& inhib_arcs, node_vector_t& trans_arcs, node_vector_t& transitions, node_vector_t& places, node_vector_t& custom_distributions);
+    types::InitialMarkingAges parseInitialMarkingAges(rapidxml::xml_node<>* element, const Colored::ColorType* type);
     void parsePlace(rapidxml::xml_node<>* element);
     std::pair<std::string, std::vector<const unfoldtacpn::Colored::Color*>> parseTimeConstraint(rapidxml::xml_node<> *element);
     void parseArc(rapidxml::xml_node<>* element, bool inhibitor = false);

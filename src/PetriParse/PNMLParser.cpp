@@ -25,10 +25,12 @@
 #include <limits>
 #include <istream>
 #include <cstring>
+#include <cassert>
 
 
 #include "PetriParse/PNMLParser.h"
 #include "errorcodes.h"
+#include "types.hpp"
 
 using namespace unfoldtacpn::PQL;
 
@@ -593,6 +595,8 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     timeInvariants.push_back(Colored::TimeInvariant::createFor(starInvariant, colors, constantValues));
 
     bool found_hl = false;
+    types::InitialMarkingAges initialAges;
+
     // we first need the type
     if(auto* node = element->first_node("type"))
     {
@@ -600,7 +604,7 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
     }
     else
     {
-        _place_types[id] = _colorTypes["dot"];
+        _place_types[id] = type = _colorTypes["dot"];
     }
     for (auto it = element->first_node(); it; it = it->next_sibling()) {
         // name element is ignored
@@ -613,7 +617,9 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
             unfoldtacpn::Colored::ExpressionContext context {binding, typeMap};
             hlinitialMarking = parseArcExpression(it->first_node("structure"), type)->eval(context);
             found_hl = true;
-        }
+        } else if (strcmp(it->name(), "initialMarkingAge") == 0) {
+            initialAges = parseInitialMarkingAges(it, type);
+        } 
     }
 
     if(initialMarking >= std::numeric_limits<int>::max())
@@ -621,15 +627,27 @@ void PNMLParser::parsePlace(rapidxml::xml_node<>* element) {
         std::cerr << "ERROR: Number of tokens in " << id << " exceeded " << std::numeric_limits<int>::max() << std::endl;
         exit(ErrorCode);
     }
-    //Create place
-    if (type == nullptr) {
-        type = _colorTypes["dot"];
-    }
+
     if(!found_hl && type->size() == 1)
     {
         hlinitialMarking = unfoldtacpn::Colored::Multiset(&(*type)[0], initialMarking);
     }
-    _builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, x, y);
+    _builder->addPlace(id, std::move(hlinitialMarking), type, timeInvariants, std::move(initialAges), x, y);
+}
+
+types::InitialMarkingAges PNMLParser::parseInitialMarkingAges(rapidxml::xml_node<>* element, const Colored::ColorType* type) {
+    types::InitialMarkingAges ages;
+    ages.reserve(type->size());
+    for (auto it = element->first_node("token"); it; it = it->next_sibling("token")) {
+        auto colorAttr = it->first_attribute("color");
+        std::string colorName = colorAttr ? colorAttr->value() : "dot";
+        auto colorId = (*type)[colorName].getId();
+        auto ageStr = it->first_attribute("age")->value();
+        assert(std::stoll(ageStr) >= 0 && "Age must be non-negative");
+        ages[colorId].push_back(std::stoul(ageStr));
+    }
+
+    return ages;
 }
 
 unfoldtacpn::Colored::ArcExpression_ptr PNMLParser::parseHLInscriptions(rapidxml::xml_node<>* element, const Colored::ColorType* type)

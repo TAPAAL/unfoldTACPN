@@ -21,6 +21,7 @@
 #include "Multiset.h"
 #include "TimeInterval.h"
 #include "TimeInvariant.h"
+#include "../types.hpp"
 
 namespace unfoldtacpn {
     namespace Colored {
@@ -86,6 +87,7 @@ namespace unfoldtacpn {
 
         struct Place {
             std::string name;
+            types::InitialMarkingAges initialMarkingAges;
             const ColorType* type;
             Multiset marking;
             std::vector<Colored::TimeInvariant> invariants;

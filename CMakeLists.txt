@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
+
+set(DEFAULT_GCC_VERSION 16)
 
 ## Default to release builds, must be set before project
 if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
@@ -7,11 +9,42 @@ endif()
 
 # Project Definition
 set(UNFOLD_NAME "unfoldTACPN")
+
+# Select GCC compiler
+set(DESIRED_GCC_VERSION "$ENV{GCC_VERSION}")
+if (DESIRED_GCC_VERSION STREQUAL "")
+    set(DESIRED_GCC_VERSION ${DEFAULT_GCC_VERSION})
+endif()
+
+if (NOT CMAKE_C_COMPILER)
+    find_program(GCC_REQ_C NAMES "gcc-${DESIRED_GCC_VERSION}" gcc REQUIRED)
+    set(CMAKE_C_COMPILER "${GCC_REQ_C}" CACHE STRING "C compiler")
+endif()
+
+if (NOT CMAKE_CXX_COMPILER)
+    find_program(GCC_REQ_CXX NAMES "g++-${DESIRED_GCC_VERSION}" g++ REQUIRED)
+    set(CMAKE_CXX_COMPILER "${GCC_REQ_CXX}" CACHE STRING "CXX compiler")
+endif()
+
 project("unfoldTACPN" VERSION 0.0.3 LANGUAGES CXX C)
+
+if (NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(FATAL_ERROR "GCC is required, but found ${CMAKE_C_COMPILER_ID} and ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
+if (NOT CMAKE_CROSSCOMPILING)
+    if (NOT CMAKE_C_COMPILER_VERSION MATCHES "^${DESIRED_GCC_VERSION}([.].*)?$")
+        message(FATAL_ERROR "GCC ${DESIRED_GCC_VERSION} is required, but found GCC ${CMAKE_C_COMPILER_VERSION}")
+    endif()
+    if (NOT CMAKE_CXX_COMPILER_VERSION MATCHES "^${DESIRED_GCC_VERSION}([.].*)?$")
+        message(FATAL_ERROR "G++ ${DESIRED_GCC_VERSION} is required, but found G++ ${CMAKE_CXX_COMPILER_VERSION}")
+    endif()
+endif()
 
 # C++ Definition
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default Values
 ## Build Flags
@@ -66,6 +99,7 @@ if (UNFOLDTACPN_GetDependencies)
         INSTALL_COMMAND cd ../rapidxml-ext && ${CMAKE_COMMAND} -E copy rapidxml.hpp rapidxml_iterators.hpp rapidxml_print.hpp rapidxml_utils.hpp ${EXTERNAL_INSTALL_LOCATION}/include
     )
 
+    set(CMAKE_PREFIX_PATH ${EXTERNAL_INSTALL_LOCATION};${CMAKE_PREFIX_PATH})
     link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
     link_directories(${EXTERNAL_INSTALL_LOCATION}/lib64)
     include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
@@ -76,8 +110,7 @@ include_directories(include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/)
 
 # Testing
-if (UNFOLDTACPN_TEST)
+if (BUILD_TESTING AND UNFOLDTACPN_TEST)
     enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 endif()
-
