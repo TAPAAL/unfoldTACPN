@@ -3,8 +3,7 @@
  */
 
 #include "PQL/Contexts.h"
-
-
+#include "Colored/ColoredPetriNetBuilder.h"
 
 namespace unfoldtacpn {
     namespace PQL {
@@ -17,6 +16,10 @@ namespace unfoldtacpn {
                 return true;
             }
             return false;
+        }
+
+        bool NamingContext::resolvePlace(const std::string& place, const std::string& color, std::string& out) {
+            return _builder && _builder->resolvePlace(place, color, out);
         }
 
         bool NamingContext::resolveTransition(const std::string& transition, std::vector<std::string>& out)

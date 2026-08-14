@@ -566,36 +566,26 @@ Expr_ptr QueryXMLParser::parseNumericExpression(rapidxml::xml_node<>*  element) 
         auto children = element->first_node();
         std::vector<Expr_ptr> ids;
         for (auto it = children; it; it = it->next_sibling()) {
-            if (strcmp(it->name(), "place") != 0)
-            {
+            if (strcmp(it->name(), "place") != 0) {
                 assert(false);
                 return nullptr;
             }
-            string placeName = parsePlace(it);
-            if (placeName.empty())
-            {
-                assert(false);
-                return nullptr; // invalid place name
-            }
-            auto id = std::make_shared<IdentifierExpr>(placeName);
+
+            auto id = parsePlaceExpression(it);
+            if (!id) return nullptr;
             ids.emplace_back(id);
         }
 
-        if (ids.empty())
-        {
+        if (ids.empty()) {
             assert(false);
             return nullptr;
         }
+
         if (ids.size() == 1) return ids[0];
 
         return std::make_shared<PlusExpr>(std::move(ids));
     } else if (elementName == "place") { // Shortcut for single places tokens count
-        string placeName = parsePlace(element);
-        if(placeName.empty()) {
-            assert(false);
-            return nullptr;
-        }
-        return std::make_shared<IdentifierExpr>(placeName);
+        return parsePlaceExpression(element);
     } else if (elementName == "integer-sum" || elementName == "integer-product") {
         auto children = element->first_node();
         bool isMult = false;
@@ -638,9 +628,51 @@ Expr_ptr QueryXMLParser::parseNumericExpression(rapidxml::xml_node<>*  element) 
     return nullptr;
 }
 
-string QueryXMLParser::parsePlace(rapidxml::xml_node<>*  element) {
-    if (strcmp(element->name(), "place") != 0)  return ""; // missing place tag
+Expr_ptr QueryXMLParser::parsePlaceExpression(rapidxml::xml_node<>* element) {
+    if (strcmp(element->name(), "place") != 0) return nullptr;
+
     string placeName = element->value();
     placeName.erase(std::remove_if(placeName.begin(), placeName.end(), ::isspace), placeName.end());
-    return placeName;
+    if (placeName.empty()) {
+        assert(false);
+        return nullptr;
+    }
+
+    auto colorExpr = element->first_node("color-expression");
+    if (!colorExpr) return std::make_shared<IdentifierExpr>(placeName);
+
+    auto color = parseColorExpression(colorExpr);
+    if (color.empty()) return nullptr;
+    return std::make_shared<IdentifierExpr>(placeName, color);
+}
+
+string QueryXMLParser::parseColorExpression(rapidxml::xml_node<>* element) {
+    if (!element) return "";
+    if (strcmp(element->name(), "color-expression") == 0) {
+        return parseColorExpression(element->first_node());
+    }
+
+    if (strcmp(element->name(), "color") == 0) {
+        auto* id = element->first_attribute("id");
+        if (!id || !*id->value()) {
+            assert(false);
+            return "";
+        }
+        return id->value();
+    } else if (strcmp(element->name(), "tuple") == 0) {
+        std::string res = "(";
+        bool first = true;
+        for (auto it = element->first_node(); it; it = it->next_sibling()) {
+            std::string sub = parseColorExpression(it);
+            if (sub.empty()) return "";
+            if (!first) res += ",";
+            res += sub;
+            first = false;
+        }
+        res += ")";
+        return res;
+    }
+
+    assert(false);
+    return "";
 }

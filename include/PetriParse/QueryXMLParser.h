@@ -53,9 +53,9 @@ private:
     std::vector<Observable> parseObservables(rapidxml::xml_node<>* element);
     Condition_ptr parseSmcFormula(SMCSettings settings, rapidxml::xml_node<>* element);
     Expr_ptr parseNumericExpression(rapidxml::xml_node<>*  element);
-    std::string parsePlace(rapidxml::xml_node<>*  element);
+    Expr_ptr parsePlaceExpression(rapidxml::xml_node<>* element);
+    std::string parseColorExpression(rapidxml::xml_node<>* element);
     void fatal_error(const std::string& token);
 };
 
 #endif /* QUERYXMLPARSER_H */
-

@@ -64,7 +64,8 @@ namespace unfoldtacpn {
     void context_analysis(const ColoredPetriNetBuilder& cpnBuilder, const std::vector<std::pair<Condition_ptr, std::string> >& queries) {
         //Context analysis
         NamingContext context(cpnBuilder.getUnfoldedPlaceNames(),
-            cpnBuilder.getUnfoldedTransitionNames());
+            cpnBuilder.getUnfoldedTransitionNames(),
+            &cpnBuilder);
         for (auto& q : queries) {
             if(q.first)
                 q.first->analyze(context);

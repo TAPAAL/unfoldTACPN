@@ -64,6 +64,16 @@ namespace unfoldtacpn {
         }
 
         void IdentifierExpr::analyze(NamingContext &context) {
+            if (!_color.empty()) {
+                std::string unfoldedName;
+                if (!context.resolvePlace(_name, _color, unfoldedName)) {
+                    ExprError error("Unable to resolve color \"" + _color + "\" for place \"" + _name + "\"");
+                    throw error;
+                }
+                
+                _compiled = std::make_shared<UnfoldedIdentifierExpr>(unfoldedName);
+                return;
+            }
 
             std::unordered_map<uint32_t,std::string> names;
             if (!context.resolvePlace(_name, names)) {
