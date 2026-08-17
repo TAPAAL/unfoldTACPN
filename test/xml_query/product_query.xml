@@ -1,0 +1,26 @@
+<property-set>
+  <property>
+    <id>tuple</id>
+    <description>tuple</description>
+    <formula>
+      <exists-path>
+        <finally>
+          <integer-eq>
+            <tokens-count>
+              <place>
+                PRODUCT
+                <color-expression>
+                  <tuple>
+                    <color id="1"/>
+                    <color id="2"/>
+                  </tuple>
+                </color-expression>
+              </place>
+            </tokens-count>
+            <integer-constant>1</integer-constant>
+          </integer-eq>
+        </finally>
+      </exists-path>
+    </formula>
+  </property>
+</property-set>

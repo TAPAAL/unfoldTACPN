@@ -90,11 +90,13 @@ namespace unfoldtacpn {
 
 
         void unfold(TAPNBuilderInterface& builder);
-        void clear() { _sumPlacesNames.clear(); _pttransitionnames.clear(); _ptplacenames.clear(); }
+        bool resolvePlace(const std::string& placeName, const std::string& colorName, std::string& out) const;
+        void clear() { _sumPlacesNames.clear(); _pttransitionnames.clear(); _ptplacenames.clear(); _placeColorIds.clear(); }
     private:
         std::unordered_map<std::string,uint32_t> _placenames;
         std::unordered_map<std::string,uint32_t> _transitionnames;
         PTPlaceMap _ptplacenames;
+        std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>> _placeColorIds;
         std::unordered_map<std::string, std::string> _sumPlacesNames;
         PTTransitionMap _pttransitionnames;
         std::vector< std::tuple<double, double> > _placelocations;
@@ -159,4 +161,3 @@ namespace unfoldtacpn {
 }
 
 #endif /* COLOREDPETRINETBUILDER_H */
-

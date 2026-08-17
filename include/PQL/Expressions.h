@@ -123,13 +123,14 @@ namespace unfoldtacpn {
 
         class IdentifierExpr : public Expr {
         public:
-            IdentifierExpr(const std::string& name) : _name(name) {}
+            IdentifierExpr(const std::string& name, const std::string& color = "") : _name(name), _color(color) {}
             void analyze(NamingContext& context) override;
             void visit(Visitor& visitor) const override;
             const Expr_ptr& compiled() const { return _compiled; }
             const std::string& name() const { return _name; }
         private:
             std::string _name;
+            std::string _color;
             Expr_ptr _compiled;
         };
 

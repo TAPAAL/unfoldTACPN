@@ -30,6 +30,7 @@
 #include <unordered_map>
 
 namespace unfoldtacpn {
+    class ColoredPetriNetBuilder;
 
     namespace PQL {
 
@@ -37,14 +38,19 @@ namespace unfoldtacpn {
         protected:
             const std::unordered_map<std::string, std::unordered_map<uint32_t , std::string>>& _coloredPlaceNames;
             const std::unordered_map<std::string, std::vector<std::string>>& _coloredTransitionNames;
+            const ColoredPetriNetBuilder* _builder;
         public:
             NamingContext(  const std::unordered_map<std::string, std::unordered_map<uint32_t , std::string>>& cplaces,
-                            const std::unordered_map<std::string, std::vector<std::string>>& ctnames)
+                            const std::unordered_map<std::string, std::vector<std::string>>& ctnames,
+                            const ColoredPetriNetBuilder* builder = nullptr)
                     : _coloredPlaceNames(cplaces),
-                      _coloredTransitionNames(ctnames)
+                      _coloredTransitionNames(ctnames),
+                      _builder(builder)
                     {}
 
             bool resolvePlace(const std::string& place, std::unordered_map<uint32_t,std::string>& out);
+
+            bool resolvePlace(const std::string& place, const std::string& color, std::string& out);
 
             bool resolveTransition(const std::string& transition, std::vector<std::string>& out);
 

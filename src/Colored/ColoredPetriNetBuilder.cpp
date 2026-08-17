@@ -241,6 +241,7 @@ namespace unfoldtacpn {
                 builder.addPlace(name, r, invariant.isBoundStrict(), invariant.getBound(), std::move(nonZeroTokenAges), x, y + offset);
 
                 _ptplacenames[place.name][color->getId()] = std::move(name);
+                _placeColorIds[place.name][color->toString()] = color->getId();
                 offset += 15;
             }
 
@@ -264,6 +265,7 @@ namespace unfoldtacpn {
         {
             _ptplacenames[place.name][0] = place.name;
             const unfoldtacpn::Colored::Color* color = &(*place.type)[0];
+            _placeColorIds[place.name][color->toString()] = color->getId();
             auto ageIt = place.initialMarkingAges.find(color->getId());
             auto nonZeroTokenAges = (ageIt != place.initialMarkingAges.end()) ? ageIt->second : types::InitialTokenAges{};
             assert(nonZeroTokenAges.size() <= place.marking[color] && "There are more non-zero token ages than tokens in the marking");
@@ -432,6 +434,23 @@ namespace unfoldtacpn {
             }
             return pit->second;
         }
+    }
+
+    bool ColoredPetriNetBuilder::resolvePlace(const std::string& placeName, const std::string& colorName, std::string& out) const {
+        auto colorPlaceIt = _placeColorIds.find(placeName);
+        if (colorPlaceIt == _placeColorIds.end()) return false;
+
+        auto colorIt = colorPlaceIt->second.find(colorName);
+        if (colorIt == colorPlaceIt->second.end()) return false;
+
+        auto placeIt = _ptplacenames.find(placeName);
+        if (placeIt == _ptplacenames.end()) return false;
+
+        auto unfoldedIt = placeIt->second.find(colorIt->second);
+        if (unfoldedIt == placeIt->second.end()) return false;
+
+        out = unfoldedIt->second;
+        return true;
     }
 
     void ColoredPetriNetBuilder::unfoldArc(TAPNBuilderInterface& builder, const Colored::Arc& arc, const Colored::ExpressionContext::BindingMap& binding, const std::string& tName) {
@@ -615,4 +634,3 @@ namespace unfoldtacpn {
         return {nullptr};
     }
 }
-
