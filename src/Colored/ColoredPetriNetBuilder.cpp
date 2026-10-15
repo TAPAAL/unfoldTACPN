@@ -440,8 +440,9 @@ namespace unfoldtacpn {
                     timeInterval.getLowerBound(), timeInterval.getUpperBound());
             }
             auto& out_sum = findSumName(arc.destination);
-            if(out_sum.size() > 0)
-                builder.addOutputArc(out_sum, findSumName(arc.destination), out_color.second);
+            if (out_sum.size() > 0) {
+                builder.addOutputArc(tName,out_sum, out_color.second);
+            }
         }
     }
 
